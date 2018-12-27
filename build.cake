@@ -89,7 +89,6 @@ Task("Test")
 Task("NuGetPackage")
 	.IsDependentOn("Rebuild")
 	.IsDependentOn("Test")
-	.IsDependentOn("UpdateDocs")
 	.Does(() =>
 	{
 		if (string.IsNullOrEmpty(versionSuffix) && !string.IsNullOrEmpty(trigger))
