@@ -1,12 +1,12 @@
-# ProjectName
+# Faithlife.Analyzers
 
-**ProjectName** description
+**Faithlife.Analyzers** description
 
 ## Installation
 
-ProjectName should be installed [via NuGet](https://www.nuget.org/packages/ProjectName).
+Faithlife.Analyzers should be installed [via NuGet](https://www.nuget.org/packages/Faithlife.Analyzers).
 
 ## Documentation
 
-* [Reference Documentation](ProjectName.md)
+* [Reference Documentation](Faithlife.Analyzers.md)
 
