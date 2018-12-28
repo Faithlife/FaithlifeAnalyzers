@@ -60,7 +60,7 @@ namespace Faithlife.Analyzers
 			{
 				context.RegisterCodeFix(
 					CodeAction.Create(
-						title: $"Use {parameter.Identifier.Text} from {containingMethod.Identifier.Text}",
+						title: $"Use '{parameter.Identifier.Text}' parameter of {containingMethod.Identifier.Text}",
 						createChangedDocument: token => ReplaceValueAsync(context.Document, diagnosticNode, parameter, token),
 						$"use-{parameter.Identifier.Text}"),
 					diagnostic);
