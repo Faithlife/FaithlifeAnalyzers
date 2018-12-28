@@ -40,7 +40,6 @@ Global
 		{2019B33E-114D-472F-9919-0E9EA0562847}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{2019B33E-114D-472F-9919-0E9EA0562847}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2019B33E-114D-472F-9919-0E9EA0562847}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{2019B33E-114D-472F-9919-0E9EA0562847}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
