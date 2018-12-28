@@ -1,6 +1,7 @@
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Diagnostics;
+using Microsoft.CodeAnalysis.Formatting;
 using Microsoft.CodeAnalysis.Text;
 using System;
 using System.Collections.Generic;
@@ -146,7 +147,12 @@ namespace Faithlife.Analyzers.Tests
 
 			var projectId = ProjectId.CreateNewId(debugName: TestProjectName);
 
-			var solution = new AdhocWorkspace()
+			var workspace = new AdhocWorkspace();
+			workspace.Options = workspace.Options
+				.WithChangedOption(FormattingOptions.NewLine, LanguageNames.CSharp, "\n")
+				.WithChangedOption(FormattingOptions.UseTabs, LanguageNames.CSharp, true)
+				.WithChangedOption(FormattingOptions.SmartIndent, LanguageNames.CSharp, FormattingOptions.IndentStyle.None);
+			var solution = workspace
 				.CurrentSolution
 				.AddProject(projectId, TestProjectName, TestProjectName, language)
 				.AddMetadataReference(projectId, CorlibReference)
