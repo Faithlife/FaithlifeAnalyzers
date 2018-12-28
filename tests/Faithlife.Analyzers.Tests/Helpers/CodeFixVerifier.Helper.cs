@@ -23,7 +23,7 @@ namespace Faithlife.Analyzers.Tests
 		/// <returns>A Document with the changes from the CodeAction</returns>
 		private static Document ApplyFix(Document document, CodeAction codeAction)
 		{
-			var operations = codeAction.GetOperationsAsync(CancellationToken.None).Result;
+			var operations = codeAction.GetOperationsAsync(CancellationToken.None).GetAwaiter().GetResult();
 			var solution = operations.OfType<ApplyChangesOperation>().Single().ChangedSolution;
 			return solution.GetDocument(document.Id);
 		}
