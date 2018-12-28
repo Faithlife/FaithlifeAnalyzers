@@ -24,7 +24,7 @@ namespace Faithlife.Analyzers
 		{
 			var root = await context.Document.GetSyntaxRootAsync(context.CancellationToken).ConfigureAwait(false);
 
-			var semanticModel = await context.Document.GetSemanticModelAsync(context.CancellationToken);
+			var semanticModel = await context.Document.GetSemanticModelAsync(context.CancellationToken).ConfigureAwait(false);
 			var iworkState = semanticModel.Compilation.GetTypeByMetadataName("Libronix.Utility.Threading.IWorkState");
 			if (iworkState == null)
 				return;
@@ -76,7 +76,7 @@ namespace Faithlife.Analyzers
 
 		private static async Task<Document> ReplaceValueAsync(Document document, SyntaxNode diagnosticNode, ParameterSyntax replacementParameter, CancellationToken cancellationToken)
 		{
-			var root = (await document.GetSyntaxRootAsync())
+			var root = (await document.GetSyntaxRootAsync(cancellationToken).ConfigureAwait(false))
 				.ReplaceNode(diagnosticNode, SyntaxFactory.Argument(SyntaxFactory.IdentifierName(replacementParameter.Identifier)));
 
 			return document.WithSyntaxRoot(root);
@@ -102,14 +102,14 @@ namespace Faithlife.Analyzers
 				suffix++;
 			}
 
-			var root = (await document.GetSyntaxRootAsync())
+			var root = (await document.GetSyntaxRootAsync(cancellationToken).ConfigureAwait(false))
 				.ReplaceNode(containingMethod, containingMethod
 					.ReplaceNode(diagnosticNode, SyntaxFactory.Argument(SyntaxFactory.IdentifierName(candidateName)))
 					.AddParameterListParameters(SyntaxFactory.Parameter(SyntaxFactory.Identifier(candidateName))
 						.WithType(s_iworkStateTypeName)
 						.WithAdditionalAnnotations(Simplifier.Annotation)));
 
-			return await Simplifier.ReduceAsync(document.WithSyntaxRoot(root), cancellationToken: cancellationToken);
+			return await Simplifier.ReduceAsync(document.WithSyntaxRoot(root), cancellationToken: cancellationToken).ConfigureAwait(false);
 		}
 
 		static readonly QualifiedNameSyntax s_iworkStateTypeName = SyntaxFactory.QualifiedName(
