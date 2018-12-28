@@ -64,6 +64,7 @@ namespace Faithlife.Analyzers
 			messageFormat: "AsyncWorkItem.Current must only be used in methods that return IEnumerable<AsyncAction>.",
 			category: "Usage",
 			defaultSeverity: DiagnosticSeverity.Warning,
-			isEnabledByDefault: true);
+			isEnabledByDefault: true,
+			helpLinkUri: "https://github.com/Faithlife/FaithlifeAnalyzers/wiki/FL0001");
 	}
 }
