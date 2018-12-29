@@ -423,6 +423,24 @@ namespace ConsoleApplication1
 		}
 
 		[Test]
+		public void EndsWithCharIsValid()
+		{
+			const string program = @"using System;
+namespace ConsoleApplication1
+{
+	class Program
+	{
+		static void Main(string[] args)
+		{
+			""a"".EndsWith('a');
+		}
+	}
+}
+";
+			VerifyCSharpDiagnostic(program);
+		}
+
+		[Test]
 		public void EndsWithStringStringComparisonIsValid()
 		{
 			const string program = @"using System;
@@ -669,6 +687,24 @@ namespace ConsoleApplication1
 		static void Main(string[] args)
 		{
 			""a"".LastIndexOf(""a"", 0, 1, StringComparison.Ordinal);
+		}
+	}
+}
+";
+			VerifyCSharpDiagnostic(program);
+		}
+
+		[Test]
+		public void StartsWithCharIsValid()
+		{
+			const string program = @"using System;
+namespace ConsoleApplication1
+{
+	class Program
+	{
+		static void Main(string[] args)
+		{
+			""a"".StartsWith('a');
 		}
 	}
 }

@@ -78,6 +78,10 @@ namespace Faithlife.Analyzers
 					methodSymbol.Parameters[4].Type.SpecialType == SpecialType.System_Int32 &&
 					methodSymbol.Parameters[5].Type.Equals(stringComparisonType);
 
+			case var t when t == (false, "EndsWith", 1) || t == (false, "StartsWith", 1):
+				// string.EndsWith(string, StringComparison)
+				return methodSymbol.Parameters[0].Type.SpecialType == SpecialType.System_Char;
+
 			case var t when t == (false, "EndsWith", 2) || t == (false, "StartsWith", 2):
 				// string.EndsWith(string, StringComparison)
 				return methodSymbol.Parameters[0].Type.SpecialType == SpecialType.System_String &&
