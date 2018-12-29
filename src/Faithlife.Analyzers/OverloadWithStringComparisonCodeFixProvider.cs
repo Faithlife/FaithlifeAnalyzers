@@ -84,8 +84,7 @@ namespace Faithlife.Analyzers
 			// TODO: find the "best" overload and map all the existing arguments to it
 			// for now, assume that there is an overload that takes all the existing arguments and also a StringComparison enum member
 			var root = (await document.GetSyntaxRootAsync(cancellationToken).ConfigureAwait(false))
-				.ReplaceNode(invocation.ArgumentList, invocation.ArgumentList.AddArguments(Argument(ParseExpression(expressionValue))))
-				.WithAdditionalAnnotations(Simplifier.Annotation);
+				.ReplaceNode(invocation.ArgumentList, invocation.ArgumentList.AddArguments(Argument(ParseExpression(expressionValue).WithAdditionalAnnotations(Simplifier.Annotation))));
 
 			return await Simplifier.ReduceAsync(document.WithSyntaxRoot(root), cancellationToken: cancellationToken).ConfigureAwait(false);
 		}
@@ -108,8 +107,8 @@ namespace Faithlife.Analyzers
 			}
 
 			var root = (await document.GetSyntaxRootAsync(cancellationToken).ConfigureAwait(false))
-				.ReplaceNode(invocation, BinaryExpression(SyntaxKind.EqualsExpression, left, right))
-				.WithAdditionalAnnotations(Simplifier.Annotation);
+				.ReplaceNode(invocation, BinaryExpression(SyntaxKind.EqualsExpression, left, right)
+					.WithAdditionalAnnotations(Simplifier.Annotation));
 
 			return await Simplifier.ReduceAsync(document.WithSyntaxRoot(root), cancellationToken: cancellationToken).ConfigureAwait(false);
 		}
@@ -117,11 +116,10 @@ namespace Faithlife.Analyzers
 		private static async Task<Document> ReplaceStringComparisonArgumentAsync(Document document, InvocationExpressionSyntax invocation, string expressionValue, CancellationToken cancellationToken)
 		{
 			var arguments = invocation.ArgumentList.Arguments;
-			var newArguments = arguments.Replace(arguments.Last(), Argument(ParseExpression(expressionValue)));
+			var newArguments = arguments.Replace(arguments.Last(), Argument(ParseExpression(expressionValue).WithAdditionalAnnotations(Simplifier.Annotation)));
 			var newArgumentList = invocation.ArgumentList.WithArguments(newArguments);
 			var root = (await document.GetSyntaxRootAsync(cancellationToken).ConfigureAwait(false))
-				.ReplaceNode(invocation.ArgumentList, newArgumentList)
-				.WithAdditionalAnnotations(Simplifier.Annotation);
+				.ReplaceNode(invocation.ArgumentList, newArgumentList);
 
 			return await Simplifier.ReduceAsync(document.WithSyntaxRoot(root), cancellationToken: cancellationToken).ConfigureAwait(false);
 		}
