@@ -9,6 +9,10 @@ Prefix the description of the change with `[major]`, `[minor]` or `[patch]` in a
 
 ## Released
 
-### 0.1.0
+### 1.0.1
 
-* Initial release.
+* Fix false positive of `FL0002` for `string.StartsWith(char)` and `string.EndsWith(char)`.
+
+### 1.0.0
+
+* Initial release, supporting [four analyzers](https://github.com/Faithlife/FaithlifeAnalyzers/wiki).
