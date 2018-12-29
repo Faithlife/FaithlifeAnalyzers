@@ -5,7 +5,6 @@ cake/
 obj/
 ipch/
 release/
-tools/
 
 # ignore user-specific options/cache files
 .vs/
