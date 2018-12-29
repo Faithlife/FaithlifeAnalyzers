@@ -9,6 +9,10 @@ Prefix the description of the change with `[major]`, `[minor]` or `[patch]` in a
 
 ## Released
 
+### 1.0.3
+
+* Fix NuGet package install script.
+
 ### 1.0.2
 
 * Downgrade `Microsoft.CodeAnalysis.CSharp.Workspaces` dependency to to 2.7.0.
