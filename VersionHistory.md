@@ -9,6 +9,10 @@ Prefix the description of the change with `[major]`, `[minor]` or `[patch]` in a
 
 ## Released
 
+### 1.0.4
+
+* Fix bug in `StringComparison` code fix provider that reformatted the entire file.
+
 ### 1.0.3
 
 * Fix NuGet package install script.
