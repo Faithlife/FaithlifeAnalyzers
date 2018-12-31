@@ -1,6 +1,12 @@
 # Faithlife.Analyzers
 
-Description
+Roslyn-based C# code analyzers used on Faithlife source code.
+
+## How to Help
+
+* Suggest new analyzers by [opening an issue](https://github.com/Faithlife/FaithlifeAnalyzers/issues/new). Please add the `new analyzer` label.
+* Vote for analyzers you would find particularly helpful by adding a 👍 reaction.
+* Implement a new analyzer from [this list of the most popular](https://github.com/Faithlife/FaithlifeAnalyzers/issues?q=is%3Aissue+is%3Aopen+sort%3Areactions-%2B1-desc+label%3A%22new+analyzer%22).
 
 ## Build Status
 
