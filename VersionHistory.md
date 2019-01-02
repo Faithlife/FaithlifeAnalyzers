@@ -11,6 +11,11 @@ or errors for existing code when the package is upgraded).
 
 ## Released
 
+### 1.0.5
+
+* Allow `AsyncWorkItem.Current` to be used in lambda passed to `AsyncWorkItem.Start`: [#20](https://github.com/Faithlife/FaithlifeAnalyzers/issues/20).
+* Offer `AsyncWorkItem.Current` fix more often: [#19](https://github.com/Faithlife/FaithlifeAnalyzers/issues/19).
+
 ### 1.0.4
 
 * Fix bug in `StringComparison` code fix provider that reformatted the entire file.
