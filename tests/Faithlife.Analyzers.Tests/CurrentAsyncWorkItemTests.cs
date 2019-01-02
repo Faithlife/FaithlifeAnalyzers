@@ -56,7 +56,7 @@ namespace TestApplication
 				Id = CurrentAsyncWorkItemAnalyzer.DiagnosticId,
 				Message = "AsyncWorkItem.Current must only be used in methods that return IEnumerable<AsyncAction>.",
 				Severity = DiagnosticSeverity.Warning,
-				Locations = new[] { new DiagnosticResultLocation("Test0.cs", 24, 17) },
+				Locations = new[] { new DiagnosticResultLocation("Test0.cs", 28, 17) },
 			};
 
 			VerifyCSharpDiagnostic(brokenProgram, expected);
@@ -99,6 +99,65 @@ namespace TestApplication
 			VerifyCSharpFix(brokenProgram, secondFix, 1);
 		}
 
+		[Test]
+		public void FixAsyncWorkItemCurrentCanceled()
+		{
+			const string brokenProgram = preamble + @"
+namespace TestApplication
+{
+	internal static class TestClass
+	{
+		public static void Method(IWorkState ignored)
+		{
+			if (AsyncWorkItem.Current.Canceled)
+				return;
+		}
+	}
+}
+";
+
+			var expected = new DiagnosticResult
+			{
+				Id = CurrentAsyncWorkItemAnalyzer.DiagnosticId,
+				Message = "AsyncWorkItem.Current must only be used in methods that return IEnumerable<AsyncAction>.",
+				Severity = DiagnosticSeverity.Warning,
+				Locations = new[] { new DiagnosticResultLocation("Test0.cs", 28, 8) },
+			};
+
+			VerifyCSharpDiagnostic(brokenProgram, expected);
+
+			const string firstFix = preamble + @"
+namespace TestApplication
+{
+	internal static class TestClass
+	{
+		public static void Method(IWorkState ignored)
+		{
+			if (ignored.Canceled)
+				return;
+		}
+	}
+}
+";
+
+			VerifyCSharpFix(brokenProgram, firstFix, 0);
+
+			const string secondFix = preamble + @"
+namespace TestApplication
+{
+	internal static class TestClass
+	{
+		public static void Method(IWorkState ignored, IWorkState workState)
+		{
+			if (workState.Canceled)
+				return;
+		}
+	}
+}
+";
+			VerifyCSharpFix(brokenProgram, secondFix, 1);
+		}
+
 		protected override CodeFixProvider GetCSharpCodeFixProvider()
 		{
 			return new CurrentAsyncWorkItemCodeFixProvider();
@@ -116,13 +175,17 @@ using Libronix.Utility.Threading;
 namespace Libronix.Utility.Threading
 {
 	public sealed class AsyncAction {}
-	public interface IWorkState {}
-	public sealed class AsyncWorkItem
+	public interface IWorkState
+	{
+		bool Canceled { get; }
+	}
+	public sealed class AsyncWorkItem : IWorkState
 	{
 		public static AsyncWorkItem Current
 		{
 			get { throw new NotImplementedException(); }
 		}
+		public bool Canceled => false;
 	}
 }
 ";

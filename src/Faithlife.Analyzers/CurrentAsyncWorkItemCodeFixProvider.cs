@@ -33,7 +33,8 @@ namespace Faithlife.Analyzers
 			var diagnosticSpan = diagnostic.Location.SourceSpan;
 
 			var diagnosticNode = root.FindNode(diagnosticSpan);
-			if (!(diagnosticNode is ArgumentSyntax))
+			var memberAccess = diagnosticNode.DescendantNodesAndSelf().OfType<MemberAccessExpressionSyntax>().FirstOrDefault();
+			if (memberAccess is null)
 				return;
 
 			var containingMethod = diagnosticNode.Ancestors().OfType<MethodDeclarationSyntax>().FirstOrDefault();
@@ -61,7 +62,7 @@ namespace Faithlife.Analyzers
 				context.RegisterCodeFix(
 					CodeAction.Create(
 						title: $"Use '{parameter.Identifier.Text}' parameter of {containingMethod.Identifier.Text}",
-						createChangedDocument: token => ReplaceValueAsync(context.Document, diagnosticNode, parameter, token),
+						createChangedDocument: token => ReplaceValueAsync(context.Document, memberAccess, parameter, token),
 						$"use-{parameter.Identifier.Text}"),
 					diagnostic);
 			}
@@ -69,20 +70,20 @@ namespace Faithlife.Analyzers
 			context.RegisterCodeFix(
 				CodeAction.Create(
 					title: $"Add new IWorkState parameter to {containingMethod.Identifier.Text}",
-					createChangedDocument: token => AddParameterAsync(context.Document, diagnosticNode, containingMethod, token),
+					createChangedDocument: token => AddParameterAsync(context.Document, memberAccess, containingMethod, token),
 					"add-parameter"),
 				diagnostic);
 		}
 
-		private static async Task<Document> ReplaceValueAsync(Document document, SyntaxNode diagnosticNode, ParameterSyntax replacementParameter, CancellationToken cancellationToken)
+		private static async Task<Document> ReplaceValueAsync(Document document, MemberAccessExpressionSyntax memberAccess, ParameterSyntax replacementParameter, CancellationToken cancellationToken)
 		{
 			var root = (await document.GetSyntaxRootAsync(cancellationToken).ConfigureAwait(false))
-				.ReplaceNode(diagnosticNode, SyntaxFactory.Argument(SyntaxFactory.IdentifierName(replacementParameter.Identifier)));
+				.ReplaceNode(memberAccess, SyntaxFactory.IdentifierName(replacementParameter.Identifier));
 
 			return document.WithSyntaxRoot(root);
 		}
 
-		private static async Task<Document> AddParameterAsync(Document document, SyntaxNode diagnosticNode, MethodDeclarationSyntax containingMethod, CancellationToken cancellationToken)
+		private static async Task<Document> AddParameterAsync(Document document, MemberAccessExpressionSyntax memberAccess, MethodDeclarationSyntax containingMethod, CancellationToken cancellationToken)
 		{
 			const string preferredName = "workState";
 
@@ -104,7 +105,7 @@ namespace Faithlife.Analyzers
 
 			var root = (await document.GetSyntaxRootAsync(cancellationToken).ConfigureAwait(false))
 				.ReplaceNode(containingMethod, containingMethod
-					.ReplaceNode(diagnosticNode, SyntaxFactory.Argument(SyntaxFactory.IdentifierName(candidateName)))
+					.ReplaceNode(memberAccess, SyntaxFactory.IdentifierName(candidateName))
 					.AddParameterListParameters(SyntaxFactory.Parameter(SyntaxFactory.Identifier(candidateName))
 						.WithType(s_iworkStateTypeName)
 						.WithAdditionalAnnotations(Simplifier.Annotation)));
