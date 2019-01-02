@@ -10,6 +10,7 @@ using Microsoft.CodeAnalysis.CodeFixes;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Simplification;
+using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Faithlife.Analyzers
 {
@@ -26,7 +27,7 @@ namespace Faithlife.Analyzers
 
 			var semanticModel = await context.Document.GetSemanticModelAsync(context.CancellationToken).ConfigureAwait(false);
 			var iworkState = semanticModel.Compilation.GetTypeByMetadataName("Libronix.Utility.Threading.IWorkState");
-			if (iworkState == null)
+			if (iworkState is null)
 				return;
 
 			var diagnostic = context.Diagnostics.First();
@@ -38,20 +39,20 @@ namespace Faithlife.Analyzers
 				return;
 
 			var containingMethod = diagnosticNode.Ancestors().OfType<MethodDeclarationSyntax>().FirstOrDefault();
-			if (containingMethod == null)
+			if (containingMethod is null)
 				return;
 
 			var workStateParameters = containingMethod.ParameterList.Parameters.Where(parameter =>
 			{
 				var symbolInfo = semanticModel.GetSymbolInfo(parameter.Type);
-				if (symbolInfo.Symbol == null)
+				if (symbolInfo.Symbol is null)
 					return false;
 
 				if (symbolInfo.Symbol.Equals(iworkState))
 					return true;
 
 				var namedTypeSymbol = symbolInfo.Symbol as INamedTypeSymbol;
-				if (namedTypeSymbol == null)
+				if (namedTypeSymbol is null)
 					return false;
 
 				return namedTypeSymbol.AllInterfaces.Any(x => x.Equals(iworkState));
@@ -78,7 +79,7 @@ namespace Faithlife.Analyzers
 		private static async Task<Document> ReplaceValueAsync(Document document, MemberAccessExpressionSyntax memberAccess, ParameterSyntax replacementParameter, CancellationToken cancellationToken)
 		{
 			var root = (await document.GetSyntaxRootAsync(cancellationToken).ConfigureAwait(false))
-				.ReplaceNode(memberAccess, SyntaxFactory.IdentifierName(replacementParameter.Identifier));
+				.ReplaceNode(memberAccess, IdentifierName(replacementParameter.Identifier));
 
 			return document.WithSyntaxRoot(root);
 		}
@@ -105,20 +106,20 @@ namespace Faithlife.Analyzers
 
 			var root = (await document.GetSyntaxRootAsync(cancellationToken).ConfigureAwait(false))
 				.ReplaceNode(containingMethod, containingMethod
-					.ReplaceNode(memberAccess, SyntaxFactory.IdentifierName(candidateName))
-					.AddParameterListParameters(SyntaxFactory.Parameter(SyntaxFactory.Identifier(candidateName))
+					.ReplaceNode(memberAccess, IdentifierName(candidateName))
+					.AddParameterListParameters(Parameter(Identifier(candidateName))
 						.WithType(s_iworkStateTypeName)
 						.WithAdditionalAnnotations(Simplifier.Annotation)));
 
 			return await Simplifier.ReduceAsync(document.WithSyntaxRoot(root), cancellationToken: cancellationToken).ConfigureAwait(false);
 		}
 
-		static readonly QualifiedNameSyntax s_iworkStateTypeName = SyntaxFactory.QualifiedName(
-			SyntaxFactory.QualifiedName(
-				SyntaxFactory.QualifiedName(
-					SyntaxFactory.IdentifierName("Libronix"),
-					SyntaxFactory.IdentifierName("Utility")),
-				SyntaxFactory.IdentifierName("Threading")),
-			SyntaxFactory.IdentifierName("IWorkState"));
+		static readonly QualifiedNameSyntax s_iworkStateTypeName = QualifiedName(
+			QualifiedName(
+				QualifiedName(
+					IdentifierName("Libronix"),
+					IdentifierName("Utility")),
+				IdentifierName("Threading")),
+			IdentifierName("IWorkState"));
 	}
 }
