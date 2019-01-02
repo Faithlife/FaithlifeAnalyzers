@@ -158,6 +158,68 @@ namespace TestApplication
 			VerifyCSharpFix(brokenProgram, secondFix, 1);
 		}
 
+		[Test]
+		public void GenerateUniqueName()
+		{
+			const string brokenProgram = preamble + @"
+namespace TestApplication
+{
+	internal static class TestClass
+	{
+		public static void Method(IWorkState workState, int workState1, string workState2)
+		{
+			var workState3 = new object();
+			if (AsyncWorkItem.Current.Canceled)
+				return;
+		}
+	}
+}
+";
+
+			var expected = new DiagnosticResult
+			{
+				Id = CurrentAsyncWorkItemAnalyzer.DiagnosticId,
+				Message = "AsyncWorkItem.Current must only be used in methods that return IEnumerable<AsyncAction>.",
+				Severity = DiagnosticSeverity.Warning,
+				Locations = new[] { new DiagnosticResultLocation("Test0.cs", 29, 8) },
+			};
+
+			VerifyCSharpDiagnostic(brokenProgram, expected);
+
+			const string firstFix = preamble + @"
+namespace TestApplication
+{
+	internal static class TestClass
+	{
+		public static void Method(IWorkState workState, int workState1, string workState2)
+		{
+			var workState3 = new object();
+			if (workState.Canceled)
+				return;
+		}
+	}
+}
+";
+
+			VerifyCSharpFix(brokenProgram, firstFix, 0);
+
+			const string secondFix = preamble + @"
+namespace TestApplication
+{
+	internal static class TestClass
+	{
+		public static void Method(IWorkState workState, int workState1, string workState2, IWorkState workState4)
+		{
+			var workState3 = new object();
+			if (workState4.Canceled)
+				return;
+		}
+	}
+}
+";
+			VerifyCSharpFix(brokenProgram, secondFix, 1);
+		}
+
 		protected override CodeFixProvider GetCSharpCodeFixProvider()
 		{
 			return new CurrentAsyncWorkItemCodeFixProvider();
