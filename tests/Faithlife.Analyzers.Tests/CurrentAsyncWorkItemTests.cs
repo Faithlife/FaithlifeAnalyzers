@@ -32,6 +32,48 @@ namespace TestApplication
 		}
 
 		[Test]
+		public void AsyncWorkItemCurrentInAsyncWorkItemStartLambdaIsValid()
+		{
+			const string validProgram = preamble + @"
+namespace TestApplication
+{
+	internal static class TestClass
+	{
+		public static void Method()
+		{
+			AsyncWorkItem.Start(null, obj => HelperMethod(AsyncWorkItem.Current));
+		}
+
+		private static void HelperMethod(IWorkState workState)
+		{
+		}
+	}
+}";
+			VerifyCSharpDiagnostic(validProgram);
+		}
+
+		[Test]
+		public void AsyncWorkItemCurrentInAsyncWorkItemStartLambdaIsValid2()
+		{
+			const string validProgram = preamble + @"
+namespace TestApplication
+{
+	internal static class TestClass
+	{
+		public static void Method()
+		{
+			AsyncWorkItem.Start(null, obj => HelperMethod(AsyncWorkItem.Current), null, AsyncWorkOptions.None);
+		}
+
+		private static void HelperMethod(IWorkState workState)
+		{
+		}
+	}
+}";
+			VerifyCSharpDiagnostic(validProgram);
+		}
+
+		[Test]
 		public void InvalidUsage()
 		{
 			const string brokenProgram = preamble + @"
@@ -237,6 +279,8 @@ using Libronix.Utility.Threading;
 namespace Libronix.Utility.Threading
 {
 	public sealed class AsyncAction {}
+	public sealed class AsyncWorkGroup {}
+	public enum AsyncWorkOptions { None }
 	public interface IWorkState
 	{
 		bool Canceled { get; }
@@ -248,6 +292,8 @@ namespace Libronix.Utility.Threading
 			get { throw new NotImplementedException(); }
 		}
 		public bool Canceled => false;
+		public static AsyncWorkItem Start(AsyncWorkGroup group, Action<object> action) => throw new NotImplementedException();
+		public static AsyncWorkItem Start(AsyncWorkGroup group, Action<object> action, object state, AsyncWorkOptions options) => throw new NotImplementedException();
 	}
 }
 ";

@@ -55,6 +55,18 @@ namespace Faithlife.Analyzers
 				return;
 			}
 
+			// check for AsyncWorkItem.Current being used in a lambda passed as an argument to AsyncWorkItem.Start
+			var invocation = syntax.FirstAncestorOrSelf<LambdaExpressionSyntax>()?.FirstAncestorOrSelf<ArgumentSyntax>()?.FirstAncestorOrSelf<InvocationExpressionSyntax>();
+			if (invocation?.Expression is MemberAccessExpressionSyntax memberAccess)
+			{
+				if (memberAccess.Name.Identifier.Text == "Start")
+				{
+					symbolInfo = context.SemanticModel.GetSymbolInfo(memberAccess.Expression);
+					if (symbolInfo.Symbol.Equals(asyncWorkItem))
+						return;
+				}
+			}
+
 			context.ReportDiagnostic(Diagnostic.Create(s_rule, syntax.GetLocation()));
 		}
 
