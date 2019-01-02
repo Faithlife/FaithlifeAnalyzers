@@ -56,7 +56,7 @@ namespace TestApplication
 				Id = CurrentAsyncWorkItemAnalyzer.DiagnosticId,
 				Message = "AsyncWorkItem.Current must only be used in methods that return IEnumerable<AsyncAction>.",
 				Severity = DiagnosticSeverity.Warning,
-				Locations = new[] { new DiagnosticResultLocation("Test0.cs", 28, 17) },
+				Locations = new[] { new DiagnosticResultLocation("Test0.cs", c_preambleLength + 7, 17) },
 			};
 
 			VerifyCSharpDiagnostic(brokenProgram, expected);
@@ -121,7 +121,7 @@ namespace TestApplication
 				Id = CurrentAsyncWorkItemAnalyzer.DiagnosticId,
 				Message = "AsyncWorkItem.Current must only be used in methods that return IEnumerable<AsyncAction>.",
 				Severity = DiagnosticSeverity.Warning,
-				Locations = new[] { new DiagnosticResultLocation("Test0.cs", 28, 8) },
+				Locations = new[] { new DiagnosticResultLocation("Test0.cs", c_preambleLength + 7, 8) },
 			};
 
 			VerifyCSharpDiagnostic(brokenProgram, expected);
@@ -181,7 +181,7 @@ namespace TestApplication
 				Id = CurrentAsyncWorkItemAnalyzer.DiagnosticId,
 				Message = "AsyncWorkItem.Current must only be used in methods that return IEnumerable<AsyncAction>.",
 				Severity = DiagnosticSeverity.Warning,
-				Locations = new[] { new DiagnosticResultLocation("Test0.cs", 29, 8) },
+				Locations = new[] { new DiagnosticResultLocation("Test0.cs", c_preambleLength + 8, 8) },
 			};
 
 			VerifyCSharpDiagnostic(brokenProgram, expected);
@@ -251,5 +251,7 @@ namespace Libronix.Utility.Threading
 	}
 }
 ";
+
+		static readonly int c_preambleLength = preamble.Split('\n').Length;
 	}
 }
