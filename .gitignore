@@ -8,6 +8,7 @@ release/
 
 # ignore user-specific options/cache files
 .vs/
+_ReSharper.*
 Thumbs.db
 *.cache
 *.user
