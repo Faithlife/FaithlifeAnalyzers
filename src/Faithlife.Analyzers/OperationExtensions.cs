@@ -8,16 +8,25 @@ namespace Faithlife.Analyzers
 	{
 		public static Location GetMethodNameLocation(this IInvocationOperation invocationOperation)
 		{
-			var invocationSyntax = (InvocationExpressionSyntax) invocationOperation.Syntax;
-			switch (invocationSyntax.Expression)
+			switch (invocationOperation.Syntax)
 			{
-			case MemberAccessExpressionSyntax memberAccessExpression:
-				return memberAccessExpression.Name.GetLocation();
-			case ConditionalAccessExpressionSyntax conditionalAccessExpression:
-				return conditionalAccessExpression.WhenNotNull.GetLocation();
-			default:
-				return invocationSyntax.GetLocation();
+			case InvocationExpressionSyntax invocation:
+				switch (invocation.Expression)
+				{
+				case MemberAccessExpressionSyntax memberAccessExpression:
+					return memberAccessExpression.Name.GetLocation();
+				case ConditionalAccessExpressionSyntax conditionalAccessExpression:
+					return conditionalAccessExpression.WhenNotNull.GetLocation();
+				case InvocationExpressionSyntax invocationExpression:
+					return invocationExpression.GetLocation();
+				}
+				break;
+
+			case OrderingSyntax ordering:
+				return ((OrderByClauseSyntax) ordering.Parent).OrderByKeyword.GetLocation();
 			}
+
+			return invocationOperation.Syntax.GetLocation();
 		}
 	}
 }

@@ -28,7 +28,7 @@ namespace Faithlife.Analyzers
 							targetMethod.TypeArguments[1].SpecialType == SpecialType.System_String &&
 							targetMethod.Parameters.Length == 2)
 						{
-							operationContext.ReportDiagnostic(Diagnostic.Create(s_useStringComparerRule, GetMethodNameLocation(operation.Syntax)));
+							operationContext.ReportDiagnostic(Diagnostic.Create(s_useStringComparerRule, operation.GetMethodNameLocation()));
 						}
 					}, OperationKind.Invocation);
 				}
@@ -38,32 +38,6 @@ namespace Faithlife.Analyzers
 		public const string UseStringComparerDiagnosticId = "FL0006";
 
 		public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => s_rules;
-
-		private static Location GetMethodNameLocation(SyntaxNode syntaxNode)
-		{
-			switch (syntaxNode)
-			{
-			case InvocationExpressionSyntax invocation:
-				var expression = invocation.Expression;
-				switch (expression)
-				{
-				case MemberAccessExpressionSyntax memberAccessExpression:
-					return memberAccessExpression.Name.GetLocation();
-				case ConditionalAccessExpressionSyntax conditionalAccessExpression:
-					return conditionalAccessExpression.WhenNotNull.GetLocation();
-				case InvocationExpressionSyntax invocationExpression:
-					return invocationExpression.GetLocation();
-				default:
-					return syntaxNode.GetLocation();
-				}
-
-			case OrderingSyntax ordering:
-				return ((OrderByClauseSyntax) ordering.Parent).OrderByKeyword.GetLocation();
-
-			default:
-				return syntaxNode.GetLocation();
-			}
-		}
 
 		static readonly DiagnosticDescriptor s_useStringComparerRule = new DiagnosticDescriptor(
 			id: UseStringComparerDiagnosticId,
