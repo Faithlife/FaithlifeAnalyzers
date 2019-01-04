@@ -19,19 +19,6 @@ namespace Faithlife.Analyzers.Tests
 	/// </summary>
 	public abstract partial class DiagnosticVerifier
 	{
-		private static readonly string[] s_assemblyReferences =
-		{
-			"System.Collections",
-			"System.Linq",
-			"System.Private.CoreLib",
-			"System.Runtime",
-			"Microsoft.CodeAnalysis",
-			"Microsoft.CodeAnalysis.CSharp",
-		};
-
-		private static readonly IReadOnlyList<MetadataReference> s_metadataReferences = s_assemblyReferences
-			.Select(x => (MetadataReference) MetadataReference.CreateFromFile(Assembly.Load(x).Location)).ToList();
-
 		internal static string DefaultFilePathPrefix = "Test";
 		internal static string CSharpDefaultFileExt = "cs";
 		internal static string VisualBasicDefaultExt = "vb";
@@ -183,6 +170,18 @@ namespace Faithlife.Analyzers.Tests
 			return solution.GetProject(projectId);
 		}
 		#endregion
+
+		private static readonly IReadOnlyList<string> s_assemblyReferences = new[]
+		{
+			"System.Collections",
+			"System.Linq",
+			"System.Private.CoreLib",
+			"System.Runtime",
+			"Microsoft.CodeAnalysis",
+			"Microsoft.CodeAnalysis.CSharp",
+		};
+
+		private static readonly IReadOnlyList<MetadataReference> s_metadataReferences = s_assemblyReferences
+			.Select(x => (MetadataReference) MetadataReference.CreateFromFile(Assembly.Load(x).Location)).ToList();
 	}
 }
-
