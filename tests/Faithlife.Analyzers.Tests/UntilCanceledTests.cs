@@ -52,7 +52,7 @@ namespace TestApplication
 				Id = UntilCanceledAnalyzer.DiagnosticId,
 				Message = "UntilCanceled() may only be used in methods that return IEnumerable<AsyncAction>.",
 				Severity = DiagnosticSeverity.Warning,
-				Locations = new[] { new DiagnosticResultLocation("Test0.cs", 22, 46) },
+				Locations = new[] { new DiagnosticResultLocation("Test0.cs", c_preambleLength + 7, 46) },
 			};
 
 			VerifyCSharpDiagnostic(brokenProgram, expected);
@@ -117,7 +117,7 @@ namespace TestApplication
 				Id = UntilCanceledAnalyzer.DiagnosticId,
 				Message = "UntilCanceled() may only be used in methods that return IEnumerable<AsyncAction>.",
 				Severity = DiagnosticSeverity.Warning,
-				Locations = new[] { new DiagnosticResultLocation("Test0.cs", 23, 19) },
+				Locations = new[] { new DiagnosticResultLocation("Test0.cs", c_preambleLength + 8, 19) },
 			};
 
 			VerifyCSharpDiagnostic(brokenProgram, expected);
@@ -166,6 +166,7 @@ namespace TestApplication
 
 		private const string preamble = @"using System;
 using System.Collections.Generic;
+using System.Linq;
 using Libronix.Utility.Threading;
 
 namespace Libronix.Utility.Threading
@@ -179,6 +180,8 @@ namespace Libronix.Utility.Threading
 	}
 }
 ";
+
+		static readonly int c_preambleLength = preamble.Split('\n').Length;
 	}
 }
 
