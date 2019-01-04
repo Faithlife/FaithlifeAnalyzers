@@ -15,10 +15,8 @@ namespace Faithlife.Analyzers
 				{
 				case MemberAccessExpressionSyntax memberAccessExpression:
 					return memberAccessExpression.Name.GetLocation();
-				case ConditionalAccessExpressionSyntax conditionalAccessExpression:
-					return conditionalAccessExpression.WhenNotNull.GetLocation();
-				case InvocationExpressionSyntax invocationExpression:
-					return invocationExpression.GetLocation();
+				case MemberBindingExpressionSyntax memberBinding:
+					return memberBinding.Name.GetLocation();
 				}
 				break;
 

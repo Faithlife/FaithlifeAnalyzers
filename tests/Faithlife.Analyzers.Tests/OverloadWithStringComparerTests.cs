@@ -24,6 +24,13 @@ namespace Faithlife.Analyzers.Tests
 		}
 
 		[Test]
+		public void OrderByStringWithoutComparerWithNullConditional_Invalid([Values] Ordering ordering)
+		{
+			string code = GetExtensionMethodCode(ordering, @"new[] { ""A"", ""b"", ""C"" }", "x => x", isNullConditional: true);
+			VerifyInvalidExpression(code, code.IndexOf(GetMethodName(ordering), StringComparison.Ordinal));
+		}
+
+		[Test]
 		public void OrderByStringWithComparer_Valid([Values] Ordering ordering)
 		{
 			string code = GetExtensionMethodCode(ordering, @"new[] { ""A"", ""b"", ""C"" }", "x => x", "StringComparer.Ordinal");
@@ -88,20 +95,21 @@ namespace Faithlife.Analyzers.Tests
 
 		private static string GetMethodName(Ordering ordering) => ordering.ToString();
 
-		private static string GetExtensionMethodCode(Ordering ordering, string collection, string lambda, string comparer = null)
+		private static string GetExtensionMethodCode(Ordering ordering, string collection, string lambda, string comparer = null, bool isNullConditional = false)
 		{
 			string parameter = (comparer == null ? "" : $", {comparer}");
+			string nullConditional = isNullConditional ? "?" : "";
 
 			switch (ordering)
 			{
 			case Ordering.OrderBy:
-				return $"{collection}.OrderBy({lambda}{parameter})";
+				return $"{collection}{nullConditional}.OrderBy({lambda}{parameter})";
 			case Ordering.OrderByDescending:
-				return $"{collection}.OrderByDescending({lambda}{parameter})";
+				return $"{collection}{nullConditional}.OrderByDescending({lambda}{parameter})";
 			case Ordering.ThenBy:
-				return $"{collection}.OrderBy(x => x.GetHashCode()).ThenBy({lambda}{parameter})";
+				return $"{collection}{nullConditional}.OrderBy(x => x.GetHashCode()).ThenBy({lambda}{parameter})";
 			case Ordering.ThenByDescending:
-				return $"{collection}.OrderBy(x => x.GetHashCode()).ThenByDescending({lambda}{parameter})";
+				return $"{collection}{nullConditional}.OrderBy(x => x.GetHashCode()).ThenByDescending({lambda}{parameter})";
 			default:
 				throw new ArgumentOutOfRangeException(nameof(ordering), ordering, null);
 			}
