@@ -1,12 +1,15 @@
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Collections.Immutable;
+using System.Linq;
+using System.Reflection;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.CodeAnalysis.Formatting;
 using Microsoft.CodeAnalysis.Text;
-using System;
-using System.Collections.Generic;
-using System.Collections.Immutable;
-using System.Linq;
+using NUnit.Framework;
 
 namespace Faithlife.Analyzers.Tests
 {
@@ -16,10 +19,12 @@ namespace Faithlife.Analyzers.Tests
 	/// </summary>
 	public abstract partial class DiagnosticVerifier
 	{
-		private static readonly MetadataReference CorlibReference = MetadataReference.CreateFromFile(typeof(object).Assembly.Location);
-		private static readonly MetadataReference SystemCoreReference = MetadataReference.CreateFromFile(typeof(Enumerable).Assembly.Location);
-		private static readonly MetadataReference CSharpSymbolsReference = MetadataReference.CreateFromFile(typeof(CSharpCompilation).Assembly.Location);
-		private static readonly MetadataReference CodeAnalysisReference = MetadataReference.CreateFromFile(typeof(Compilation).Assembly.Location);
+		private static readonly MetadataReference SystemCoreLibReference = MetadataReference.CreateFromFile(Assembly.Load("System.Private.CoreLib").Location);
+		private static readonly MetadataReference SystemLinqReference = MetadataReference.CreateFromFile(Assembly.Load("System.Linq").Location);
+		private static readonly MetadataReference SystemCollectionsReference = MetadataReference.CreateFromFile(Assembly.Load("System.Collections").Location);
+		private static readonly MetadataReference SystemRuntimeReference = MetadataReference.CreateFromFile(Assembly.Load("System.Runtime").Location);
+		private static readonly MetadataReference CodeAnalysisReference = MetadataReference.CreateFromFile(Assembly.Load("Microsoft.CodeAnalysis").Location);
+		private static readonly MetadataReference CodeAnalysisCSharpReference = MetadataReference.CreateFromFile(Assembly.Load("Microsoft.CodeAnalysis.CSharp").Location);
 
 		internal static string DefaultFilePathPrefix = "Test";
 		internal static string CSharpDefaultFileExt = "cs";
@@ -58,7 +63,10 @@ namespace Faithlife.Analyzers.Tests
 			var diagnostics = new List<Diagnostic>();
 			foreach (var project in projects)
 			{
-				var compilationWithAnalyzers = project.GetCompilationAsync().Result.WithAnalyzers(ImmutableArray.Create(analyzer));
+				var compilation = project.GetCompilationAsync().Result;
+				foreach (var diagnostic in compilation.GetDiagnostics())
+					Assert.GreaterOrEqual(diagnostic.WarningLevel, 4, diagnostic.GetMessage());
+				var compilationWithAnalyzers = compilation.WithAnalyzers(ImmutableArray.Create(analyzer));
 				var diags = compilationWithAnalyzers.GetAnalyzerDiagnosticsAsync().Result;
 				foreach (var diag in diags)
 				{
@@ -155,10 +163,13 @@ namespace Faithlife.Analyzers.Tests
 			var solution = workspace
 				.CurrentSolution
 				.AddProject(projectId, TestProjectName, TestProjectName, language)
-				.AddMetadataReference(projectId, CorlibReference)
-				.AddMetadataReference(projectId, SystemCoreReference)
-				.AddMetadataReference(projectId, CSharpSymbolsReference)
-				.AddMetadataReference(projectId, CodeAnalysisReference);
+				.WithProjectCompilationOptions(projectId, new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary))
+				.AddMetadataReference(projectId, SystemCoreLibReference)
+				.AddMetadataReference(projectId, SystemLinqReference)
+				.AddMetadataReference(projectId, SystemCollectionsReference)
+				.AddMetadataReference(projectId, SystemRuntimeReference)
+				.AddMetadataReference(projectId, CodeAnalysisReference)
+				.AddMetadataReference(projectId, CodeAnalysisCSharpReference);
 
 			int count = 0;
 			foreach (var source in sources)
