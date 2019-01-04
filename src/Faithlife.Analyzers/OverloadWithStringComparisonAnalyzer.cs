@@ -31,7 +31,7 @@ namespace Faithlife.Analyzers
 								// wrong overload
 								var rule = (methodSymbol.Name == "Equals" && ((methodSymbol.Parameters.Length == 1 && !methodSymbol.IsStatic) || (methodSymbol.Parameters.Length == 2 && methodSymbol.IsStatic))) ?
 									s_avoidStringEqualsRule : s_useStringComparisonRule;
-								operationContext.ReportDiagnostic(Diagnostic.Create(rule, GetMethodNameLocation(operation.Syntax)));
+								operationContext.ReportDiagnostic(Diagnostic.Create(rule, operation.GetMethodNameLocation()));
 							}
 							else if (methodSymbol.Name == "Equals" && ((methodSymbol.Parameters.Length == 2 && !methodSymbol.IsStatic) || (methodSymbol.Parameters.Length == 3 && methodSymbol.IsStatic)))
 							{
@@ -42,7 +42,7 @@ namespace Faithlife.Analyzers
 									if (fieldSymbol?.ContainingType == stringComparisonType && fieldSymbol.Name == "Ordinal")
 									{
 										// right overload, wrong value
-										operationContext.ReportDiagnostic(Diagnostic.Create(s_avoidStringEqualsRule, GetMethodNameLocation(operation.Syntax)));
+										operationContext.ReportDiagnostic(Diagnostic.Create(s_avoidStringEqualsRule, operation.GetMethodNameLocation()));
 									}
 								}
 							}
@@ -128,19 +128,6 @@ namespace Faithlife.Analyzers
 					methodSymbol.Parameters[3].Type.Equals(stringComparisonType);
 			}
 			return false;
-		}
-
-		private static Location GetMethodNameLocation(SyntaxNode invocationNode)
-		{
-			switch (((InvocationExpressionSyntax) invocationNode).Expression)
-			{
-			case MemberAccessExpressionSyntax memberAccessExpression:
-				return memberAccessExpression.Name.GetLocation();
-			case ConditionalAccessExpressionSyntax conditionalAccessExpression:
-				return conditionalAccessExpression.WhenNotNull.GetLocation();
-			default:
-				return ((InvocationExpressionSyntax) invocationNode).GetLocation();
-			}
 		}
 
 		static readonly DiagnosticDescriptor s_useStringComparisonRule = new DiagnosticDescriptor(
