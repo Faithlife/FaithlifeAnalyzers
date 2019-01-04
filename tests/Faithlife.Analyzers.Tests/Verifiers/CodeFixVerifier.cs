@@ -1,11 +1,11 @@
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CodeActions;
 using Microsoft.CodeAnalysis.CodeFixes;
 using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.CodeAnalysis.Formatting;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
 using NUnit.Framework;
 
 namespace Faithlife.Analyzers.Tests
@@ -104,13 +104,13 @@ namespace Faithlife.Analyzers.Tests
 				if (!allowNewCompilerDiagnostics && newCompilerDiagnostics.Any())
 				{
 					// Format and get the compiler diagnostics again so that the locations make sense in the output
-					document = document.WithSyntaxRoot(Formatter.Format(document.GetSyntaxRootAsync().Result, Formatter.Annotation, document.Project.Solution.Workspace));
+					document = document.WithSyntaxRoot(Formatter.Format(document.GetSyntaxRootAsync().GetAwaiter().GetResult(), Formatter.Annotation, document.Project.Solution.Workspace));
 					newCompilerDiagnostics = GetNewDiagnostics(compilerDiagnostics, GetCompilerDiagnostics(document));
 
 					Assert.IsTrue(false,
 						string.Format("Fix introduced new compiler diagnostics:\r\n{0}\r\n\r\nNew document:\r\n{1}\r\n",
 							string.Join("\r\n", newCompilerDiagnostics.Select(d => d.ToString())),
-							document.GetSyntaxRootAsync().Result.ToFullString()));
+							document.GetSyntaxRootAsync().GetAwaiter().GetResult().ToFullString()));
 				}
 
 				//check if there are analyzer diagnostics left after the code fix

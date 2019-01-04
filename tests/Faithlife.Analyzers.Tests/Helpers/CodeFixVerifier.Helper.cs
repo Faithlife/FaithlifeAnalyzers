@@ -1,10 +1,10 @@
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CodeActions;
 using Microsoft.CodeAnalysis.Formatting;
 using Microsoft.CodeAnalysis.Simplification;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
 
 namespace Faithlife.Analyzers.Tests
 {
@@ -65,7 +65,7 @@ namespace Faithlife.Analyzers.Tests
 		/// <returns>The compiler diagnostics that were found in the code</returns>
 		private static IEnumerable<Diagnostic> GetCompilerDiagnostics(Document document)
 		{
-			return document.GetSemanticModelAsync().Result.GetDiagnostics();
+			return document.GetSemanticModelAsync().GetAwaiter().GetResult().GetDiagnostics();
 		}
 
 		/// <summary>
@@ -75,8 +75,8 @@ namespace Faithlife.Analyzers.Tests
 		/// <returns>A string containing the syntax of the Document after formatting</returns>
 		private static string GetStringFromDocument(Document document)
 		{
-			var simplifiedDoc = Simplifier.ReduceAsync(document, Simplifier.Annotation).Result;
-			var root = simplifiedDoc.GetSyntaxRootAsync().Result;
+			var simplifiedDoc = Simplifier.ReduceAsync(document, Simplifier.Annotation).GetAwaiter().GetResult();
+			var root = simplifiedDoc.GetSyntaxRootAsync().GetAwaiter().GetResult();
 			root = Formatter.Format(root, Formatter.Annotation, simplifiedDoc.Project.Solution.Workspace);
 			return root.GetText().ToString();
 		}

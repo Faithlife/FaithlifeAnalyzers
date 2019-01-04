@@ -69,11 +69,11 @@ namespace Faithlife.Analyzers.Tests
 			var diagnostics = new List<Diagnostic>();
 			foreach (var project in projects)
 			{
-				var compilation = project.GetCompilationAsync().Result;
+				var compilation = project.GetCompilationAsync().GetAwaiter().GetResult();
 				foreach (var diagnostic in compilation.GetDiagnostics())
 					Assert.GreaterOrEqual(diagnostic.WarningLevel, 4, diagnostic.GetMessage());
 				var compilationWithAnalyzers = compilation.WithAnalyzers(ImmutableArray.Create(analyzer));
-				var diags = compilationWithAnalyzers.GetAnalyzerDiagnosticsAsync().Result;
+				var diags = compilationWithAnalyzers.GetAnalyzerDiagnosticsAsync().GetAwaiter().GetResult();
 				foreach (var diag in diags)
 				{
 					if (diag.Location == Location.None || diag.Location.IsInMetadata)
@@ -85,7 +85,7 @@ namespace Faithlife.Analyzers.Tests
 						for (int i = 0; i < documents.Length; i++)
 						{
 							var document = documents[i];
-							var tree = document.GetSyntaxTreeAsync().Result;
+							var tree = document.GetSyntaxTreeAsync().GetAwaiter().GetResult();
 							if (tree == diag.Location.SourceTree)
 							{
 								diagnostics.Add(diag);
