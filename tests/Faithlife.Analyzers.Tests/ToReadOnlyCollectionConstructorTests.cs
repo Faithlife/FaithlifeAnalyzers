@@ -107,6 +107,50 @@ namespace TestApplication
 		}
 
 		[Test]
+		public void AssignFieldConditionalNull()
+		{
+			const string program = c_preamble + @"
+namespace TestApplication
+{
+	public class TestClass
+	{
+		public TestClass(IEnumerable<int> args)
+		{
+			m_field = args?.ToReadOnlyCollection();
+		}
+
+		ReadOnlyCollection<int> m_field;
+	}
+}";
+
+			var expected = new DiagnosticResult
+			{
+				Id = ToReadOnlyCollectionAnalyzer.DiagnosticId,
+				Message = "Avoid ToReadOnlyCollection in constructors.",
+				Severity = DiagnosticSeverity.Warning,
+				Locations = new[] { new DiagnosticResultLocation("Test0.cs", 20, 19) },
+			};
+
+			VerifyCSharpDiagnostic(program, expected);
+
+			const string fix = c_preamble + @"
+namespace TestApplication
+{
+	public class TestClass
+	{
+		public TestClass(IEnumerable<int> args)
+		{
+			m_field = args?.ToList().AsReadOnly();
+		}
+
+		ReadOnlyCollection<int> m_field;
+	}
+}";
+
+			VerifyCSharpFix(program, fix, 0);
+		}
+
+		[Test]
 		public void AssignProperty()
 		{
 			const string program = c_preamble + @"

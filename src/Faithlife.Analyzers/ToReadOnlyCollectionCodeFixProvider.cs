@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Immutable;
 using System.Composition;
 using System.Linq;
@@ -50,15 +51,34 @@ namespace Faithlife.Analyzers
 				.ReplaceNode(invocation, InvocationExpression(
 						MemberAccessExpression(
 							SyntaxKind.SimpleMemberAccessExpression,
-							InvocationExpression(
-								MemberAccessExpression(
-									SyntaxKind.SimpleMemberAccessExpression,
-									((MemberAccessExpressionSyntax) invocation.Expression).Expression,
-									IdentifierName("ToList"))),
+							ReplaceInvocation(invocation),
 							IdentifierName("AsReadOnly")))
 					.NormalizeWhitespace());
 
 			return await Simplifier.ReduceAsync(document.WithSyntaxRoot(root), cancellationToken: cancellationToken).ConfigureAwait(false);
+		}
+
+		private static ExpressionSyntax ReplaceInvocation(InvocationExpressionSyntax invocation)
+		{
+			ExpressionSyntax newExpression;
+			switch (invocation.Expression)
+			{
+			case MemberAccessExpressionSyntax memberAccess:
+				newExpression = MemberAccessExpression(
+					SyntaxKind.SimpleMemberAccessExpression,
+					memberAccess.Expression,
+					IdentifierName("ToList"));
+				break;
+
+			case MemberBindingExpressionSyntax _:
+				newExpression = MemberBindingExpression(IdentifierName("ToList"));
+				break;
+
+			default:
+				throw new NotSupportedException($"Can't handle {invocation.Expression.GetType()}");
+			}
+
+			return InvocationExpression(newExpression);
 		}
 	}
 }
