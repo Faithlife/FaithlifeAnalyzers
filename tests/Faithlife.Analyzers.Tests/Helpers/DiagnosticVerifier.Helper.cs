@@ -19,12 +19,18 @@ namespace Faithlife.Analyzers.Tests
 	/// </summary>
 	public abstract partial class DiagnosticVerifier
 	{
-		private static readonly MetadataReference SystemCoreLibReference = MetadataReference.CreateFromFile(Assembly.Load("System.Private.CoreLib").Location);
-		private static readonly MetadataReference SystemLinqReference = MetadataReference.CreateFromFile(Assembly.Load("System.Linq").Location);
-		private static readonly MetadataReference SystemCollectionsReference = MetadataReference.CreateFromFile(Assembly.Load("System.Collections").Location);
-		private static readonly MetadataReference SystemRuntimeReference = MetadataReference.CreateFromFile(Assembly.Load("System.Runtime").Location);
-		private static readonly MetadataReference CodeAnalysisReference = MetadataReference.CreateFromFile(Assembly.Load("Microsoft.CodeAnalysis").Location);
-		private static readonly MetadataReference CodeAnalysisCSharpReference = MetadataReference.CreateFromFile(Assembly.Load("Microsoft.CodeAnalysis.CSharp").Location);
+		private static readonly string[] s_assemblyReferences =
+		{
+			"System.Collections",
+			"System.Linq",
+			"System.Private.CoreLib",
+			"System.Runtime",
+			"Microsoft.CodeAnalysis",
+			"Microsoft.CodeAnalysis.CSharp",
+		};
+
+		private static readonly IReadOnlyList<MetadataReference> s_metadataReferences = s_assemblyReferences
+			.Select(x => (MetadataReference) MetadataReference.CreateFromFile(Assembly.Load(x).Location)).ToList();
 
 		internal static string DefaultFilePathPrefix = "Test";
 		internal static string CSharpDefaultFileExt = "cs";
@@ -164,12 +170,7 @@ namespace Faithlife.Analyzers.Tests
 				.CurrentSolution
 				.AddProject(projectId, TestProjectName, TestProjectName, language)
 				.WithProjectCompilationOptions(projectId, new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary))
-				.AddMetadataReference(projectId, SystemCoreLibReference)
-				.AddMetadataReference(projectId, SystemLinqReference)
-				.AddMetadataReference(projectId, SystemCollectionsReference)
-				.AddMetadataReference(projectId, SystemRuntimeReference)
-				.AddMetadataReference(projectId, CodeAnalysisReference)
-				.AddMetadataReference(projectId, CodeAnalysisCSharpReference);
+				.AddMetadataReferences(projectId, s_metadataReferences);
 
 			int count = 0;
 			foreach (var source in sources)
