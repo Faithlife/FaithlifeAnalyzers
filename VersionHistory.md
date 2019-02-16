@@ -11,6 +11,7 @@ or errors for existing code when the package is upgraded).
 
 * [minor] Add `FL0005`: detect `.ToReadOnlyCollection()` in constructors: [#17](https://github.com/Faithlife/FaithlifeAnalyzers/issues/17).
 * [minor] Add `FL0006`: detect `.OrderBy` without a `StringComparer`: [#23](https://github.com/Faithlife/FaithlifeAnalyzers/issues/23).
+* [minor] Add `FL0007`: detect `$` in interpolated strings: [#50](https://github.com/Faithlife/FaithlifeAnalyzers/issues/50).
 
 ## Released
 
