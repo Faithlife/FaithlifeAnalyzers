@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Diagnostics;
@@ -30,7 +31,7 @@ namespace Faithlife.Analyzers
 
 			foreach (var child in invocationOperation.Children)
 			{
-				if ((child as IInterpolatedStringTextOperation)?.Text.Syntax.ToFullString().EndsWith("$") ?? false)
+				if ((child as IInterpolatedStringTextOperation)?.Text.Syntax.ToFullString().EndsWith("$", StringComparison.Ordinal) ?? false)
 				{
 					foundDollarSign = true;
 				}
