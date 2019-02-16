@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.IO;
@@ -37,14 +38,12 @@ namespace Faithlife.Analyzers.Tests
 
 			var project = solution.GetProject(projectId);
 			var compilation = await project.GetCompilationAsync();
-			var compilationWithAnalyzers = compilation.WithAnalyzers(ImmutableArray.Create<DiagnosticAnalyzer>(
-				new CurrentAsyncWorkItemAnalyzer(),
-				new OverloadWithStringComparerAnalyzer(),
-				new OverloadWithStringComparisonAnalyzer(),
-				new StringAnalyzer(),
-				new ToReadOnlyCollectionAnalyzer(),
-				new UntilCanceledAnalyzer()
-			));
+			var compilationWithAnalyzers = compilation.WithAnalyzers(ImmutableArray.CreateRange(typeof(CurrentAsyncWorkItemAnalyzer)
+				.Assembly
+				.GetTypes()
+				.Where(x => x.BaseType == typeof(DiagnosticAnalyzer))
+				.Select(Activator.CreateInstance)
+				.Cast<DiagnosticAnalyzer>()));
 
 			var diagnostics = await compilationWithAnalyzers.GetAnalyzerDiagnosticsAsync();
 			Assert.IsEmpty(diagnostics);
