@@ -27,6 +27,24 @@ namespace TestApplication
 		}
 
 		[Test]
+		public void ValidDollarSign()
+		{
+			const string validProgram = @"
+namespace TestApplication
+{
+	public class TestClass
+	{
+		public TestClass()
+		{
+			string one = ""one"";
+			string two = $""{one} costs $0.00"";
+		}
+	}
+}";
+			VerifyCSharpDiagnostic(validProgram);
+		}
+
+		[Test]
 		public void InvalidInterpolatedString()
 		{
 			const string invalidProgram = @"
