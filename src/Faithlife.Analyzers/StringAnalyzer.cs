@@ -35,12 +35,10 @@ namespace Faithlife.Analyzers
 				{
 					foundDollarSign = true;
 				}
-				else if ((child is IInterpolatedStringContentOperation) && foundDollarSign)
-				{
-					context.ReportDiagnostic(Diagnostic.Create(s_rule, child.Syntax.GetLocation()));
-				}
 				else
 				{
+					if (child is IInterpolatedStringContentOperation && foundDollarSign)
+						context.ReportDiagnostic(Diagnostic.Create(s_rule, child.Syntax.GetLocation()));
 					foundDollarSign = false;
 				}
 			}
