@@ -68,6 +68,39 @@ namespace TestApplication
 		}
 
 		[Test]
+		public void InvalidInterpolatedStrings()
+		{
+			const string invalidProgram = @"
+namespace TestApplication
+{
+	public class TestClass
+	{
+		public TestClass()
+		{
+			string one = ""${hello}"";
+			string two = $""${one}${one}"";
+		}
+	}
+}";
+			VerifyCSharpDiagnostic(invalidProgram,
+				new DiagnosticResult
+				{
+					Id = StringAnalyzer.DiagnosticId,
+					Message = "Avoid using ${} in interpolated strings.",
+					Severity = DiagnosticSeverity.Warning,
+					Locations = new[] { new DiagnosticResultLocation("Test0.cs", 9, 20) },
+				},
+				new DiagnosticResult
+				{
+					Id = StringAnalyzer.DiagnosticId,
+					Message = "Avoid using ${} in interpolated strings.",
+					Severity = DiagnosticSeverity.Warning,
+					Locations = new[] { new DiagnosticResultLocation("Test0.cs", 9, 26) },
+				}
+			);
+		}
+
+		[Test]
 		public void ConsecutiveInterpolatedStrings()
 		{
 			const string invalidProgram = @"
