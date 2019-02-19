@@ -15,7 +15,7 @@ namespace Faithlife.Analyzers
 			{
 				compilationStartAnalysisContext.RegisterOperationBlockStartAction(context =>
 				{
-					context.RegisterOperationAction(oc => AnalyzeOperation(oc), OperationKind.InterpolatedString);
+					context.RegisterOperationAction(AnalyzeOperation, OperationKind.InterpolatedString);
 				});
 			});
 		}
@@ -37,7 +37,7 @@ namespace Faithlife.Analyzers
 				}
 				else if ((child is IInterpolatedStringContentOperation) && foundDollarSign)
 				{
-					context.ReportDiagnostic(Diagnostic.Create(s_rule, null));
+					context.ReportDiagnostic(Diagnostic.Create(s_rule, child.Syntax.GetLocation()));
 				}
 				else
 				{
