@@ -29,7 +29,7 @@ namespace Faithlife.Analyzers.Tests
 				.WithProjectCompilationOptions(projectId, new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary))
 				.AddMetadataReferences(projectId, s_metadataReferences);
 
-			foreach (var source in Directory.GetFiles(@"../../../../../src/Faithlife.Analyzers", "*.cs"))
+			foreach (var source in Directory.GetFiles(@"../../../../../src/Faithlife.Analyzers", "*.cs").Concat(Directory.GetFiles(@"../../../../../tests/Faithlife.Analyzers.Tests", "*.cs")))
 			{
 				var fileName = Path.GetFileName(source);
 				var documentId = DocumentId.CreateNewId(projectId, debugName: fileName);
