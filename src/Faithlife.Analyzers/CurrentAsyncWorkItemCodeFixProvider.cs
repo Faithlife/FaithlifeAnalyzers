@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Composition;
@@ -93,7 +94,7 @@ namespace Faithlife.Analyzers
 				.Concat(containingMethod.Body.DescendantNodes().OfType<VariableDeclaratorSyntax>()
 					.Select(x => x.Identifier))
 				.Select(x => x.Text)
-				.Where(x => x.StartsWith(preferredName)));
+				.Where(x => x.StartsWith(preferredName, StringComparison.Ordinal)));
 
 			string candidateName = preferredName;
 			int suffix = 1;
