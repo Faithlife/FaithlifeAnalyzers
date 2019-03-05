@@ -7,7 +7,7 @@ using Microsoft.CodeAnalysis.Operations;
 namespace Faithlife.Analyzers
 {
 	[DiagnosticAnalyzer(LanguageNames.CSharp)]
-	public sealed class StringAnalyzer : DiagnosticAnalyzer
+	public sealed class InterpolatedStringAnalyzer : DiagnosticAnalyzer
 	{
 		public override void Initialize(AnalysisContext analysisContext)
 		{
@@ -26,7 +26,7 @@ namespace Faithlife.Analyzers
 
 		private static void AnalyzeOperation(OperationAnalysisContext context)
 		{
-			var invocationOperation = (IInterpolatedStringOperation) context.Operation;
+			var invocationOperation = (IInterpolatedStringOperation)context.Operation;
 			var foundDollarSign = false;
 
 			foreach (var child in invocationOperation.Children)

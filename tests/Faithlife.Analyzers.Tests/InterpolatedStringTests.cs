@@ -5,7 +5,7 @@ using NUnit.Framework;
 namespace Faithlife.Analyzers.Tests
 {
 	[TestFixture]
-	public class StringTests : CodeFixVerifier
+	public sealed class InterpolatedStringTests : CodeFixVerifier
 	{
 		[Test]
 		public void ValidInterpolatedStrings()
@@ -60,7 +60,7 @@ namespace TestApplication
 }";
 			VerifyCSharpDiagnostic(invalidProgram, new DiagnosticResult
 			{
-				Id = StringAnalyzer.DiagnosticId,
+				Id = InterpolatedStringAnalyzer.DiagnosticId,
 				Message = "Avoid using ${} in interpolated strings.",
 				Severity = DiagnosticSeverity.Warning,
 				Locations = new[] { new DiagnosticResultLocation("Test0.cs", 9, 20) },
@@ -85,14 +85,14 @@ namespace TestApplication
 			VerifyCSharpDiagnostic(invalidProgram,
 				new DiagnosticResult
 				{
-					Id = StringAnalyzer.DiagnosticId,
+					Id = InterpolatedStringAnalyzer.DiagnosticId,
 					Message = "Avoid using ${} in interpolated strings.",
 					Severity = DiagnosticSeverity.Warning,
 					Locations = new[] { new DiagnosticResultLocation("Test0.cs", 9, 20) },
 				},
 				new DiagnosticResult
 				{
-					Id = StringAnalyzer.DiagnosticId,
+					Id = InterpolatedStringAnalyzer.DiagnosticId,
 					Message = "Avoid using ${} in interpolated strings.",
 					Severity = DiagnosticSeverity.Warning,
 					Locations = new[] { new DiagnosticResultLocation("Test0.cs", 9, 26) },
@@ -117,13 +117,13 @@ namespace TestApplication
 }";
 			VerifyCSharpDiagnostic(invalidProgram, new DiagnosticResult
 			{
-				Id = StringAnalyzer.DiagnosticId,
+				Id = InterpolatedStringAnalyzer.DiagnosticId,
 				Message = "Avoid using ${} in interpolated strings.",
 				Severity = DiagnosticSeverity.Warning,
 				Locations = new[] { new DiagnosticResultLocation("Test0.cs", 9, 20) },
 			});
 		}
 
-		protected override DiagnosticAnalyzer GetCSharpDiagnosticAnalyzer() => new StringAnalyzer();
+		protected override DiagnosticAnalyzer GetCSharpDiagnosticAnalyzer() => new InterpolatedStringAnalyzer();
 	}
 }
