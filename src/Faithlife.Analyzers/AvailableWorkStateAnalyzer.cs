@@ -12,39 +12,42 @@ namespace Faithlife.Analyzers
 	{
 		public override void Initialize(AnalysisContext context)
 		{
-			context.RegisterSyntaxNodeAction(AnalyzeSyntax, SyntaxKind.SimpleMemberAccessExpression);
+			context.RegisterCompilationStartAction(compilationStartAnalysisContext =>
+			{
+				var iworkState = compilationStartAnalysisContext.Compilation.GetTypeByMetadataName("Libronix.Utility.Threading.IWorkState");
+				if (iworkState is null)
+					return;
+
+				var workStateClass = compilationStartAnalysisContext.Compilation.GetTypeByMetadataName("Libronix.Utility.Threading.WorkState");
+				if (workStateClass is null)
+					return;
+
+				var workStateNone = workStateClass.GetMembers("None");
+				if (workStateNone.Length != 1)
+					return;
+
+				var workStateToDo = workStateClass.GetMembers("ToDo");
+				if (workStateToDo.Length != 1)
+					return;
+
+				compilationStartAnalysisContext.RegisterSyntaxNodeAction(c => AnalyzeSyntax(c, iworkState, workStateClass, workStateNone[0], workStateToDo[0]), SyntaxKind.SimpleMemberAccessExpression);
+			});
 		}
 
 		public const string DiagnosticId = "FL0008";
 
 		public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get { return ImmutableArray.Create(s_rule); } }
 
-		private static void AnalyzeSyntax(SyntaxNodeAnalysisContext context)
+		private static void AnalyzeSyntax(SyntaxNodeAnalysisContext context, INamedTypeSymbol iworkState, INamedTypeSymbol workStateClass, ISymbol workStateNone, ISymbol workStateToDo)
 		{
 			var syntax = (MemberAccessExpressionSyntax)context.Node;
-
-			var iworkState = context.SemanticModel.Compilation.GetTypeByMetadataName("Libronix.Utility.Threading.IWorkState");
-			if (iworkState == null)
-				return;
-
-			var workStateClass = context.SemanticModel.Compilation.GetTypeByMetadataName("Libronix.Utility.Threading.WorkState");
-			if (workStateClass == null)
-				return;
-
-			var workStateNone = workStateClass.GetMembers("None");
-			if (workStateNone == null || workStateNone.Length != 1)
-				return;
-
-			var workStateToDo = workStateClass.GetMembers("ToDo");
-			if (workStateToDo == null || workStateToDo.Length != 1)
-				return;
 
 			var symbolInfo = context.SemanticModel.GetSymbolInfo(syntax.Expression);
 			if (symbolInfo.Symbol == null || !symbolInfo.Symbol.Equals(workStateClass))
 				return;
 
 			var memberSymbolInfo = context.SemanticModel.GetSymbolInfo(syntax.Name);
-			if (memberSymbolInfo.Symbol == null || (!memberSymbolInfo.Symbol.Equals(workStateNone[0]) && !memberSymbolInfo.Symbol.Equals(workStateToDo[0])))
+			if (memberSymbolInfo.Symbol == null || (!memberSymbolInfo.Symbol.Equals(workStateNone) && !memberSymbolInfo.Symbol.Equals(workStateToDo)))
 				return;
 
 			var containingMethod = syntax.Ancestors().OfType<MethodDeclarationSyntax>().FirstOrDefault();

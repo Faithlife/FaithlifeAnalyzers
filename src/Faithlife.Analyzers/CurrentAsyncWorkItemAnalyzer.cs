@@ -12,35 +12,38 @@ namespace Faithlife.Analyzers
 	{
 		public override void Initialize(AnalysisContext context)
 		{
-			context.RegisterSyntaxNodeAction(AnalyzeSyntax, SyntaxKind.SimpleMemberAccessExpression);
+			context.RegisterCompilationStartAction(compilationStartAnalysisContext =>
+			{
+				var asyncWorkItem = compilationStartAnalysisContext.Compilation.GetTypeByMetadataName("Libronix.Utility.Threading.AsyncWorkItem");
+				if (asyncWorkItem is null)
+					return;
+
+				var currentMembers = asyncWorkItem.GetMembers("Current");
+				if (currentMembers.Length != 1)
+					return;
+
+				var asyncAction = compilationStartAnalysisContext.Compilation.GetTypeByMetadataName("Libronix.Utility.Threading.AsyncAction");
+				if (asyncAction is null)
+					return;
+
+				compilationStartAnalysisContext.RegisterSyntaxNodeAction(c => AnalyzeSyntax(c, asyncWorkItem, asyncAction, currentMembers[0]), SyntaxKind.SimpleMemberAccessExpression);
+			});
 		}
 
 		public const string DiagnosticId = "FL0001";
 
 		public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get { return ImmutableArray.Create(s_rule); } }
 
-		private static void AnalyzeSyntax(SyntaxNodeAnalysisContext context)
+		private static void AnalyzeSyntax(SyntaxNodeAnalysisContext context, INamedTypeSymbol asyncWorkItem, INamedTypeSymbol asyncAction, ISymbol asyncWorkItemCurrent)
 		{
-			var syntax = (MemberAccessExpressionSyntax)context.Node;
-
-			var asyncWorkItem = context.SemanticModel.Compilation.GetTypeByMetadataName("Libronix.Utility.Threading.AsyncWorkItem");
-			if (asyncWorkItem == null)
-				return;
-
-			var asyncAction = context.SemanticModel.Compilation.GetTypeByMetadataName("Libronix.Utility.Threading.AsyncAction");
-			if (asyncAction == null)
-				return;
-
-			var currentMembers = asyncWorkItem.GetMembers("Current");
-			if (currentMembers == null || currentMembers.Length != 1)
-				return;
+			var syntax = (MemberAccessExpressionSyntax) context.Node;
 
 			var symbolInfo = context.SemanticModel.GetSymbolInfo(syntax.Expression);
 			if (symbolInfo.Symbol == null || !symbolInfo.Symbol.Equals(asyncWorkItem))
 				return;
 
 			var memberSymbolInfo = context.SemanticModel.GetSymbolInfo(syntax.Name);
-			if (memberSymbolInfo.Symbol == null || !memberSymbolInfo.Symbol.Equals(currentMembers[0]))
+			if (memberSymbolInfo.Symbol == null || !memberSymbolInfo.Symbol.Equals(asyncWorkItemCurrent))
 				return;
 
 			var containingMethod = syntax.Ancestors().OfType<MethodDeclarationSyntax>().FirstOrDefault();

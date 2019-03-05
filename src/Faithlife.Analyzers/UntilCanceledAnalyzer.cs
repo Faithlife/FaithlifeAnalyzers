@@ -1,8 +1,5 @@
-using System;
-using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
-using System.Text;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -15,21 +12,27 @@ namespace Faithlife.Analyzers
 	{
 		public override void Initialize(AnalysisContext context)
 		{
-			context.RegisterSyntaxNodeAction(AnalyzeSyntax, SyntaxKind.InvocationExpression);
+			context.RegisterCompilationStartAction(compilationStartAnalysisContext =>
+			{
+				var asyncEnumerableUtility = compilationStartAnalysisContext.Compilation.GetTypeByMetadataName("Libronix.Utility.Threading.AsyncEnumerableUtility");
+				if (asyncEnumerableUtility is null)
+					return;
+
+				var asyncAction = compilationStartAnalysisContext.Compilation.GetTypeByMetadataName("Libronix.Utility.Threading.AsyncAction");
+				if (asyncAction is null)
+					return;
+
+				compilationStartAnalysisContext.RegisterSyntaxNodeAction(c => AnalyzeSyntax(c, asyncEnumerableUtility, asyncAction), SyntaxKind.InvocationExpression);
+			});
 		}
 
 		public const string DiagnosticId = "FL0003";
 
 		public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => ImmutableArray.Create(s_rule);
 
-		private static void AnalyzeSyntax(SyntaxNodeAnalysisContext context)
+		private static void AnalyzeSyntax(SyntaxNodeAnalysisContext context, INamedTypeSymbol asyncEnumerableUtility, INamedTypeSymbol asyncAction)
 		{
 			var invocation = (InvocationExpressionSyntax) context.Node;
-
-			var asyncEnumerableUtility = context.SemanticModel.Compilation.GetTypeByMetadataName("Libronix.Utility.Threading.AsyncEnumerableUtility");
-			var asyncAction = context.SemanticModel.Compilation.GetTypeByMetadataName("Libronix.Utility.Threading.AsyncAction");
-			if (asyncEnumerableUtility is null || asyncAction is null)
-				return;
 
 			var method = context.SemanticModel.GetSymbolInfo(invocation.Expression).Symbol as IMethodSymbol;
 			if (method?.Name != "UntilCanceled" || method.ContainingType != asyncEnumerableUtility)
