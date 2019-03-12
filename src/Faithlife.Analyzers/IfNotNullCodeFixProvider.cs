@@ -45,12 +45,6 @@ namespace Faithlife.Analyzers
 
 			var methodSymbol = semanticModel.GetSymbolInfo(ifNotNullInvocation).Symbol as IMethodSymbol;
 
-			// There is a family of void IfNotNull method overloads that only have a single type argument.
-			// The handling of these is completely different; I supsect that usages are vanishingly rare, so
-			// for now, just bail on these.
-			if (methodSymbol.Arity != 2)
-				return;
-
 			// The location of each of the arguments changes based on whether the method is invoked as an extension method.
 			var targetExpression = methodSymbol.IsStatic ?
 				ifNotNullInvocation.ArgumentList.Arguments[0].Expression :
@@ -65,10 +59,11 @@ namespace Faithlife.Analyzers
 				ifNotNullInvocation.ArgumentList.Arguments[defaultArgumentIndex].Expression :
 				default;
 
-			var outputTypeArgument = methodSymbol.TypeArguments[1];
+			var outputTypeArgument = methodSymbol.Arity == 2 ? methodSymbol.TypeArguments[1] : default;
 
 			// Handle default value generators.
-			if (methodSymbol.Parameters.Length > defaultArgumentIndex && methodSymbol.Parameters[defaultArgumentIndex].Type != outputTypeArgument)
+			if (methodSymbol.Parameters.Length > defaultArgumentIndex &&
+				(methodSymbol.Arity == 1 || methodSymbol.Parameters[defaultArgumentIndex].Type != outputTypeArgument))
 			{
 				if (defaultValueExpression is LambdaExpressionSyntax lambda)
 				{
@@ -103,31 +98,35 @@ namespace Faithlife.Analyzers
 				}
 			}
 
-			var outputTypeIsNullable = outputTypeArgument.IsReferenceType ||
-				((outputTypeArgument as INamedTypeSymbol)?.ConstructedFrom?.SpecialType.HasFlag(SpecialType.System_Nullable_T) ?? false);
+			var outputTypeIsNullable = methodSymbol.Arity == 2 &&
+				(outputTypeArgument.IsReferenceType ||
+					((outputTypeArgument as INamedTypeSymbol)?.ConstructedFrom?.SpecialType.HasFlag(SpecialType.System_Nullable_T) ?? false));
 
-			// Explicitly supplying default(SomeType) or null is identical to not supplying anything.
-			// However, the presence of a defaultValueExpression will prevent us from using
-			// the most concise formulation for reference types. Clearing this out allows the other
-			// optimizations to take place.
-			//
-			// On the other hand, value types always need a default value expression. This is because
-			// the null-conditional operator always forces a result to be nullable (either a reference type
-			// or Nullable<T>), while IfNotNull does not. In order to create a compatible replacement,
-			// a default value expression must be used in order to ensure that the resulting expression
-			// evaluates to the correct type.
-			if (outputTypeIsNullable &&
-				(defaultValueExpression is DefaultExpressionSyntax ||
-			 		(defaultValueExpression is LiteralExpressionSyntax defaultLiteral && defaultLiteral.IsKind(SyntaxKind.NullLiteralExpression))))
+			if (methodSymbol.Arity == 2)
 			{
-				defaultValueExpression = null;
-			}
-			else if (defaultValueExpression is null && !outputTypeIsNullable)
-			{
-				if (!outputTypeArgument.CanBeReferencedByName)
-					return;
+				// Explicitly supplying default(SomeType) or null is identical to not supplying anything.
+				// However, the presence of a defaultValueExpression will prevent us from using
+				// the most concise formulation for reference types. Clearing this out allows the other
+				// optimizations to take place.
+				//
+				// On the other hand, value types always need a default value expression. This is because
+				// the null-conditional operator always forces a result to be nullable (either a reference type
+				// or Nullable<T>), while IfNotNull does not. In order to create a compatible replacement,
+				// a default value expression must be used in order to ensure that the resulting expression
+				// evaluates to the correct type.
+				if (outputTypeIsNullable &&
+					(defaultValueExpression is DefaultExpressionSyntax ||
+						 (defaultValueExpression is LiteralExpressionSyntax defaultLiteral && defaultLiteral.IsKind(SyntaxKind.NullLiteralExpression))))
+				{
+					defaultValueExpression = null;
+				}
+				else if (defaultValueExpression is null && !outputTypeIsNullable)
+				{
+					if (!outputTypeArgument.CanBeReferencedByName)
+						return;
 
-				defaultValueExpression = DefaultExpression(GetTypeSyntax(outputTypeArgument));
+					defaultValueExpression = DefaultExpression(GetTypeSyntax(outputTypeArgument));
+				}
 			}
 
 			var lambdaExpression = delegateExpression as LambdaExpressionSyntax;
@@ -167,9 +166,14 @@ namespace Faithlife.Analyzers
 				return;
 
 			// There are several factors that might prohibit us from using the conditional access operator.
-			// If we discover any of them, we'll mark this as false and fall back to this pattern:
-			// target is InferredType foo ? expression(foo) : defaultValue
+			// If we discover any of them, we'll mark this as false and fall back to more verbose patterns.
 			var canUseConditionalOperator = true;
+
+			// A void IfNotNull invocation with a default expression cannot be converted
+			// to use the conditional access operator because there would be nowhere to
+			// "hang" the default expression.
+			if (methodSymbol.Arity == 1 && defaultValueExpression is object)
+				canUseConditionalOperator = false;
 
 			var lambdaParameterIdentifier = parameterList[0].Identifier;
 
@@ -255,7 +259,7 @@ namespace Faithlife.Analyzers
 					if (conditionalAccess != null)
 					{
 						ExpressionSyntax finalExpression = conditionalAccess;
-						if (defaultValueExpression != null)
+						if (defaultValueExpression is object)
 						{
 							finalExpression = SyntaxUtility.ReplaceIdentifiers("fixedExpression ?? defaultExpression",
 								("fixedExpression", finalExpression),
@@ -288,6 +292,39 @@ namespace Faithlife.Analyzers
 			if (!AreEquivalent(lambdaParameterIdentifier, hoistableIdentifier))
 				lambdaExpressionBody = SyntaxUtility.ReplaceIdentifier(lambdaExpressionBody, originalName, IdentifierName(hoistableIdentifier));
 
+			var conditionExpression = IsPatternExpression(targetExpression, DeclarationPattern(GetTypeSyntax(methodSymbol.TypeArguments[0]), SingleVariableDesignation(hoistableIdentifier)));
+
+			// From this point on, the handling of void IfNotNull invocations is totally different from the others.
+			// If we couldn't use the conditional access operator, a void invocation will need to be converted to
+			// an if/else block, but this is not possible in all contexts.
+			if (methodSymbol.Arity == 1)
+			{
+				// There might be other contexts in which we could convert a void IfNotNull invocation to an
+				// if statement, but this is the only one that I'm confident about.
+				if (ifNotNullInvocation.Parent is ExpressionStatementSyntax)
+				{
+					var ifStatement = IfStatement(
+						conditionExpression,
+						CreateStatement(lambdaExpressionBody));
+
+					if (defaultValueExpression is object)
+						ifStatement = ifStatement.WithElse(ElseClause(CreateStatement(defaultValueExpression)));
+
+					context.RegisterCodeFix(
+						CodeAction.Create(
+							title: "Use pattern matching",
+							createChangedDocument: token => ReplaceValueAsync(
+								context.Document,
+								ifNotNullInvocation.Parent,
+								ifStatement,
+								token),
+							c_fixName),
+						diagnostic);
+				}
+
+				return;
+			}
+
 			ExpressionSyntax replacementTarget;
 			ExpressionSyntax replacementExpression;
 
@@ -302,7 +339,7 @@ namespace Faithlife.Analyzers
 				// in a few more contexts.
 				replacementTarget = parentExpression;
 				replacementExpression = ConditionalExpression(
-					IsPatternExpression(targetExpression, DeclarationPattern(GetTypeSyntax(methodSymbol.TypeArguments[0]), SingleVariableDesignation(hoistableIdentifier))),
+					conditionExpression,
 					lambdaExpressionBody,
 					parentExpression.Right);
 			}
@@ -310,7 +347,7 @@ namespace Faithlife.Analyzers
 			{
 				replacementTarget = ifNotNullInvocation;
 				replacementExpression = ConditionalExpression(
-					IsPatternExpression(targetExpression, DeclarationPattern(GetTypeSyntax(methodSymbol.TypeArguments[0]), SingleVariableDesignation(hoistableIdentifier))),
+					conditionExpression,
 					SyntaxUtility.SimplifiableParentheses(lambdaExpressionBody),
 					defaultValueExpression ?? DefaultExpression(GetTypeSyntax(outputTypeArgument)));
 			}
@@ -330,6 +367,14 @@ namespace Faithlife.Analyzers
 						token),
 					c_fixName),
 				diagnostic);
+		}
+
+		private static StatementSyntax CreateStatement(ExpressionSyntax expression)
+		{
+			if (expression is ThrowExpressionSyntax throwExpression)
+				return ThrowStatement(throwExpression.Expression);
+
+			return ExpressionStatement(expression);
 		}
 
 		private static ImmutableArray<ParameterSyntax> GetLambdaParameters(LambdaExpressionSyntax lambda)
@@ -378,12 +423,10 @@ namespace Faithlife.Analyzers
 			return currentExpression;
 		}
 
-		private static async Task<Document> ReplaceValueAsync(Document document, ExpressionSyntax replacementTarget, ExpressionSyntax replacementExpression, CancellationToken cancellationToken)
+		private static async Task<Document> ReplaceValueAsync(Document document, SyntaxNode replacementTarget, SyntaxNode replacementNode, CancellationToken cancellationToken)
 		{
 			var root = (await document.GetSyntaxRootAsync(cancellationToken).ConfigureAwait(false))
-				.ReplaceNode(
-					replacementTarget,
-					replacementExpression);
+				.ReplaceNode(replacementTarget, replacementNode);
 
 			var ifNotNullUsingDirective = root.DescendantNodes()
 				.OfType<UsingDirectiveSyntax>()

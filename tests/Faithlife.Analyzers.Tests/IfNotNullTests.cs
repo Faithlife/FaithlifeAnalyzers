@@ -269,29 +269,21 @@ namespace TestProgram
 
 		[TestCase(
 			"new ReferenceThing()",
-			"possiblyNull.IfNotNull(x => x.Method());")]
+			"possiblyNull.IfNotNull(x => x.Method());",
+			"possiblyNull?.Method();")]
+		[TestCase(
+			"(ValueThing?) new ValueThing()",
+			"possiblyNull.IfNotNull((ValueThing x) => x.Method());",
+			"possiblyNull?.Method();")]
 		[TestCase(
 			"new ReferenceThing()",
-			"IfNotNullExtensionMethod.IfNotNull(possiblyNull, x => x.Method());")]
+			"possiblyNull.IfNotNull(x => x.Method(), () => throw new InvalidOperationException());",
+			"if (possiblyNull is ReferenceThing x)\n\t\t\t\tx.Method();\n\t\t\telse\n\t\t\t\tthrow new InvalidOperationException();")]
 		[TestCase(
 			"(ValueThing?) new ValueThing()",
-			"possiblyNull.IfNotNull((ValueThing x) => x.Method());")]
-		[TestCase(
-			"(ValueThing?) new ValueThing()",
-			"IfNotNullExtensionMethod.IfNotNull(possiblyNull, (ValueThing x) => x.Method());")]
-		[TestCase(
-			"new ReferenceThing()",
-			"possiblyNull.IfNotNull(x => x.Method(), () => throw new InvalidOperationException());")]
-		[TestCase(
-			"new ReferenceThing()",
-			"IfNotNullExtensionMethod.IfNotNull(possiblyNull, x => x.Method(), () => throw new InvalidOperationException());")]
-		[TestCase(
-			"(ValueThing?) new ValueThing()",
-			"possiblyNull.IfNotNull((ValueThing x) => x.Method(), () => throw new InvalidOperationException());")]
-		[TestCase(
-			"(ValueThing?) new ValueThing()",
-			"IfNotNullExtensionMethod.IfNotNull(possiblyNull, (ValueThing x) => x.Method(), () => throw new InvalidOperationException());")]
-		public void VoidInvocation(string possiblyNull, string call)
+			"possiblyNull.IfNotNull((ValueThing x) => x.Method(), () => throw new InvalidOperationException());",
+			"if (possiblyNull is ValueThing x)\n\t\t\t\tx.Method();\n\t\t\telse\n\t\t\t\tthrow new InvalidOperationException();")]
+		public void VoidInvocation(string possiblyNull, string call, string fixedCall)
 		{
 			string createProgram(string actualCall) =>
 				c_preamble + @"
@@ -319,8 +311,8 @@ namespace TestProgram
 
 			VerifyCSharpDiagnostic(invalidProgram, expected);
 
-			// The fixer should decline to make any modifications to these calls.
-			VerifyCSharpFix(invalidProgram, invalidProgram);
+			// The fixer should decline to make any modifications to unsupported calls.
+			VerifyCSharpFix(invalidProgram, fixedCall is null ? invalidProgram : createProgram(fixedCall).Replace("using Libronix.Utility.IfNotNull;\n", ""));
 		}
 
 		[TestCase(

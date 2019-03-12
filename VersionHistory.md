@@ -13,6 +13,8 @@ or errors for existing code when the package is upgraded).
 * [minor] Add `FL0006`: detect `.OrderBy` without a `StringComparer`: [#23](https://github.com/Faithlife/FaithlifeAnalyzers/issues/23).
 * [minor] Add `FL0007`: detect `$` in interpolated strings: [#50](https://github.com/Faithlife/FaithlifeAnalyzers/issues/50).
 * [minor] Add `FL0008`: detect usages of `WorkState.None` and `WorkState.ToDo` when alternatives exist: [#4](https://github.com/Faithlife/FaithlifeAnalyzers/issues/4)
+* [minor] Add `FL0009`: prefer `""` over `string.Empty`: [#7](https://github.com/Faithlife/FaithlifeAnalyzers/issues/7)
+* [minor] Add `FL0010`: discourage use of `IfNotNull`: [#13](https://github.com/Faithlife/FaithlifeAnalyzers/issues/13)
 
 ## Released
 
