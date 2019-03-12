@@ -93,18 +93,11 @@ namespace Faithlife.Analyzers
 				.ReplaceNode(containingMethod, containingMethod
 					.ReplaceNode(memberAccess, IdentifierName(parameterIdentifier))
 					.AddParameterListParameters(Parameter(parameterIdentifier)
-						.WithType(s_iworkStateTypeName)
-						.WithAdditionalAnnotations(Simplifier.Annotation)));
+						.WithType(s_iworkStateTypeName)));
 
 			return await Simplifier.ReduceAsync(document.WithSyntaxRoot(root), cancellationToken: cancellationToken).ConfigureAwait(false);
 		}
 
-		static readonly QualifiedNameSyntax s_iworkStateTypeName = QualifiedName(
-			QualifiedName(
-				QualifiedName(
-					IdentifierName("Libronix"),
-					IdentifierName("Utility")),
-				IdentifierName("Threading")),
-			IdentifierName("IWorkState"));
+		private static readonly TypeSyntax s_iworkStateTypeName = SyntaxUtility.ParseSimplifiableTypeName("Libronix.Utility.Threading.IWorkState");
 	}
 }

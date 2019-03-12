@@ -5,6 +5,7 @@ using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.CodeAnalysis.Simplification;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Faithlife.Analyzers
@@ -76,5 +77,32 @@ namespace Faithlife.Analyzers
 
 			return Identifier(candidateName);
 		}
+
+		public static ExpressionSyntax ReplaceIdentifiers(string expression, params (string OriginalIdentifierName, ExpressionSyntax Replacement)[] identifiers) =>
+			SimplifiableParentheses(ReplaceIdentifiers(ParseExpression(expression), identifiers));
+
+		public static ExpressionSyntax ReplaceIdentifiers(ExpressionSyntax expression, params (string OriginalIdentifierName, ExpressionSyntax Replacement)[] identifiers) =>
+			identifiers.Aggregate(
+				expression,
+				(currentExpression, identifier) => ReplaceIdentifier(currentExpression, identifier.OriginalIdentifierName, identifier.Replacement));
+
+		public static ExpressionSyntax ReplaceIdentifier(ExpressionSyntax expression, string originalIdentifierName, ExpressionSyntax replacement)
+		{
+			var targetNodes = expression.DescendantNodes()
+				.OfType<IdentifierNameSyntax>()
+				.Where(x => x.Identifier.Text == originalIdentifierName)
+				.ToList();
+
+			if (targetNodes.Count == 0)
+				throw new InvalidOperationException($"The identifier {originalIdentifierName} was not found in the expression.");
+
+			return expression.ReplaceNodes(targetNodes, (original, updated) => replacement.WithTriviaFrom(original));
+		}
+
+		public static ParenthesizedExpressionSyntax SimplifiableParentheses(ExpressionSyntax expression) =>
+			ParenthesizedExpression(expression).WithAdditionalAnnotations(Simplifier.Annotation);
+
+		public static TypeSyntax ParseSimplifiableTypeName(string name) =>
+			ParseTypeName(name).WithAdditionalAnnotations(Simplifier.Annotation);
 	}
 }

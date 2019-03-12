@@ -145,7 +145,7 @@ namespace Faithlife.Analyzers
 				lambdaExpression = SimpleLambdaExpression(
 					Parameter(parameterIdentifier),
 					InvocationExpression(
-						SimplifiableParentheses(delegateExpression),
+						SyntaxUtility.SimplifiableParentheses(delegateExpression),
 						ArgumentList(
 							SingletonSeparatedList(
 								Argument(
@@ -211,7 +211,7 @@ namespace Faithlife.Analyzers
 				AreEquivalent(toplevelIdentifier.Identifier, lambdaParameterIdentifier))
 			{
 				lambdaExpressionBody = InvocationExpression(
-					ReplaceIdentifier(ParseExpression("target.Invoke"), "target", IdentifierName(lambdaParameterIdentifier)),
+					SyntaxUtility.ReplaceIdentifier(ParseExpression("target.Invoke"), "target", IdentifierName(lambdaParameterIdentifier)),
 					toplevelInvocation.ArgumentList);
 			}
 
@@ -257,7 +257,7 @@ namespace Faithlife.Analyzers
 						ExpressionSyntax finalExpression = conditionalAccess;
 						if (defaultValueExpression != null)
 						{
-							finalExpression = ReplaceIdentifiers("fixedExpression ?? defaultExpression",
+							finalExpression = SyntaxUtility.ReplaceIdentifiers("fixedExpression ?? defaultExpression",
 								("fixedExpression", finalExpression),
 								("defaultExpression", defaultValueExpression));
 						}
@@ -268,7 +268,7 @@ namespace Faithlife.Analyzers
 								createChangedDocument: token => ReplaceValueAsync(
 									context.Document,
 									ifNotNullInvocation,
-									SimplifiableParentheses(finalExpression),
+									SyntaxUtility.SimplifiableParentheses(finalExpression),
 									token),
 								c_fixName),
 							diagnostic);
@@ -286,7 +286,7 @@ namespace Faithlife.Analyzers
 			var originalName = lambdaParameterIdentifier.Text;
 			var hoistableIdentifier = SyntaxUtility.GetHoistableIdentifier(originalName, ifNotNullInvocation, parameterList[0]);
 			if (!AreEquivalent(lambdaParameterIdentifier, hoistableIdentifier))
-				lambdaExpressionBody = ReplaceIdentifier(lambdaExpressionBody, originalName, IdentifierName(hoistableIdentifier));
+				lambdaExpressionBody = SyntaxUtility.ReplaceIdentifier(lambdaExpressionBody, originalName, IdentifierName(hoistableIdentifier));
 
 			ExpressionSyntax replacementTarget;
 			ExpressionSyntax replacementExpression;
@@ -311,7 +311,7 @@ namespace Faithlife.Analyzers
 				replacementTarget = ifNotNullInvocation;
 				replacementExpression = ConditionalExpression(
 					IsPatternExpression(targetExpression, DeclarationPattern(GetTypeSyntax(methodSymbol.TypeArguments[0]), SingleVariableDesignation(hoistableIdentifier))),
-					SimplifiableParentheses(lambdaExpressionBody),
+					SyntaxUtility.SimplifiableParentheses(lambdaExpressionBody),
 					defaultValueExpression ?? DefaultExpression(GetTypeSyntax(outputTypeArgument)));
 			}
 			else
@@ -326,7 +326,7 @@ namespace Faithlife.Analyzers
 					createChangedDocument: token => ReplaceValueAsync(
 						context.Document,
 						replacementTarget,
-						SimplifiableParentheses(replacementExpression),
+						SyntaxUtility.SimplifiableParentheses(replacementExpression),
 						token),
 					c_fixName),
 				diagnostic);
@@ -397,35 +397,8 @@ namespace Faithlife.Analyzers
 				cancellationToken: cancellationToken).ConfigureAwait(false);
 		}
 
-		private static ExpressionSyntax ReplaceIdentifiers(string expression, params (string OriginalIdentifierName, ExpressionSyntax Replacement)[] identifiers) =>
-			SimplifiableParentheses(ReplaceIdentifiers(ParseExpression(expression), identifiers));
-
-		private static ExpressionSyntax ReplaceIdentifiers(ExpressionSyntax expression, params (string OriginalIdentifierName, ExpressionSyntax Replacement)[] identifiers) =>
-			identifiers.Aggregate(
-				expression,
-				(currentExpression, identifier) => ReplaceIdentifier(currentExpression, identifier.OriginalIdentifierName, identifier.Replacement));
-
-		private static ExpressionSyntax ReplaceIdentifier(ExpressionSyntax expression, string originalIdentifierName, ExpressionSyntax replacement)
-		{
-			var targetNodes = expression.DescendantNodes()
-				.OfType<IdentifierNameSyntax>()
-				.Where(x => x.Identifier.Text == originalIdentifierName)
-				.ToList();
-
-			if (targetNodes.Count == 0)
-				throw new InvalidOperationException($"The identifier {originalIdentifierName} was not found in the expression.");
-
-			return expression.ReplaceNodes(targetNodes, (original, updated) => replacement.WithTriviaFrom(original));
-		}
-
-		private static ParenthesizedExpressionSyntax SimplifiableParentheses(ExpressionSyntax expression) =>
-			ParenthesizedExpression(expression).WithAdditionalAnnotations(Simplifier.Annotation);
-
 		private static TypeSyntax GetTypeSyntax(ITypeSymbol typeName) =>
-			ParseSimplifiableTypeName(typeName.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat));
-
-		private static TypeSyntax ParseSimplifiableTypeName(string name) =>
-			ParseTypeName(name).WithAdditionalAnnotations(Simplifier.Annotation);
+			SyntaxUtility.ParseSimplifiableTypeName(typeName.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat));
 
 		private static readonly NameSyntax s_ifNotNullNamespace = ParseName("Libronix.Utility.IfNotNull");
 

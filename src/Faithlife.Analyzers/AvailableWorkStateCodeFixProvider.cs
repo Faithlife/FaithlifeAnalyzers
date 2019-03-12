@@ -85,7 +85,7 @@ namespace Faithlife.Analyzers
 							createChangedDocument: token => ReplaceValueAsync(
 								context.Document,
 								memberAccess,
-								ReplaceIdentifier(s_fromCancellationTokenExpression, "token", IdentifierName(parameter.Identifier)),
+								SyntaxUtility.ReplaceIdentifier(s_fromCancellationTokenExpression, "token", IdentifierName(parameter.Identifier)),
 								token),
 							$"use-{parameter.Identifier.Text}"),
 						diagnostic);
@@ -98,7 +98,7 @@ namespace Faithlife.Analyzers
 							createChangedDocument: token => ReplaceValueAsync(
 								context.Document,
 								memberAccess,
-								ReplaceIdentifier(s_contextWorkStateExpression, "asyncMethodContext", IdentifierName(parameter.Identifier)),
+								SyntaxUtility.ReplaceIdentifier(s_contextWorkStateExpression, "asyncMethodContext", IdentifierName(parameter.Identifier)),
 								token),
 							$"use-{parameter.Identifier.Text}"),
 						diagnostic);
@@ -114,36 +114,16 @@ namespace Faithlife.Analyzers
 			return await Simplifier.ReduceAsync(document.WithSyntaxRoot(root), cancellationToken: cancellationToken).ConfigureAwait(false);
 		}
 
-		private static NameSyntax ParseQualifiedName(string qualifiedName) =>
-			qualifiedName
-				.Split('.')
-				.Select(IdentifierName)
-				.Cast<NameSyntax>()
-				.Aggregate((left, right) => QualifiedName(left, (IdentifierNameSyntax)right));
-
-		private static ExpressionSyntax ReplaceIdentifier(ExpressionSyntax expression, string originalIdentifierName, ExpressionSyntax replacement)
-		{
-			var targetNodes = expression.DescendantNodes()
-				.OfType<IdentifierNameSyntax>()
-				.Where(x => x.Identifier.Text == originalIdentifierName)
-				.ToList();
-
-			if (targetNodes.Count == 0)
-				throw new InvalidOperationException($"The identifier {originalIdentifierName} was not found in the expression.");
-
-			return expression.ReplaceNodes(targetNodes, (x, y) => replacement);
-		}
-
-		static readonly ExpressionSyntax s_currentWorkItemExpression = ReplaceIdentifier(
+		private static readonly ExpressionSyntax s_currentWorkItemExpression = SyntaxUtility.ReplaceIdentifier(
 			ParseExpression("AsyncWorkItem.Current"),
 			"AsyncWorkItem",
-			ParseQualifiedName("Libronix.Utility.Threading.AsyncWorkItem").WithAdditionalAnnotations(Simplifier.Annotation));
+			SyntaxUtility.ParseSimplifiableTypeName("Libronix.Utility.Threading.AsyncWorkItem"));
 
-		static readonly ExpressionSyntax s_fromCancellationTokenExpression = ReplaceIdentifier(
+		private static readonly ExpressionSyntax s_fromCancellationTokenExpression = SyntaxUtility.ReplaceIdentifier(
 			ParseExpression("WorkState.FromCancellationToken(token)"),
 			"WorkState",
-			ParseQualifiedName("Libronix.Utility.Threading.WorkState").WithAdditionalAnnotations(Simplifier.Annotation));
+			SyntaxUtility.ParseSimplifiableTypeName("Libronix.Utility.Threading.WorkState"));
 
-		static readonly ExpressionSyntax s_contextWorkStateExpression = ParseExpression("asyncMethodContext.WorkState");
+		private static readonly ExpressionSyntax s_contextWorkStateExpression = ParseExpression("asyncMethodContext.WorkState");
 	}
 }
