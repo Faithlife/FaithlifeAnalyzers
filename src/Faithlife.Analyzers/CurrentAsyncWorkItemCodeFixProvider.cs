@@ -87,28 +87,12 @@ namespace Faithlife.Analyzers
 
 		private static async Task<Document> AddParameterAsync(Document document, MemberAccessExpressionSyntax memberAccess, MethodDeclarationSyntax containingMethod, CancellationToken cancellationToken)
 		{
-			const string preferredName = "workState";
-
-			var conflictingNames = new HashSet<string>(containingMethod.ParameterList.Parameters
-				.Select(x => x.Identifier)
-				.Concat(containingMethod.Body.DescendantNodes().OfType<VariableDeclaratorSyntax>()
-					.Select(x => x.Identifier))
-				.Select(x => x.Text)
-				.Where(x => x.StartsWith(preferredName, StringComparison.Ordinal)));
-
-			string candidateName = preferredName;
-			int suffix = 1;
-
-			while (conflictingNames.Contains(candidateName))
-			{
-				candidateName = preferredName + suffix;
-				suffix++;
-			}
+			var parameterIdentifier = SyntaxUtility.GetHoistableIdentifier("workState", containingMethod);
 
 			var root = (await document.GetSyntaxRootAsync(cancellationToken).ConfigureAwait(false))
 				.ReplaceNode(containingMethod, containingMethod
-					.ReplaceNode(memberAccess, IdentifierName(candidateName))
-					.AddParameterListParameters(Parameter(Identifier(candidateName))
+					.ReplaceNode(memberAccess, IdentifierName(parameterIdentifier))
+					.AddParameterListParameters(Parameter(parameterIdentifier)
 						.WithType(s_iworkStateTypeName)
 						.WithAdditionalAnnotations(Simplifier.Annotation)));
 
