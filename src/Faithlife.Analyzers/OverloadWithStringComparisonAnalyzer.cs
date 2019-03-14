@@ -2,8 +2,6 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.CodeAnalysis.Operations;
 
@@ -18,6 +16,8 @@ namespace Faithlife.Analyzers
 			context.RegisterCompilationStartAction(compilationStartAnalysisContext =>
 			{
 				var stringComparisonType = compilationStartAnalysisContext.Compilation.GetTypeByMetadataName("System.StringComparison");
+				var cultureInfoType = compilationStartAnalysisContext.Compilation.GetTypeByMetadataName("System.Globalization.CultureInfo");
+
 				if (stringComparisonType != null)
 				{
 					compilationStartAnalysisContext.RegisterOperationAction(operationContext =>
@@ -26,7 +26,7 @@ namespace Faithlife.Analyzers
 						var methodSymbol = operation.TargetMethod;
 						if (methodSymbol?.ContainingType.SpecialType == SpecialType.System_String && s_affectedMethods.Contains(methodSymbol.Name))
 						{
-							if (!IsAcceptableOverload(methodSymbol, stringComparisonType))
+							if (!IsAcceptableOverload(methodSymbol, stringComparisonType, cultureInfoType))
 							{
 								// wrong overload
 								var rule = (methodSymbol.Name == "Equals" && ((methodSymbol.Parameters.Length == 1 && !methodSymbol.IsStatic) || (methodSymbol.Parameters.Length == 2 && methodSymbol.IsStatic))) ?
@@ -57,80 +57,26 @@ namespace Faithlife.Analyzers
 
 		public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => s_rules;
 
-		static readonly ISet<string> s_affectedMethods = new HashSet<string>(new[] { "Equals", "Compare", "IndexOf", "LastIndexOf", "StartsWith", "EndsWith" });
-
-		private static bool IsAcceptableOverload(IMethodSymbol methodSymbol, INamedTypeSymbol stringComparisonType)
+		private static bool IsAcceptableOverload(IMethodSymbol methodSymbol, INamedTypeSymbol stringComparisonType, INamedTypeSymbol cultureInfoType)
 		{
-			switch ((methodSymbol.IsStatic, methodSymbol.Name, methodSymbol.Parameters.Length))
+			foreach (var parameter in methodSymbol.Parameters)
 			{
-			case var t when t == (true, "Compare", 3):
-				// static string.Compare(string, string, StringComparison)
-				return methodSymbol.Parameters[0].Type.SpecialType == SpecialType.System_String &&
-					methodSymbol.Parameters[1].Type.SpecialType == SpecialType.System_String &&
-					methodSymbol.Parameters[2].Type.Equals(stringComparisonType);
-
-			case var t when t == (true, "Compare", 6):
-				// static string.Compare(string, int, string, int, int, StringComparison)
-				return methodSymbol.Parameters[0].Type.SpecialType == SpecialType.System_String &&
-					methodSymbol.Parameters[1].Type.SpecialType == SpecialType.System_Int32 &&
-					methodSymbol.Parameters[2].Type.SpecialType == SpecialType.System_String &&
-					methodSymbol.Parameters[3].Type.SpecialType == SpecialType.System_Int32 &&
-					methodSymbol.Parameters[4].Type.SpecialType == SpecialType.System_Int32 &&
-					methodSymbol.Parameters[5].Type.Equals(stringComparisonType);
-
-			case var t when t == (false, "EndsWith", 1) || t == (false, "StartsWith", 1):
-				// string.EndsWith(string, StringComparison)
-				return methodSymbol.Parameters[0].Type.SpecialType == SpecialType.System_Char;
-
-			case var t when t == (false, "EndsWith", 2) || t == (false, "StartsWith", 2):
-				// string.EndsWith(string, StringComparison)
-				return methodSymbol.Parameters[0].Type.SpecialType == SpecialType.System_String &&
-					methodSymbol.Parameters[1].Type.Equals(stringComparisonType);
-
-			case var t when t == (false, "Equals", 1):
-				// string.Equals(object)
-				return methodSymbol.Parameters[0].Type.SpecialType == SpecialType.System_Object;
-
-			case var t when t == (false, "Equals", 2):
-				// string.Equals(string, StringComparison)
-				return methodSymbol.Parameters[0].Type.SpecialType == SpecialType.System_String &&
-					methodSymbol.Parameters[1].Type.Equals(stringComparisonType);
-
-			case var t when t == (true, "Equals", 3):
-				// static string.Equals(string, string, StringComparison)
-				return methodSymbol.Parameters[0].Type.SpecialType == SpecialType.System_String &&
-					methodSymbol.Parameters[1].Type.SpecialType == SpecialType.System_String &&
-					methodSymbol.Parameters[2].Type.Equals(stringComparisonType);
-
-			case var t when t == (false, "IndexOf", 1) || t == (false, "LastIndexOf", 1):
-				// string.IndexOf(char)
-				return methodSymbol.Parameters[0].Type.SpecialType == SpecialType.System_Char;
-
-			case var t when t == (false, "IndexOf", 2) || t == (false, "LastIndexOf", 2):
-				// string.IndexOf(char, int); string.IndexOf(string, StringComparison)
-				return (methodSymbol.Parameters[0].Type.SpecialType == SpecialType.System_Char && methodSymbol.Parameters[1].Type.SpecialType == SpecialType.System_Int32) ||
-						(methodSymbol.Parameters[0].Type.SpecialType == SpecialType.System_String && methodSymbol.Parameters[1].Type.Equals(stringComparisonType));
-
-			case var t when t == (false, "IndexOf", 3) || t == (false, "LastIndexOf", 3):
-				// string.IndexOf(char, int, int); string.IndexOf(string, int, StringComparison)
-				return (methodSymbol.Parameters[0].Type.SpecialType == SpecialType.System_Char &&
-					methodSymbol.Parameters[1].Type.SpecialType == SpecialType.System_Int32 &&
-					methodSymbol.Parameters[2].Type.SpecialType == SpecialType.System_Int32) ||
-					(methodSymbol.Parameters[0].Type.SpecialType == SpecialType.System_String &&
-					methodSymbol.Parameters[1].Type.SpecialType == SpecialType.System_Int32 &&
-					methodSymbol.Parameters[2].Type.Equals(stringComparisonType));
-
-			case var t when t == (false, "IndexOf", 4) || t == (false, "LastIndexOf", 4):
-				// string.IndexOf(string, int, int, StringComparison)
-				return methodSymbol.Parameters[0].Type.SpecialType == SpecialType.System_String &&
-					methodSymbol.Parameters[1].Type.SpecialType == SpecialType.System_Int32 &&
-					methodSymbol.Parameters[2].Type.SpecialType == SpecialType.System_Int32 &&
-					methodSymbol.Parameters[3].Type.Equals(stringComparisonType);
+				if (parameter.Type.SpecialType == SpecialType.System_Object)
+					return true;
+				if (parameter.Type.SpecialType == SpecialType.System_Char)
+					return true;
+				if (parameter.Type.Equals(stringComparisonType))
+					return true;
+				if (parameter.Type.Equals(cultureInfoType))
+					return true;
 			}
+			
 			return false;
 		}
 
-		static readonly DiagnosticDescriptor s_useStringComparisonRule = new DiagnosticDescriptor(
+		private static readonly ISet<string> s_affectedMethods = new HashSet<string>(new[] { "Equals", "Compare", "IndexOf", "LastIndexOf", "StartsWith", "EndsWith" });
+
+		private static readonly DiagnosticDescriptor s_useStringComparisonRule = new DiagnosticDescriptor(
 			id: UseStringComparisonDiagnosticId,
 			title: "Use StringComparison overload",
 			messageFormat: "Use an overload that takes a StringComparison.",
@@ -140,7 +86,7 @@ namespace Faithlife.Analyzers
 			description: "The desired StringComparison must be explicitly specified.",
 			helpLinkUri: $"https://github.com/Faithlife/FaithlifeAnalyzers/wiki/{UseStringComparisonDiagnosticId}");
 
-		static readonly DiagnosticDescriptor s_avoidStringEqualsRule = new DiagnosticDescriptor(
+		private static readonly DiagnosticDescriptor s_avoidStringEqualsRule = new DiagnosticDescriptor(
 			id: AvoidStringEqualsDiagnosticId,
 			title: "Avoid string.Equals(string, string)",
 			messageFormat: "Use operator== or a non-ordinal StringComparison.",

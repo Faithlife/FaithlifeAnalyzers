@@ -6,7 +6,7 @@ using NUnit.Framework;
 namespace Faithlife.Analyzers.Tests
 {
 	[TestFixture]
-	public class OverloadWithStringComparisonTests : CodeFixVerifier
+	public sealed class OverloadWithStringComparisonTests : CodeFixVerifier
 	{
 		[Test]
 		public void ValidUsage()
@@ -23,6 +23,32 @@ namespace ConsoleApplication1
 	}
 }
 ";
+			VerifyCSharpDiagnostic(program);
+		}
+
+		[TestCase("\"a\".StartsWith(\"b\", true, CultureInfo.CurrentCulture);")]
+		[TestCase("\"a\".EndsWith(\"b\", true, CultureInfo.CurrentCulture);")]
+		[TestCase("string.Compare(\"a\", \"b\", true, CultureInfo.CurrentCulture);")]
+		[TestCase("string.Compare(\"a\", \"b\", CultureInfo.CurrentCulture, CompareOptions.None);")]
+		[TestCase("string.Compare(\"a\", 0, \"b\", 0, 1, true, CultureInfo.CurrentCulture);")]
+		[TestCase("string.Compare(\"a\", 0, \"b\", 0, 1, CultureInfo.CurrentCulture, CompareOptions.None);")]
+		public void ValidUsageWithCultureInfo(string expression)
+		{
+			string program = @"using System;
+using System.Globalization;
+
+namespace ConsoleApplication1
+{
+	class Program
+	{
+		static void Main(string[] args)
+		{
+			" + expression + @"
+		}
+	}
+}
+";
+
 			VerifyCSharpDiagnostic(program);
 		}
 
