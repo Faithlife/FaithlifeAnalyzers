@@ -94,7 +94,7 @@ namespace Faithlife.Analyzers
 				.ToList();
 
 			if (targetNodes.Count == 0)
-				throw new InvalidOperationException($"The identifier {originalIdentifierName} was not found in the expression.");
+				return expression;
 
 			return expression.ReplaceNodes(targetNodes, (original, updated) => replacement.WithTriviaFrom(original));
 		}

@@ -285,14 +285,30 @@ namespace Faithlife.Analyzers
 			if (!methodSymbol.TypeArguments[0].CanBeReferencedByName)
 				return;
 
-			// It's possible that hoisting the lambda's declaration into the parent context will cause naming conflicts.
-			// When this happens, we'll generate a new name that is unique to the context.
-			var originalName = lambdaParameterIdentifier.Text;
-			var hoistableIdentifier = SyntaxUtility.GetHoistableIdentifier(originalName, ifNotNullInvocation, parameterList[0]);
-			if (!AreEquivalent(lambdaParameterIdentifier, hoistableIdentifier))
-				lambdaExpressionBody = SyntaxUtility.ReplaceIdentifier(lambdaExpressionBody, originalName, IdentifierName(hoistableIdentifier));
+			ExpressionSyntax conditionExpression;
 
-			var conditionExpression = IsPatternExpression(targetExpression, DeclarationPattern(GetTypeSyntax(methodSymbol.TypeArguments[0]), SingleVariableDesignation(hoistableIdentifier)));
+			// If the invocation target is just a local variable, we can reuse that name. Otherwise, we'll need to hoist the identifier from the lambda expression.
+			// We could *probably* get away with using this strategy for *any* single identifier, but the further we get away from local variable scope, the more
+			// likely we are to introduce subtle race conditions.
+			// Even a local variable is technically susceptible to a race condition if it participates in a closure, but the paranoia has to end somewhere.
+			if (methodSymbol.TypeArguments[0].IsReferenceType &&
+				targetExpression is IdentifierNameSyntax &&
+				(semanticModel.GetSymbolInfo(targetExpression).Symbol?.Kind.HasFlag(SymbolKind.Local) ?? false))
+			{
+				lambdaExpressionBody = SyntaxUtility.ReplaceIdentifier(lambdaExpressionBody, lambdaParameterIdentifier.Text, targetExpression);
+				conditionExpression = BinaryExpression(SyntaxKind.IsExpression, targetExpression, GetTypeSyntax(methodSymbol.TypeArguments[0]));
+			}
+			else
+			{
+				// It's possible that hoisting the lambda's declaration into the parent context will cause naming conflicts.
+				// When this happens, we'll generate a new name that is unique to the context.
+				var originalName = lambdaParameterIdentifier.Text;
+				var hoistableIdentifier = SyntaxUtility.GetHoistableIdentifier(originalName, ifNotNullInvocation, parameterList[0]);
+				if (!AreEquivalent(lambdaParameterIdentifier, hoistableIdentifier))
+					lambdaExpressionBody = SyntaxUtility.ReplaceIdentifier(lambdaExpressionBody, originalName, IdentifierName(hoistableIdentifier));
+
+				conditionExpression = IsPatternExpression(targetExpression, DeclarationPattern(GetTypeSyntax(methodSymbol.TypeArguments[0]), SingleVariableDesignation(hoistableIdentifier)));
+			}
 
 			// From this point on, the handling of void IfNotNull invocations is totally different from the others.
 			// If we couldn't use the conditional access operator, a void invocation will need to be converted to

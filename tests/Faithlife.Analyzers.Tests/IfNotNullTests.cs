@@ -46,29 +46,41 @@ namespace Faithlife.Analyzers.Tests
 		[TestCase(
 			"new ReferenceThing()",
 			"var result = possiblyNull.IfNotNull(x => (x.CalculateValue()));",
-			"var result = possiblyNull is ReferenceThing x ? (x.CalculateValue()) : default(ReferenceThing);")]
+			"var result = possiblyNull is ReferenceThing ? (possiblyNull.CalculateValue()) : default(ReferenceThing);")]
+		[TestCase(
+			"new ReferenceThing()",
+			"var result = possiblyNull.RecursiveProperty.IfNotNull(x => (x.CalculateValue()));",
+			"var result = possiblyNull.RecursiveProperty is ReferenceThing x ? (x.CalculateValue()) : default(ReferenceThing);")]
 		[TestCase(
 			"new ReferenceThing()",
 			"var result = possiblyNull.IfNotNull(x => (x).CalculateValue());",
-			"var result = possiblyNull is ReferenceThing x ? (x).CalculateValue() : default(ReferenceThing);")]
+			"var result = possiblyNull is ReferenceThing ? (possiblyNull).CalculateValue() : default(ReferenceThing);")]
+		[TestCase(
+			"new ReferenceThing()",
+			"var result = possiblyNull.RecursiveProperty.IfNotNull(x => (x).CalculateValue());",
+			"var result = possiblyNull.RecursiveProperty is ReferenceThing x ? (x).CalculateValue() : default(ReferenceThing);")]
 		[TestCase(
 			"new ReferenceThing()",
 			"var result = possiblyNull.IfNotNull(x => (x.RecursiveProperty).CalculateValue());",
-			"var result = possiblyNull is ReferenceThing x ? (x.RecursiveProperty).CalculateValue() : default(ReferenceThing);")]
+			"var result = possiblyNull is ReferenceThing ? (possiblyNull.RecursiveProperty).CalculateValue() : default(ReferenceThing);")]
 		[TestCase(
 			"new ReferenceThing()",
 			"var result = possiblyNull.IfNotNull(x => ((x.RecursiveProperty).RecursiveProperty).CalculateValue());",
-			"var result = possiblyNull is ReferenceThing x ? ((x.RecursiveProperty).RecursiveProperty).CalculateValue() : default(ReferenceThing);")]
+			"var result = possiblyNull is ReferenceThing ? ((possiblyNull.RecursiveProperty).RecursiveProperty).CalculateValue() : default(ReferenceThing);")]
 		[TestCase(
 			"new ReferenceThing()",
 			"var result = possiblyNull.IfNotNull(x => (x.RecursiveProperty?.RecursiveProperty).CalculateValue());",
-			"var result = possiblyNull is ReferenceThing x ? (x.RecursiveProperty?.RecursiveProperty).CalculateValue() : default(ReferenceThing);")]
+			"var result = possiblyNull is ReferenceThing ? (possiblyNull.RecursiveProperty?.RecursiveProperty).CalculateValue() : default(ReferenceThing);")]
 		// When using pattern matching, the input type must be used for the declaration type.
 		// (in most of these tests, the input type and output type are the same)
 		[TestCase(
 			"new ReferenceThing()",
 			"var result = possiblyNull.IfNotNull(x => (x.ValueTypeProperty));",
-			"var result = possiblyNull is ReferenceThing x ? (x.ValueTypeProperty) : default(int);")]
+			"var result = possiblyNull is ReferenceThing ? (possiblyNull.ValueTypeProperty) : default(int);")]
+		[TestCase(
+			"new ReferenceThing()",
+			"var result = possiblyNull.RecursiveProperty.IfNotNull(x => (x.ValueTypeProperty));",
+			"var result = possiblyNull.RecursiveProperty is ReferenceThing x ? (x.ValueTypeProperty) : default(int);")]
 		// Conditional operators should also work with indexed access.
 		[TestCase(
 			"new ReferenceThing()",
@@ -88,11 +100,15 @@ namespace Faithlife.Analyzers.Tests
 		[TestCase(
 			"new ReferenceThing()",
 			"var result = possiblyNull.IfNotNull(ReferenceThing.CalculateStatic);",
-			"var result = possiblyNull is ReferenceThing value ? ReferenceThing.CalculateStatic(value) : default(ReferenceThing);")]
+			"var result = possiblyNull is ReferenceThing ? ReferenceThing.CalculateStatic(possiblyNull) : default(ReferenceThing);")]
+		[TestCase(
+			"new ReferenceThing()",
+			"var result = possiblyNull.RecursiveProperty.IfNotNull(ReferenceThing.CalculateStatic);",
+			"var result = possiblyNull.RecursiveProperty is ReferenceThing value ? ReferenceThing.CalculateStatic(value) : default(ReferenceThing);")]
 		[TestCase(
 			"new ReferenceThing()",
 			"var result = possiblyNull.IfNotNull(ReferenceThing.CalculateStatic, ReferenceThing.Factory);",
-			"var result = possiblyNull is ReferenceThing value ? ReferenceThing.CalculateStatic(value) : ReferenceThing.Factory();")]
+			"var result = possiblyNull is ReferenceThing ? ReferenceThing.CalculateStatic(possiblyNull) : ReferenceThing.Factory();")]
 		// The results using Nullable<T> generally look the same, but they require special handling.
 		[TestCase(
 			"new ReferenceThing()",
@@ -130,11 +146,19 @@ namespace Faithlife.Analyzers.Tests
 		[TestCase(
 			"new ReferenceThing()",
 			"var result = possiblyNull.IfNotNull(x => x.CalculateValue(), () => new ReferenceThing());",
-			"var result = possiblyNull is ReferenceThing x ? x.CalculateValue() : new ReferenceThing();")]
+			"var result = possiblyNull is ReferenceThing ? possiblyNull.CalculateValue() : new ReferenceThing();")]
 		[TestCase(
 			"new ReferenceThing()",
 			"var result = possiblyNull.IfNotNull(x => x.CalculateValue(), new ReferenceThing());",
-			"var result = possiblyNull is ReferenceThing x ? x.CalculateValue() : new ReferenceThing();")]
+			"var result = possiblyNull is ReferenceThing ? possiblyNull.CalculateValue() : new ReferenceThing();")]
+		[TestCase(
+			"new ReferenceThing()",
+			"var result = possiblyNull.RecursiveProperty.IfNotNull(x => x.CalculateValue(), () => new ReferenceThing());",
+			"var result = possiblyNull.RecursiveProperty is ReferenceThing x ? x.CalculateValue() : new ReferenceThing();")]
+		[TestCase(
+			"new ReferenceThing()",
+			"var result = possiblyNull.RecursiveProperty.IfNotNull(x => x.CalculateValue(), new ReferenceThing());",
+			"var result = possiblyNull.RecursiveProperty is ReferenceThing x ? x.CalculateValue() : new ReferenceThing();")]
 		// Calling IfNotNull on a delegate that is immediately invoked results in some special cases.
 		[TestCase(
 			"(Func<ReferenceThing>) new ReferenceThing().CalculateValue",
@@ -156,7 +180,11 @@ namespace Faithlife.Analyzers.Tests
 		[TestCase(
 			"new ReferenceThing()",
 			"var result = possiblyNull.IfNotNull(x => x.CalculateValue(x));",
-			"var result = possiblyNull is ReferenceThing x ? x.CalculateValue(x) : default(ReferenceThing);")]
+			"var result = possiblyNull is ReferenceThing ? possiblyNull.CalculateValue(possiblyNull) : default(ReferenceThing);")]
+		[TestCase(
+			"new ReferenceThing()",
+			"var result = possiblyNull.RecursiveProperty.IfNotNull(x => x.CalculateValue(x));",
+			"var result = possiblyNull.RecursiveProperty is ReferenceThing x ? x.CalculateValue(x) : default(ReferenceThing);")]
 		// This cast makes the call equivalent to the null-conditional operator, which means that
 		// pattern matching is unnecessary and the cast can be discarded.
 		[TestCase(
@@ -174,12 +202,12 @@ namespace Faithlife.Analyzers.Tests
 		[TestCase(
 			"new ReferenceThing()",
 			"var result = possiblyNull.IfNotNull(x => new { Property = \"value\" }, () => new { Property = \"other value\" });",
-			"var result = possiblyNull is ReferenceThing x ? (new { Property = \"value\" }) : new { Property = \"other value\" };")]
+			"var result = possiblyNull is ReferenceThing ? (new { Property = \"value\" }) : new { Property = \"other value\" };")]
 		// A new expression with no default value can still be transformed if it is the left hand side of a null-coalescing operator.
 		[TestCase(
 			"new ReferenceThing()",
 			"var result = possiblyNull.IfNotNull(x => new { Property = \"value\" }) ?? new { Property = \"other value\" };",
-			"var result = possiblyNull is ReferenceThing x ? new { Property = \"value\" } : new { Property = \"other value\" };")]
+			"var result = possiblyNull is ReferenceThing ? new { Property = \"value\" } : new { Property = \"other value\" };")]
 		public void SimpleMethodCall(string possiblyNull, string call, string fixedCall)
 		{
 			string createProgram(string actualCall) =>
@@ -226,12 +254,12 @@ namespace TestProgram
 		[TestCase(
 			"new ReferenceThing()",
 			"var result = possiblyNull.IfNotNull(x => ReferenceThing.CalculateStatic(x)).IfNotNull(x => ReferenceThing.CalculateStatic(x));",
-			"var result = (possiblyNull is ReferenceThing x ? ReferenceThing.CalculateStatic(x) : default(ReferenceThing)) is ReferenceThing x1 ? ReferenceThing.CalculateStatic(x1) : default(ReferenceThing);",
+			"var result = (possiblyNull is ReferenceThing ? ReferenceThing.CalculateStatic(possiblyNull) : default(ReferenceThing)) is ReferenceThing x1 ? ReferenceThing.CalculateStatic(x1) : default(ReferenceThing);",
 			17, 17)]
 		[TestCase(
 			"new ReferenceThing()",
 			"var result = possiblyNull.IfNotNull(ReferenceThing.CalculateStatic).IfNotNull(ReferenceThing.CalculateStatic);",
-			"var result = (possiblyNull is ReferenceThing value1 ? ReferenceThing.CalculateStatic(value1) : default(ReferenceThing)) is ReferenceThing value ? ReferenceThing.CalculateStatic(value) : default(ReferenceThing);",
+			"var result = (possiblyNull is ReferenceThing ? ReferenceThing.CalculateStatic(possiblyNull) : default(ReferenceThing)) is ReferenceThing value ? ReferenceThing.CalculateStatic(value) : default(ReferenceThing);",
 			17, 17)]
 		public void MultipleMethodCalls(string possiblyNull, string call, string fixedCall, int firstColumn, int secondColumn)
 		{
@@ -278,7 +306,7 @@ namespace TestProgram
 		[TestCase(
 			"new ReferenceThing()",
 			"possiblyNull.IfNotNull(x => x.Method(), () => throw new InvalidOperationException());",
-			"if (possiblyNull is ReferenceThing x)\n\t\t\t\tx.Method();\n\t\t\telse\n\t\t\t\tthrow new InvalidOperationException();")]
+			"if (possiblyNull is ReferenceThing)\n\t\t\t\tpossiblyNull.Method();\n\t\t\telse\n\t\t\t\tthrow new InvalidOperationException();")]
 		[TestCase(
 			"(ValueThing?) new ValueThing()",
 			"possiblyNull.IfNotNull((ValueThing x) => x.Method(), () => throw new InvalidOperationException());",
@@ -313,6 +341,42 @@ namespace TestProgram
 
 			// The fixer should decline to make any modifications to unsupported calls.
 			VerifyCSharpFix(invalidProgram, fixedCall is null ? invalidProgram : createProgram(fixedCall).Replace("using Libronix.Utility.IfNotNull;\n", ""));
+		}
+
+		public void NonLocalInvocation()
+		{
+			string createProgram(string actualCall) =>
+				c_preamble + @"
+namespace TestProgram
+{
+	internal class TestClass
+	{
+		public event Action OnAction;
+
+		public void CallIfNotNull()
+		{
+			" + actualCall + @"
+		}
+	}
+}";
+
+			var expected = new DiagnosticResult
+			{
+				Id = IfNotNullAnalyzer.DiagnosticId,
+				Message = "Prefer modern language features over IfNotNull usage.",
+				Severity = DiagnosticSeverity.Info,
+				Locations = new[] { new DiagnosticResultLocation("Test0.cs", c_preambleLength + 8, 4) },
+			};
+
+			string invalidProgram = createProgram("OnAction.IfNotNull(x => x(), () => throw new InvalidOperationException());");
+
+			VerifyCSharpDiagnostic(invalidProgram, expected);
+
+			// Ensure that invocations on identifiers that are *not* local variables receive a local variable definition.
+			VerifyCSharpFix(invalidProgram, createProgram(@"if (OnAction is Action x)
+				x();
+			else
+				throw new InvalidOperationException();").Replace("using Libronix.Utility.IfNotNull;\n", ""));
 		}
 
 		[TestCase(
