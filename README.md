@@ -1,6 +1,6 @@
 # Faithlife.Analyzers
 
-[![AppVeyor](https://img.shields.io/appveyor/ci/Faithlife/reponame/master.svg)](https://ci.appveyor.com/project/Faithlife/reponame) [![NuGet](https://img.shields.io/nuget/v/ProjectName.svg)](https://www.nuget.org/packages/ProjectName)
+[![AppVeyor](https://img.shields.io/appveyor/ci/Faithlife/FaithlifeAnalyzers/master.svg)](https://ci.appveyor.com/project/Faithlife/FaithlifeAnalyzers) [![NuGet](https://img.shields.io/nuget/v/Faithlife.Analyzers.svg)](https://www.nuget.org/packages/Faithlife.Analyzers)
 
 Roslyn-based C# code analyzers used on Faithlife source code.
 
