@@ -11,6 +11,10 @@ or errors for existing code when the package is upgraded).
 
 ## Released
 
+### 1.0.6 Beta 1
+
+* Add diagnostic for `NullReferenceException` being thrown by `UntilCanceledAnalyzer`.
+
 ### 1.0.5
 
 * Allow `AsyncWorkItem.Current` to be used in lambda passed to `AsyncWorkItem.Start`: [#20](https://github.com/Faithlife/FaithlifeAnalyzers/issues/20).

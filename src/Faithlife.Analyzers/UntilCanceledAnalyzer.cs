@@ -24,30 +24,37 @@ namespace Faithlife.Analyzers
 
 		private static void AnalyzeSyntax(SyntaxNodeAnalysisContext context)
 		{
-			var invocation = (InvocationExpressionSyntax) context.Node;
+			try
+			{
+				var invocation = (InvocationExpressionSyntax) context.Node;
 
-			var asyncEnumerableUtility = context.SemanticModel.Compilation.GetTypeByMetadataName("Libronix.Utility.Threading.AsyncEnumerableUtility");
-			var asyncAction = context.SemanticModel.Compilation.GetTypeByMetadataName("Libronix.Utility.Threading.AsyncAction");
-			if (asyncEnumerableUtility is null || asyncAction is null)
-				return;
+				var asyncEnumerableUtility = context.SemanticModel.Compilation.GetTypeByMetadataName("Libronix.Utility.Threading.AsyncEnumerableUtility");
+				var asyncAction = context.SemanticModel.Compilation.GetTypeByMetadataName("Libronix.Utility.Threading.AsyncAction");
+				if (asyncEnumerableUtility is null || asyncAction is null)
+					return;
 
-			var method = context.SemanticModel.GetSymbolInfo(invocation.Expression).Symbol as IMethodSymbol;
-			if (method?.Name != "UntilCanceled" || method.ContainingType != asyncEnumerableUtility)
-				return;
+				var method = context.SemanticModel.GetSymbolInfo(invocation.Expression).Symbol as IMethodSymbol;
+				if (method?.Name != "UntilCanceled" || method.ContainingType != asyncEnumerableUtility)
+					return;
 
-			if (invocation.ArgumentList.Arguments.Count != 0)
-				return;
+				if (invocation.ArgumentList.Arguments.Count != 0)
+					return;
 
-			var containingMethod = invocation.Ancestors().OfType<MethodDeclarationSyntax>().FirstOrDefault();
-			if (containingMethod is null)
-				return;
+				var containingMethod = invocation.Ancestors().OfType<MethodDeclarationSyntax>().FirstOrDefault();
+				if (containingMethod is null)
+					return;
 
-			var ienumerable = context.SemanticModel.Compilation.GetTypeByMetadataName("System.Collections.Generic.IEnumerable`1");
-			var returnTypeSymbol = ModelExtensions.GetSymbolInfo(context.SemanticModel, containingMethod.ReturnType).Symbol as INamedTypeSymbol;
-			if (returnTypeSymbol?.ConstructedFrom == ienumerable && returnTypeSymbol?.TypeArguments[0] == asyncAction)
-				return;
+				var ienumerable = context.SemanticModel.Compilation.GetTypeByMetadataName("System.Collections.Generic.IEnumerable`1");
+				var returnTypeSymbol = ModelExtensions.GetSymbolInfo(context.SemanticModel, containingMethod.ReturnType).Symbol as INamedTypeSymbol;
+				if (returnTypeSymbol?.ConstructedFrom == ienumerable && returnTypeSymbol?.TypeArguments[0] == asyncAction)
+					return;
 
-			context.ReportDiagnostic(Diagnostic.Create(s_rule, invocation.ArgumentList.GetLocation()));
+				context.ReportDiagnostic(Diagnostic.Create(s_rule, invocation.ArgumentList.GetLocation()));
+			}
+			catch (NullReferenceException ex)
+			{
+				throw new InvalidOperationException("UntilCanceledAnalyzer failed: " + ex.ToString());
+			}
 		}
 
 		static readonly DiagnosticDescriptor s_rule = new DiagnosticDescriptor(
