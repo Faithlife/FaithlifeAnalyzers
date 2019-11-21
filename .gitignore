@@ -1,9 +1,6 @@
 # ignore output folders
 bin/
-build/
-cake/
 obj/
-ipch/
 release/
 
 # ignore user-specific options/cache files
@@ -12,10 +9,8 @@ _ReSharper.*
 Thumbs.db
 *.cache
 *.user
-*.opensdf
-*.sdf
-*.suo
 *.userprefs
 *.ncrunchproject
 *.ncrunchsolution
 nCrunchTemp*
+_ReSharper*

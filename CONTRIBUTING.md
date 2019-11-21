@@ -2,8 +2,8 @@
 
 ## Prerequisites
 
-* Install [Visual Studio 2017](https://www.visualstudio.com/downloads/) or [Visual Studio Code](https://code.visualstudio.com/) with the [editorconfig extension](https://github.com/editorconfig/editorconfig-vscode).
-* Install [.NET Core 2.0](https://www.microsoft.com/net/core).
+* Install [Visual Studio 2019](https://visualstudio.microsoft.com/downloads/) or [Visual Studio Code](https://code.visualstudio.com/).
+* Install [.NET Core 3.x](https://dotnet.microsoft.com/download).
 
 ## Guidelines
 
@@ -15,4 +15,4 @@
 
 * Clone the repository: `git clone https://github.com/Faithlife/FaithlifeAnalyzers.git`
 * `cd FaithlifeAnalyzers`
-* `dotnet test tests/Faithlife.Analyzers.Tests`
+* `dotnet test`
