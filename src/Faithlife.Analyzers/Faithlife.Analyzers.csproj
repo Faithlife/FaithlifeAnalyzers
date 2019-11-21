@@ -9,6 +9,7 @@
     <NoWarn>$(NoWarn);NU5128</NoWarn>
     <Description>C# Code Analyzers used at Faithlife</Description>
     <PackageTags>roslyn;analyzer</PackageTags>
+    <DebugType>embedded</DebugType>
   </PropertyGroup>
 
   <ItemGroup>
