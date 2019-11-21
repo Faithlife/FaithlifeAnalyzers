@@ -95,7 +95,7 @@ namespace Faithlife.Analyzers.Tests
 
 		private static string GetMethodName(Ordering ordering) => ordering.ToString();
 
-		private static string GetExtensionMethodCode(Ordering ordering, string collection, string lambda, string comparer = null, bool isNullConditional = false)
+		private static string GetExtensionMethodCode(Ordering ordering, string collection, string lambda, string? comparer = null, bool isNullConditional = false)
 		{
 			string parameter = (comparer == null ? "" : $", {comparer}");
 			string nullConditional = isNullConditional ? "?" : "";

@@ -17,7 +17,7 @@ namespace Faithlife.Analyzers
 
 		public static IfNotNullFixAllProvider Instance { get; } = new IfNotNullFixAllProvider();
 
-		public override async Task<CodeAction> GetFixAsync(FixAllContext fixAllContext)
+		public override async Task<CodeAction?> GetFixAsync(FixAllContext fixAllContext)
 		{
 			IEnumerable<Diagnostic> allDiagnostics;
 			IEnumerable<(Document Document, SyntaxTree SyntaxTree)> allSyntaxTrees;
@@ -89,13 +89,13 @@ namespace Faithlife.Analyzers
 			return CodeAction.Create("Update solution", token => Task.FromResult(updatedSolution));
 		}
 
-		private static async Task<Document> GetDocumentFixAsync(FixAllContext fixAllContext, Document document, ImmutableArray<Diagnostic> initialDiagnostics)
+		private static async Task<Document?> GetDocumentFixAsync(FixAllContext fixAllContext, Document document, ImmutableArray<Diagnostic> initialDiagnostics)
 		{
 			var currentDocument = document;
 			var diagnostics = initialDiagnostics;
 			while (diagnostics.Length != 0)
 			{
-				CodeAction firstFix = null;
+				CodeAction? firstFix = null;
 
 				foreach (var diagnostic in diagnostics)
 				{

@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Simplification;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
@@ -26,7 +25,7 @@ namespace Faithlife.Analyzers
 		/// Currently, this method takes a conservative approach to declarations within the member and pays no attention at all
 		/// to identifiers declared outside the scope of the member.
 		/// </remarks>
-		public static SyntaxToken GetHoistableIdentifier(string desiredName, SyntaxNode declarationLocation, SyntaxNode originalDeclaration = null)
+		public static SyntaxToken GetHoistableIdentifier(string desiredName, SyntaxNode declarationLocation, SyntaxNode? originalDeclaration = null)
 		{
 			if (desiredName is null)
 				throw new ArgumentNullException(nameof(desiredName));

@@ -20,7 +20,7 @@ namespace Faithlife.Analyzers
 	{
 		public sealed override ImmutableArray<string> FixableDiagnosticIds => ImmutableArray.Create(AvailableWorkStateAnalyzer.DiagnosticId);
 
-		public sealed override FixAllProvider GetFixAllProvider() => null;
+		public sealed override FixAllProvider? GetFixAllProvider() => null;
 
 		public sealed override async Task RegisterCodeFixesAsync(CodeFixContext context)
 		{

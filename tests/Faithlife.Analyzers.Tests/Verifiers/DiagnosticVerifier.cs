@@ -1,3 +1,4 @@
+using System;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Diagnostics;
@@ -17,18 +18,13 @@ namespace Faithlife.Analyzers.Tests
 		/// <summary>
 		/// Get the CSharp analyzer being tested - to be implemented in non-abstract class
 		/// </summary>
-		protected virtual DiagnosticAnalyzer GetCSharpDiagnosticAnalyzer()
-		{
-			return null;
-		}
+		protected virtual DiagnosticAnalyzer GetCSharpDiagnosticAnalyzer() => throw new NotImplementedException();
 
 		/// <summary>
 		/// Get the Visual Basic analyzer being tested (C#) - to be implemented in non-abstract class
 		/// </summary>
-		protected virtual DiagnosticAnalyzer GetBasicDiagnosticAnalyzer()
-		{
-			return null;
-		}
+		protected virtual DiagnosticAnalyzer GetBasicDiagnosticAnalyzer() => throw new NotImplementedException();
+
 		#endregion
 
 		#region Verifier wrappers

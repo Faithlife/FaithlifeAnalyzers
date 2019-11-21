@@ -43,7 +43,7 @@ namespace Faithlife.Analyzers
 			if (ifNotNullInvocation is null)
 				return;
 
-			var methodSymbol = semanticModel.GetSymbolInfo(ifNotNullInvocation).Symbol as IMethodSymbol;
+			var methodSymbol = (IMethodSymbol) semanticModel.GetSymbolInfo(ifNotNullInvocation).Symbol;
 
 			// The location of each of the arguments changes based on whether the method is invoked as an extension method.
 			var targetExpression = methodSymbol.IsStatic ?
@@ -99,7 +99,7 @@ namespace Faithlife.Analyzers
 			}
 
 			var outputTypeIsNullable = methodSymbol.Arity == 2 &&
-				(outputTypeArgument.IsReferenceType ||
+				(outputTypeArgument!.IsReferenceType ||
 					((outputTypeArgument as INamedTypeSymbol)?.ConstructedFrom?.SpecialType.HasFlag(SpecialType.System_Nullable_T) ?? false));
 
 			if (methodSymbol.Arity == 2)
@@ -122,7 +122,7 @@ namespace Faithlife.Analyzers
 				}
 				else if (defaultValueExpression is null && !outputTypeIsNullable)
 				{
-					if (!outputTypeArgument.CanBeReferencedByName)
+					if (!outputTypeArgument!.CanBeReferencedByName)
 						return;
 
 					defaultValueExpression = DefaultExpression(GetTypeSyntax(outputTypeArgument));
@@ -222,7 +222,7 @@ namespace Faithlife.Analyzers
 			// Some usages of IfNotNull explicitly cast the result to Nullable<T>, which means
 			// they can use the null-conditional operator without the cast or a null-conditional operator.
 			var mainLambdaExpressionBody = lambdaExpressionBody;
-			if (outputTypeIsNullable && !outputTypeArgument.IsReferenceType)
+			if (outputTypeIsNullable && !outputTypeArgument!.IsReferenceType) // TODO: verify this null coercion is safe
 			{
 				if (lambdaExpressionBody is CastExpressionSyntax cast)
 					mainLambdaExpressionBody = cast.Expression;
@@ -234,7 +234,7 @@ namespace Faithlife.Analyzers
 			{
 				if (AreEquivalent(leftmostExpression.Identifier, lambdaParameterIdentifier))
 				{
-					ConditionalAccessExpressionSyntax conditionalAccess;
+					ConditionalAccessExpressionSyntax? conditionalAccess;
 					if (leftmostExpression.Parent is MemberAccessExpressionSyntax leftMostMemberAccess)
 					{
 						conditionalAccess = ConditionalAccessExpression(
@@ -256,7 +256,7 @@ namespace Faithlife.Analyzers
 						conditionalAccess = default;
 					}
 
-					if (conditionalAccess != null)
+					if (conditionalAccess is object)
 					{
 						ExpressionSyntax finalExpression = conditionalAccess;
 						if (defaultValueExpression is object)
@@ -359,13 +359,13 @@ namespace Faithlife.Analyzers
 					lambdaExpressionBody,
 					parentExpression.Right);
 			}
-			else if (defaultValueExpression is object || outputTypeArgument.CanBeReferencedByName)
+			else if (defaultValueExpression is object || outputTypeArgument!.CanBeReferencedByName) // TODO: verify this null coercion is safe
 			{
 				replacementTarget = ifNotNullInvocation;
 				replacementExpression = ConditionalExpression(
 					conditionExpression,
 					SyntaxUtility.SimplifiableParentheses(lambdaExpressionBody),
-					defaultValueExpression ?? DefaultExpression(GetTypeSyntax(outputTypeArgument)));
+					defaultValueExpression ?? DefaultExpression(GetTypeSyntax(outputTypeArgument!))); // TODO: verify this null coercion is safe
 			}
 			else
 			{
@@ -406,7 +406,7 @@ namespace Faithlife.Analyzers
 
 		private static ExpressionSyntax GetLeftmostDescendant(ExpressionSyntax expression)
 		{
-			ExpressionSyntax GetLeftmostChild(ExpressionSyntax x)
+			ExpressionSyntax? GetLeftmostChild(ExpressionSyntax x)
 			{
 				switch (x)
 				{
