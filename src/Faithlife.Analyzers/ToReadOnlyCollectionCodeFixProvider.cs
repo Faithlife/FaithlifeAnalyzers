@@ -60,23 +60,12 @@ namespace Faithlife.Analyzers
 
 		private static ExpressionSyntax ReplaceInvocation(InvocationExpressionSyntax invocation)
 		{
-			ExpressionSyntax newExpression;
-			switch (invocation.Expression)
+			var newExpression = invocation.Expression switch
 			{
-			case MemberAccessExpressionSyntax memberAccess:
-				newExpression = MemberAccessExpression(
-					SyntaxKind.SimpleMemberAccessExpression,
-					memberAccess.Expression,
-					IdentifierName("ToList"));
-				break;
-
-			case MemberBindingExpressionSyntax _:
-				newExpression = MemberBindingExpression(IdentifierName("ToList"));
-				break;
-
-			default:
-				throw new NotSupportedException($"Can't handle {invocation.Expression.GetType()}");
-			}
+				MemberAccessExpressionSyntax memberAccess => (ExpressionSyntax) MemberAccessExpression(SyntaxKind.SimpleMemberAccessExpression, memberAccess.Expression, IdentifierName("ToList")),
+				MemberBindingExpressionSyntax _ => MemberBindingExpression(IdentifierName("ToList")),
+				_ => throw new NotSupportedException($"Can't handle {invocation.Expression.GetType()}")
+			};
 
 			return InvocationExpression(newExpression);
 		}

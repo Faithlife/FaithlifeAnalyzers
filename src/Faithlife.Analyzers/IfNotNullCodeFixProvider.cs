@@ -406,26 +406,15 @@ namespace Faithlife.Analyzers
 
 		private static ExpressionSyntax GetLeftmostDescendant(ExpressionSyntax expression)
 		{
-			ExpressionSyntax? GetLeftmostChild(ExpressionSyntax x)
-			{
-				switch (x)
+			ExpressionSyntax? GetLeftmostChild(ExpressionSyntax x) =>
+				x switch
 				{
-					case InvocationExpressionSyntax invocation:
-						return invocation.Expression;
-
-					case MemberAccessExpressionSyntax memberAccess:
-						return memberAccess.Expression;
-
-					case ConditionalAccessExpressionSyntax conditionalAccess:
-						return conditionalAccess.Expression;
-
-					case ElementAccessExpressionSyntax elementAccess:
-						return elementAccess.Expression;
-
-					default:
-						return null;
-				}
-			}
+					InvocationExpressionSyntax invocation => invocation.Expression,
+					MemberAccessExpressionSyntax memberAccess => memberAccess.Expression,
+					ConditionalAccessExpressionSyntax conditionalAccess => conditionalAccess.Expression,
+					ElementAccessExpressionSyntax elementAccess => elementAccess.Expression,
+					_ => null
+				};
 
 			var currentExpression = expression;
 			while (true)

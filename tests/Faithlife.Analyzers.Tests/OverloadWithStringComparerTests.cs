@@ -97,40 +97,28 @@ namespace Faithlife.Analyzers.Tests
 
 		private static string GetExtensionMethodCode(Ordering ordering, string collection, string lambda, string? comparer = null, bool isNullConditional = false)
 		{
-			string parameter = (comparer == null ? "" : $", {comparer}");
-			string nullConditional = isNullConditional ? "?" : "";
+			var parameter = (comparer is null ? "" : $", {comparer}");
+			var nullConditional = isNullConditional ? "?" : "";
 
-			switch (ordering)
+			return ordering switch
 			{
-			case Ordering.OrderBy:
-				return $"{collection}{nullConditional}.OrderBy({lambda}{parameter})";
-			case Ordering.OrderByDescending:
-				return $"{collection}{nullConditional}.OrderByDescending({lambda}{parameter})";
-			case Ordering.ThenBy:
-				return $"{collection}{nullConditional}.OrderBy(x => x.GetHashCode()).ThenBy({lambda}{parameter})";
-			case Ordering.ThenByDescending:
-				return $"{collection}{nullConditional}.OrderBy(x => x.GetHashCode()).ThenByDescending({lambda}{parameter})";
-			default:
-				throw new ArgumentOutOfRangeException(nameof(ordering), ordering, null);
-			}
+				Ordering.OrderBy => $"{collection}{nullConditional}.OrderBy({lambda}{parameter})",
+				Ordering.OrderByDescending => $"{collection}{nullConditional}.OrderByDescending({lambda}{parameter})",
+				Ordering.ThenBy => $"{collection}{nullConditional}.OrderBy(x => x.GetHashCode()).ThenBy({lambda}{parameter})",
+				Ordering.ThenByDescending => $"{collection}{nullConditional}.OrderBy(x => x.GetHashCode()).ThenByDescending({lambda}{parameter})",
+				_ => throw new ArgumentOutOfRangeException(nameof(ordering), ordering, null)
+			};
 		}
 
-		private static string GetLinqSyntaxCode(Ordering ordering, string collection, string orderBy)
-		{
-			switch (ordering)
+		private static string GetLinqSyntaxCode(Ordering ordering, string collection, string orderBy) =>
+			ordering switch
 			{
-			case Ordering.OrderBy:
-				return $"from x in {collection} orderby {orderBy} select x";
-			case Ordering.OrderByDescending:
-				return $"from x in {collection} orderby {orderBy} descending select x";
-			case Ordering.ThenBy:
-				return $"from x in {collection} orderby x.GetHashCode(), {orderBy} select x";
-			case Ordering.ThenByDescending:
-				return $"from x in {collection} orderby x.GetHashCode(), {orderBy} descending select x";
-			default:
-				throw new ArgumentOutOfRangeException(nameof(ordering), ordering, null);
-			}
-		}
+				Ordering.OrderBy => $"from x in {collection} orderby {orderBy} select x",
+				Ordering.OrderByDescending => $"from x in {collection} orderby {orderBy} descending select x",
+				Ordering.ThenBy => $"from x in {collection} orderby x.GetHashCode(), {orderBy} select x",
+				Ordering.ThenByDescending => $"from x in {collection} orderby x.GetHashCode(), {orderBy} descending select x",
+				_ => throw new ArgumentOutOfRangeException(nameof(ordering), ordering, null)
+			};
 
 		private void VerifyValidExpression(string source)
 		{
