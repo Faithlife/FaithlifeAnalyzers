@@ -11,6 +11,10 @@ or errors for existing code when the package is upgraded).
 
 ## Released
 
+### 1.0.6 Beta 3
+
+* Strip newlines from the exception message.
+
 ### 1.0.6 Beta 2
 
 * Include debug symbols.

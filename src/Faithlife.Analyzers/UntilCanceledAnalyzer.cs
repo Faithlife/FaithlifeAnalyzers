@@ -53,7 +53,7 @@ namespace Faithlife.Analyzers
 			}
 			catch (NullReferenceException ex)
 			{
-				throw new InvalidOperationException("UntilCanceledAnalyzer failed: " + ex.ToString());
+				throw new InvalidOperationException("UntilCanceledAnalyzer failed: " + ex.ToString().Replace("\r", "").Replace("\n", "~ "));
 			}
 		}
 
