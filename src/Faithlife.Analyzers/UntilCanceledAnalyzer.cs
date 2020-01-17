@@ -1,8 +1,6 @@
 using System;
-using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
-using System.Text;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -51,9 +49,11 @@ namespace Faithlife.Analyzers
 
 				context.ReportDiagnostic(Diagnostic.Create(s_rule, invocation.ArgumentList.GetLocation()));
 			}
-			catch (NullReferenceException ex)
+			catch (NullReferenceException)
 			{
-				throw new InvalidOperationException("UntilCanceledAnalyzer failed: " + ex.ToString().Replace("\r", "").Replace("\n", "~ "));
+				// A NullReferenceException happens inconsistently on the build server, breaking a small percentage of builds.
+				// We have been unable to track it down, so are just ignoring it (and are trusting that the analyzer will work
+				// to catch bugs on developers' systems.)
 			}
 		}
 
