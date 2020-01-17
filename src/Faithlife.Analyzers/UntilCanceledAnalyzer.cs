@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Immutable;
 using System.Linq;
 using Microsoft.CodeAnalysis;
@@ -32,25 +33,34 @@ namespace Faithlife.Analyzers
 
 		private static void AnalyzeSyntax(SyntaxNodeAnalysisContext context, INamedTypeSymbol asyncEnumerableUtility, INamedTypeSymbol asyncAction)
 		{
-			var invocation = (InvocationExpressionSyntax) context.Node;
+			try
+			{
+				var invocation = (InvocationExpressionSyntax) context.Node;
 
-			var method = context.SemanticModel.GetSymbolInfo(invocation.Expression).Symbol as IMethodSymbol;
-			if (method?.Name != "UntilCanceled" || method.ContainingType != asyncEnumerableUtility)
-				return;
+				var method = context.SemanticModel.GetSymbolInfo(invocation.Expression).Symbol as IMethodSymbol;
+				if (method?.Name != "UntilCanceled" || method.ContainingType != asyncEnumerableUtility)
+					return;
 
-			if (invocation.ArgumentList.Arguments.Count != 0)
-				return;
+				if (invocation.ArgumentList.Arguments.Count != 0)
+					return;
 
-			var containingMethod = invocation.Ancestors().OfType<MethodDeclarationSyntax>().FirstOrDefault();
-			if (containingMethod is null)
-				return;
+				var containingMethod = invocation.Ancestors().OfType<MethodDeclarationSyntax>().FirstOrDefault();
+				if (containingMethod is null)
+					return;
 
-			var ienumerable = context.SemanticModel.Compilation.GetTypeByMetadataName("System.Collections.Generic.IEnumerable`1");
-			var returnTypeSymbol = ModelExtensions.GetSymbolInfo(context.SemanticModel, containingMethod.ReturnType).Symbol as INamedTypeSymbol;
-			if (returnTypeSymbol?.ConstructedFrom == ienumerable && returnTypeSymbol?.TypeArguments[0] == asyncAction)
-				return;
+				var ienumerable = context.SemanticModel.Compilation.GetTypeByMetadataName("System.Collections.Generic.IEnumerable`1");
+				var returnTypeSymbol = ModelExtensions.GetSymbolInfo(context.SemanticModel, containingMethod.ReturnType).Symbol as INamedTypeSymbol;
+				if (returnTypeSymbol?.ConstructedFrom == ienumerable && returnTypeSymbol?.TypeArguments[0] == asyncAction)
+					return;
 
-			context.ReportDiagnostic(Diagnostic.Create(s_rule, invocation.ArgumentList.GetLocation()));
+				context.ReportDiagnostic(Diagnostic.Create(s_rule, invocation.ArgumentList.GetLocation()));
+			}
+			catch (NullReferenceException)
+			{
+				// A NullReferenceException happens inconsistently on the build server, breaking a small percentage of builds.
+				// We have been unable to track it down, so are just ignoring it (and are trusting that the analyzer will work
+				// to catch bugs on developers' systems.)
+			}
 		}
 
 		static readonly DiagnosticDescriptor s_rule = new DiagnosticDescriptor(
