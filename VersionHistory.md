@@ -18,9 +18,13 @@ or errors for existing code when the package is upgraded).
 
 ## Released
 
-### 1.0.6
+### 1.0.7
 
 * Ignore `NullReferenceException` that's infrequently thrown by `UntilCanceledAnalyzer`.
+
+### 1.0.6
+
+* Add diagnostic for `NullReferenceException` being thrown by `UntilCanceledAnalyzer`.
 
 ### 1.0.5
 
