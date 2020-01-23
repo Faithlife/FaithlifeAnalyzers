@@ -11,16 +11,11 @@ or errors for existing code when the package is upgraded).
 
 ## Released
 
-### 1.0.6 Beta 3
+### 1.0.7
 
-* Strip newlines from the exception message.
+* Ignore `NullReferenceException` that's infrequently thrown by `UntilCanceledAnalyzer`.
 
-### 1.0.6 Beta 2
-
-* Include debug symbols.
-* Fix incorrect DLL version bundled in Beta 1 package.
-
-### 1.0.6 Beta 1
+### 1.0.6
 
 * Add diagnostic for `NullReferenceException` being thrown by `UntilCanceledAnalyzer`.
 
