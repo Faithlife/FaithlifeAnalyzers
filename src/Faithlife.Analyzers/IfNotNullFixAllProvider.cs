@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
@@ -82,7 +83,7 @@ namespace Faithlife.Analyzers
 					async (solutionAsync, document) =>
 						(await solutionAsync.ConfigureAwait(false))
 							.WithDocumentText(
-								document.Id,
+								document?.Id ?? throw new NullReferenceException(nameof(document)),
 								await document.GetTextAsync(fixAllContext.CancellationToken).ConfigureAwait(false)))
 				.ConfigureAwait(false);
 
