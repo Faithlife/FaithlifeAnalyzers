@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
@@ -76,13 +77,13 @@ namespace Faithlife.Analyzers
 				.ConfigureAwait(false);
 
 			var updatedSolution = await updatedDocuments
-				.Where(x => x is object)
+				.Where(x => x is not null)
 				.Aggregate(
 					Task.FromResult(fixAllContext.Solution),
 					async (solutionAsync, document) =>
 						(await solutionAsync.ConfigureAwait(false))
 							.WithDocumentText(
-								document.Id,
+								document!.Id,
 								await document.GetTextAsync(fixAllContext.CancellationToken).ConfigureAwait(false)))
 				.ConfigureAwait(false);
 
