@@ -19,6 +19,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		VersionHistory.md = VersionHistory.md
 	EndProjectSection
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Build", "tools\Build\Build.csproj", "{E49957A8-1AFC-4247-8F77-1271197B7001}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +35,10 @@ Global
 		{DF559AD1-5287-43B1-AB47-61B6F342B0FE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DF559AD1-5287-43B1-AB47-61B6F342B0FE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DF559AD1-5287-43B1-AB47-61B6F342B0FE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E49957A8-1AFC-4247-8F77-1271197B7001}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E49957A8-1AFC-4247-8F77-1271197B7001}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E49957A8-1AFC-4247-8F77-1271197B7001}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E49957A8-1AFC-4247-8F77-1271197B7001}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
