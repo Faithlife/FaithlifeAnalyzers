@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <VersionPrefix>1.0.7</VersionPrefix>
-    <TargetFramework>netstandard1.3</TargetFramework>
+    <TargetFramework>netstandard2.0</TargetFramework>
     <IncludeBuildOutput>false</IncludeBuildOutput>
     <IsPackable>true</IsPackable>
     <NoWarn>$(NoWarn);NU5128</NoWarn>
