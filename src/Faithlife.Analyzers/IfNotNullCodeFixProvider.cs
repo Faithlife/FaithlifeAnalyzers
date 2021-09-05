@@ -100,7 +100,7 @@ namespace Faithlife.Analyzers
 
 			var outputTypeIsNullable = methodSymbol.Arity == 2 &&
 				(outputTypeArgument!.IsReferenceType ||
-					((outputTypeArgument as INamedTypeSymbol)?.ConstructedFrom?.SpecialType.HasFlag(SpecialType.System_Nullable_T) ?? false));
+					((outputTypeArgument as INamedTypeSymbol)?.ConstructedFrom?.SpecialType.Equals(SpecialType.System_Nullable_T) ?? false));
 
 			if (methodSymbol.Arity == 2)
 			{
@@ -139,7 +139,6 @@ namespace Faithlife.Analyzers
 				// If this isn't an anonymous function, then it must be a reference to a
 				// delegate. We can transform this into a lambda expression that invokes
 				// the delegate.
-
 				var parameterIdentifier = Identifier("value");
 				lambdaExpression = SimpleLambdaExpression(
 					Parameter(parameterIdentifier),
@@ -160,6 +159,7 @@ namespace Faithlife.Analyzers
 				return;
 
 			var lambdaExpressionBody = lambdaExpression.Body as ExpressionSyntax;
+
 			// To properly handle block-bodied lambda expressions, we'll need to hoist
 			// the body of the lambda to a local function and call it. For now, skip this.
 			if (lambdaExpressionBody is null)
@@ -222,7 +222,7 @@ namespace Faithlife.Analyzers
 			// Some usages of IfNotNull explicitly cast the result to Nullable<T>, which means
 			// they can use the null-conditional operator without the cast or a null-conditional operator.
 			var mainLambdaExpressionBody = lambdaExpressionBody;
-			if (outputTypeIsNullable && !outputTypeArgument!.IsReferenceType) // TODO: verify this null coercion is safe
+			if (outputTypeIsNullable && !outputTypeArgument!.IsReferenceType) //// TODO: verify this null coercion is safe
 			{
 				if (lambdaExpressionBody is CastExpressionSyntax cast)
 					mainLambdaExpressionBody = cast.Expression;
@@ -293,7 +293,7 @@ namespace Faithlife.Analyzers
 			// Even a local variable is technically susceptible to a race condition if it participates in a closure, but the paranoia has to end somewhere.
 			if (methodSymbol.TypeArguments[0].IsReferenceType &&
 				targetExpression is IdentifierNameSyntax &&
-				(semanticModel.GetSymbolInfo(targetExpression).Symbol?.Kind.HasFlag(SymbolKind.Local) ?? false))
+				(semanticModel.GetSymbolInfo(targetExpression).Symbol?.Kind.Equals(SymbolKind.Local) ?? false))
 			{
 				lambdaExpressionBody = SyntaxUtility.ReplaceIdentifier(lambdaExpressionBody, lambdaParameterIdentifier.Text, targetExpression);
 				conditionExpression = BinaryExpression(SyntaxKind.IsExpression, targetExpression, GetTypeSyntax(methodSymbol.TypeArguments[0]));
@@ -359,7 +359,7 @@ namespace Faithlife.Analyzers
 					lambdaExpressionBody,
 					parentExpression.Right);
 			}
-			else if (defaultValueExpression is object || outputTypeArgument!.CanBeReferencedByName) // TODO: verify this null coercion is safe
+			else if (defaultValueExpression is object || outputTypeArgument!.CanBeReferencedByName) //// TODO: verify this null coercion is safe
 			{
 				replacementTarget = ifNotNullInvocation;
 				replacementExpression = ConditionalExpression(
@@ -413,7 +413,7 @@ namespace Faithlife.Analyzers
 					MemberAccessExpressionSyntax memberAccess => memberAccess.Expression,
 					ConditionalAccessExpressionSyntax conditionalAccess => conditionalAccess.Expression,
 					ElementAccessExpressionSyntax elementAccess => elementAccess.Expression,
-					_ => null
+					_ => null,
 				};
 
 			var currentExpression = expression;

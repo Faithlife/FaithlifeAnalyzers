@@ -298,6 +298,6 @@ namespace Libronix.Utility.Threading
 }
 ";
 
-		static readonly int c_preambleLength = preamble.Split('\n').Length;
+		private static readonly int c_preambleLength = preamble.Split('\n').Length;
 	}
 }

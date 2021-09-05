@@ -9,9 +9,9 @@ namespace Faithlife.Analyzers
 	[DiagnosticAnalyzer(LanguageNames.CSharp)]
 	public sealed class InterpolatedStringAnalyzer : DiagnosticAnalyzer
 	{
-		public override void Initialize(AnalysisContext analysisContext)
+		public override void Initialize(AnalysisContext context)
 		{
-			analysisContext.RegisterCompilationStartAction(compilationStartAnalysisContext =>
+			context.RegisterCompilationStartAction(compilationStartAnalysisContext =>
 			{
 				compilationStartAnalysisContext.RegisterOperationBlockStartAction(context =>
 				{
@@ -44,7 +44,7 @@ namespace Faithlife.Analyzers
 			}
 		}
 
-		static readonly DiagnosticDescriptor s_rule = new DiagnosticDescriptor(
+		private static readonly DiagnosticDescriptor s_rule = new DiagnosticDescriptor(
 			id: DiagnosticId,
 			title: "Unintentional ${} in interpolated strings",
 			messageFormat: "Avoid using ${} in interpolated strings.",

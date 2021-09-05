@@ -97,7 +97,7 @@ namespace Faithlife.Analyzers.Tests
 
 		private static string GetExtensionMethodCode(Ordering ordering, string collection, string lambda, string? comparer = null, bool isNullConditional = false)
 		{
-			var parameter = (comparer is null ? "" : $", {comparer}");
+			var parameter = comparer is null ? "" : $", {comparer}";
 			var nullConditional = isNullConditional ? "?" : "";
 
 			return ordering switch
@@ -106,7 +106,7 @@ namespace Faithlife.Analyzers.Tests
 				Ordering.OrderByDescending => $"{collection}{nullConditional}.OrderByDescending({lambda}{parameter})",
 				Ordering.ThenBy => $"{collection}{nullConditional}.OrderBy(x => x.GetHashCode()).ThenBy({lambda}{parameter})",
 				Ordering.ThenByDescending => $"{collection}{nullConditional}.OrderBy(x => x.GetHashCode()).ThenByDescending({lambda}{parameter})",
-				_ => throw new ArgumentOutOfRangeException(nameof(ordering), ordering, null)
+				_ => throw new ArgumentOutOfRangeException(nameof(ordering), ordering, null),
 			};
 		}
 
@@ -117,7 +117,7 @@ namespace Faithlife.Analyzers.Tests
 				Ordering.OrderByDescending => $"from x in {collection} orderby {orderBy} descending select x",
 				Ordering.ThenBy => $"from x in {collection} orderby x.GetHashCode(), {orderBy} select x",
 				Ordering.ThenByDescending => $"from x in {collection} orderby x.GetHashCode(), {orderBy} descending select x",
-				_ => throw new ArgumentOutOfRangeException(nameof(ordering), ordering, null)
+				_ => throw new ArgumentOutOfRangeException(nameof(ordering), ordering, null),
 			};
 
 		private void VerifyValidExpression(string source)

@@ -96,8 +96,7 @@ namespace TestApplication
 					Message = "Avoid using ${} in interpolated strings.",
 					Severity = DiagnosticSeverity.Warning,
 					Locations = new[] { new DiagnosticResultLocation("Test0.cs", 9, 26) },
-				}
-			);
+				});
 		}
 
 		[Test]

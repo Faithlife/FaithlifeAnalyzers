@@ -64,7 +64,7 @@ namespace Faithlife.Analyzers
 			{
 				MemberAccessExpressionSyntax memberAccess => (ExpressionSyntax) MemberAccessExpression(SyntaxKind.SimpleMemberAccessExpression, memberAccess.Expression, IdentifierName("ToList")),
 				MemberBindingExpressionSyntax _ => MemberBindingExpression(IdentifierName("ToList")),
-				_ => throw new NotSupportedException($"Can't handle {invocation.Expression.GetType()}")
+				_ => throw new NotSupportedException($"Can't handle {invocation.Expression.GetType()}"),
 			};
 
 			return InvocationExpression(newExpression);

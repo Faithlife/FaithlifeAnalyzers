@@ -573,7 +573,7 @@ namespace ConsoleApplication1
 ";
 			VerifyCSharpDiagnostic(program);
 		}
-		
+
 		[Test]
 		public void IndexOfStringIntStringComparisonIsValid()
 		{
@@ -591,7 +591,6 @@ namespace ConsoleApplication1
 ";
 			VerifyCSharpDiagnostic(program);
 		}
-
 
 		[Test]
 		public void IndexOfStringIntIntStringComparisonIsValid()
@@ -700,7 +699,6 @@ namespace ConsoleApplication1
 ";
 			VerifyCSharpDiagnostic(program);
 		}
-
 
 		[Test]
 		public void LastIndexOfStringIntIntStringComparisonIsValid()

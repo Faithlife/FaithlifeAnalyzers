@@ -36,7 +36,7 @@ namespace Faithlife.Analyzers
 
 		public const string DiagnosticId = "FL0008";
 
-		public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get { return ImmutableArray.Create(s_rule); } }
+		public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => ImmutableArray.Create(s_rule);
 
 		private static void AnalyzeSyntax(SyntaxNodeAnalysisContext context, INamedTypeSymbol iworkState, INamedTypeSymbol workStateClass, ISymbol workStateNone, ISymbol workStateToDo)
 		{
@@ -94,7 +94,7 @@ namespace Faithlife.Analyzers
 			context.ReportDiagnostic(Diagnostic.Create(s_rule, syntax.GetLocation()));
 		}
 
-		static readonly DiagnosticDescriptor s_rule = new DiagnosticDescriptor(
+		private static readonly DiagnosticDescriptor s_rule = new DiagnosticDescriptor(
 			id: DiagnosticId,
 			title: "WorkState.None and WorkState.ToDo Usage",
 			messageFormat: "WorkState.None and WorkState.ToDo must not be used when an IWorkState is available.",

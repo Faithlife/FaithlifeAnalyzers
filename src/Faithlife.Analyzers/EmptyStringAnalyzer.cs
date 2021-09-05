@@ -43,7 +43,7 @@ namespace Faithlife.Analyzers
 			context.ReportDiagnostic(Diagnostic.Create(s_rule, syntax.GetLocation()));
 		}
 
-		static readonly DiagnosticDescriptor s_rule = new DiagnosticDescriptor(
+		private static readonly DiagnosticDescriptor s_rule = new DiagnosticDescriptor(
 			id: DiagnosticId,
 			title: "Prefer \"\" over string.Empty",
 			messageFormat: "Prefer \"\" over string.Empty.",

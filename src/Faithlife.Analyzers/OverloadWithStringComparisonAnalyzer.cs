@@ -70,7 +70,7 @@ namespace Faithlife.Analyzers
 				if (parameter.Type.Equals(cultureInfoType))
 					return true;
 			}
-			
+
 			return false;
 		}
 
@@ -95,6 +95,6 @@ namespace Faithlife.Analyzers
 			isEnabledByDefault: true,
 			helpLinkUri: $"https://github.com/Faithlife/FaithlifeAnalyzers/wiki/{AvoidStringEqualsDiagnosticId}");
 
-		static readonly ImmutableArray<DiagnosticDescriptor> s_rules = ImmutableArray.Create(s_useStringComparisonRule, s_avoidStringEqualsRule);
+		private static readonly ImmutableArray<DiagnosticDescriptor> s_rules = ImmutableArray.Create(s_useStringComparisonRule, s_avoidStringEqualsRule);
 	}
 }

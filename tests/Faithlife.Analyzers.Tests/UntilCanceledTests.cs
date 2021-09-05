@@ -91,7 +91,6 @@ namespace TestApplication
 			VerifyCSharpFix(brokenProgram, secondFix, 1);
 		}
 
-
 		[Test]
 		public void InvalidMultiLineUsage()
 		{
@@ -181,7 +180,6 @@ namespace Libronix.Utility.Threading
 }
 ";
 
-		static readonly int c_preambleLength = preamble.Split('\n').Length;
+		private static readonly int c_preambleLength = preamble.Split('\n').Length;
 	}
 }
-

@@ -1,3 +1,4 @@
+using System;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CodeFixes;
 using Microsoft.CodeAnalysis.Diagnostics;
@@ -14,11 +15,13 @@ namespace Faithlife.Analyzers.Tests
 			"new ReferenceThing()",
 			"var result = possiblyNull.IfNotNull(x => x.ValueTypeProperty);",
 			"var result = possiblyNull?.ValueTypeProperty ?? default(int);")]
+
 		// Complex expressions of a value type still need the null coalescing operator
 		[TestCase(
 			"new ReferenceThing()",
 			"var result = possiblyNull.IfNotNull(x => x.CalculateValue().ValueTypeProperty);",
 			"var result = possiblyNull?.CalculateValue().ValueTypeProperty ?? default(int);")]
+
 		// Most usages of the default parameter cannot be combined with the conditional operator,
 		// but value types are fine.
 		[TestCase(
@@ -29,17 +32,20 @@ namespace Faithlife.Analyzers.Tests
 			"new ReferenceThing()",
 			"var result = IfNotNullExtensionMethod.IfNotNull(possiblyNull, x => x.ValueTypeProperty, () => 0);",
 			"var result = possiblyNull?.ValueTypeProperty ?? 0;")]
+
 		// A method invocation can be performed using the conditional operator.
 		[TestCase(
 			"new ReferenceThing()",
 			"var result = possiblyNull.IfNotNull(x => x.CalculateValue());",
 			"var result = possiblyNull?.CalculateValue();")]
+
 		// The presences of conditional operators within the expression shouldn't prevent
 		// the use of a new conditional operator.
 		[TestCase(
 			"new ReferenceThing()",
 			"var result = possiblyNull.IfNotNull(x => x.RecursiveProperty?.CalculateValue());",
 			"var result = possiblyNull?.RecursiveProperty?.CalculateValue();")]
+
 		// Parentheses at the root will prevent the use of the conditional operator because
 		// there are some weird edge cases, but it should still fall back to pattern matching
 		// just fine.
@@ -71,6 +77,7 @@ namespace Faithlife.Analyzers.Tests
 			"new ReferenceThing()",
 			"var result = possiblyNull.IfNotNull(x => (x.RecursiveProperty?.RecursiveProperty).CalculateValue());",
 			"var result = possiblyNull is ReferenceThing ? (possiblyNull.RecursiveProperty?.RecursiveProperty).CalculateValue() : default(ReferenceThing);")]
+
 		// When using pattern matching, the input type must be used for the declaration type.
 		// (in most of these tests, the input type and output type are the same)
 		[TestCase(
@@ -81,21 +88,25 @@ namespace Faithlife.Analyzers.Tests
 			"new ReferenceThing()",
 			"var result = possiblyNull.RecursiveProperty.IfNotNull(x => (x.ValueTypeProperty));",
 			"var result = possiblyNull.RecursiveProperty is ReferenceThing x ? (x.ValueTypeProperty) : default(int);")]
+
 		// Conditional operators should also work with indexed access.
 		[TestCase(
 			"new ReferenceThing()",
 			"var result = possiblyNull.IfNotNull(x => x[0]);",
 			"var result = possiblyNull?[0];")]
+
 		// Nothing fancy should happen if indexed access is later in the expression.
 		[TestCase(
 			"new ReferenceThing()",
 			"var result = possiblyNull.IfNotNull(x => x.RecursiveProperty[0]);",
 			"var result = possiblyNull?.RecursiveProperty[0];")]
+
 		// A conditional operator for indexed access later in the expression shouldn't break anything.
 		[TestCase(
 			"new ReferenceThing()",
 			"var result = possiblyNull.IfNotNull(x => x.RecursiveProperty?[0]);",
 			"var result = possiblyNull?.RecursiveProperty?[0];")]
+
 		// Passing delegate references should be transformed into appropriate invocations.
 		[TestCase(
 			"new ReferenceThing()",
@@ -109,6 +120,7 @@ namespace Faithlife.Analyzers.Tests
 			"new ReferenceThing()",
 			"var result = possiblyNull.IfNotNull(ReferenceThing.CalculateStatic, ReferenceThing.Factory);",
 			"var result = possiblyNull is ReferenceThing ? ReferenceThing.CalculateStatic(possiblyNull) : ReferenceThing.Factory();")]
+
 		// The results using Nullable<T> generally look the same, but they require special handling.
 		[TestCase(
 			"new ReferenceThing()",
@@ -142,6 +154,7 @@ namespace Faithlife.Analyzers.Tests
 			"(ValueThing?) new ValueThing()",
 			"var result = IfNotNullExtensionMethod.IfNotNull(possiblyNull, (ValueThing x) => x.ValueTypeProperty, () => 0);",
 			"var result = possiblyNull?.ValueTypeProperty ?? 0;")]
+
 		// Supplying a reference type default value requires falling back to pattern matching.
 		[TestCase(
 			"new ReferenceThing()",
@@ -159,6 +172,7 @@ namespace Faithlife.Analyzers.Tests
 			"new ReferenceThing()",
 			"var result = possiblyNull.RecursiveProperty.IfNotNull(x => x.CalculateValue(), new ReferenceThing());",
 			"var result = possiblyNull.RecursiveProperty is ReferenceThing x ? x.CalculateValue() : new ReferenceThing();")]
+
 		// Calling IfNotNull on a delegate that is immediately invoked results in some special cases.
 		[TestCase(
 			"(Func<ReferenceThing>) new ReferenceThing().CalculateValue",
@@ -176,6 +190,7 @@ namespace Faithlife.Analyzers.Tests
 			"(Func<int>) new ReferenceThing().CalculateValueTypeValue",
 			"var result = possiblyNull.IfNotNull(x => x(), possiblyNull);",
 			"var result = possiblyNull?.Invoke() ?? possiblyNull();")]
+
 		// Multiple usages of the parameter should force the usage of pattern matching.
 		[TestCase(
 			"new ReferenceThing()",
@@ -185,24 +200,28 @@ namespace Faithlife.Analyzers.Tests
 			"new ReferenceThing()",
 			"var result = possiblyNull.RecursiveProperty.IfNotNull(x => x.CalculateValue(x));",
 			"var result = possiblyNull.RecursiveProperty is ReferenceThing x ? x.CalculateValue(x) : default(ReferenceThing);")]
+
 		// This cast makes the call equivalent to the null-conditional operator, which means that
 		// pattern matching is unnecessary and the cast can be discarded.
 		[TestCase(
 			"new ReferenceThing()",
 			"var result = possiblyNull.IfNotNull(x => (int?) x.ValueTypeProperty);",
 			"var result = possiblyNull?.ValueTypeProperty;")]
+
 		// Anonymous types can sometimes prevent the code fixer from supplying a transformation, but
 		// this pattern should work.
 		[TestCase(
 			"new { Property = \"value\" }",
 			"var result = possiblyNull.IfNotNull(x => x.Property);",
 			"var result = possiblyNull?.Property;")]
+
 		// Invocations that return anonymous types often cannot be converted, but they work when a default value is explicitly
 		// provided.
 		[TestCase(
 			"new ReferenceThing()",
 			"var result = possiblyNull.IfNotNull(x => new { Property = \"value\" }, () => new { Property = \"other value\" });",
 			"var result = possiblyNull is ReferenceThing ? (new { Property = \"value\" }) : new { Property = \"other value\" };")]
+
 		// A new expression with no default value can still be transformed if it is the left hand side of a null-coalescing operator.
 		[TestCase(
 			"new ReferenceThing()",
@@ -236,7 +255,7 @@ namespace TestProgram
 
 			VerifyCSharpDiagnostic(invalidProgram, expected);
 
-			string validProgram = createProgram(fixedCall).Replace("using Libronix.Utility.IfNotNull;\n", "");
+			string validProgram = createProgram(fixedCall).Replace("using Libronix.Utility.IfNotNull;\n", "", StringComparison.Ordinal);
 
 			VerifyCSharpFix(invalidProgram, validProgram);
 		}
@@ -290,7 +309,7 @@ namespace TestProgram
 
 			VerifyCSharpDiagnostic(invalidProgram, CreateDiagnosticAtColumn(firstColumn), CreateDiagnosticAtColumn(secondColumn));
 
-			string validProgram = createProgram(fixedCall).Replace("using Libronix.Utility.IfNotNull;\n", "");
+			string validProgram = createProgram(fixedCall).Replace("using Libronix.Utility.IfNotNull;\n", "", StringComparison.Ordinal);
 
 			VerifyCSharpFix(invalidProgram, validProgram);
 		}
@@ -340,7 +359,7 @@ namespace TestProgram
 			VerifyCSharpDiagnostic(invalidProgram, expected);
 
 			// The fixer should decline to make any modifications to unsupported calls.
-			VerifyCSharpFix(invalidProgram, fixedCall is null ? invalidProgram : createProgram(fixedCall).Replace("using Libronix.Utility.IfNotNull;\n", ""));
+			VerifyCSharpFix(invalidProgram, fixedCall is null ? invalidProgram : createProgram(fixedCall).Replace("using Libronix.Utility.IfNotNull;\n", "", StringComparison.Ordinal));
 		}
 
 		public void NonLocalInvocation()
@@ -376,7 +395,7 @@ namespace TestProgram
 			VerifyCSharpFix(invalidProgram, createProgram(@"if (OnAction is Action x)
 				x();
 			else
-				throw new InvalidOperationException();").Replace("using Libronix.Utility.IfNotNull;\n", ""));
+				throw new InvalidOperationException();").Replace("using Libronix.Utility.IfNotNull;\n", "", StringComparison.Ordinal));
 		}
 
 		[TestCase(

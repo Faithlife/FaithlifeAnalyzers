@@ -177,7 +177,6 @@ namespace TestApplication
 
 			VerifyCSharpDiagnostic(program, expected);
 
-
 			const string fix = c_preamble + @"
 namespace TestApplication
 {

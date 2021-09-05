@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Threading;
 using Microsoft.CodeAnalysis;
@@ -95,7 +96,7 @@ namespace Faithlife.Analyzers.Tests
 
 				var newCompilerDiagnostics = GetNewDiagnostics(compilerDiagnostics, GetCompilerDiagnostics(document));
 
-				//check if applying the code fix introduced any new compiler diagnostics
+				// check if applying the code fix introduced any new compiler diagnostics
 				if (!allowNewCompilerDiagnostics && newCompilerDiagnostics.Any())
 				{
 					// Format and get the compiler diagnostics again so that the locations make sense in the output
@@ -103,19 +104,19 @@ namespace Faithlife.Analyzers.Tests
 					newCompilerDiagnostics = GetNewDiagnostics(compilerDiagnostics, GetCompilerDiagnostics(document));
 
 					Assert.IsTrue(false,
-						string.Format("Fix introduced new compiler diagnostics:\r\n{0}\r\n\r\nNew document:\r\n{1}\r\n",
+						string.Format(CultureInfo.InvariantCulture, "Fix introduced new compiler diagnostics:\r\n{0}\r\n\r\nNew document:\r\n{1}\r\n",
 							string.Join("\r\n", newCompilerDiagnostics.Select(d => d.ToString())),
 							document.GetSyntaxRootAsync().GetAwaiter().GetResult().ToFullString()));
 				}
 
-				//check if there are analyzer diagnostics left after the code fix
+				// check if there are analyzer diagnostics left after the code fix
 				if (!analyzerDiagnostics.Any())
 				{
 					break;
 				}
 			}
 
-			//after applying all of the code fixes, compare the resulting string to the inputted one
+			// after applying all of the code fixes, compare the resulting string to the inputted one
 			var actual = GetStringFromDocument(document);
 			Assert.AreEqual(newSource, actual);
 		}

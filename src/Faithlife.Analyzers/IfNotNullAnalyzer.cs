@@ -37,7 +37,7 @@ namespace Faithlife.Analyzers
 			var methodSymbol = context.SemanticModel.GetSymbolInfo(syntax.Expression).Symbol as IMethodSymbol;
 			if (methodSymbol == null ||
 				(methodSymbol.ReducedFrom == null && methodSymbol.ConstructedFrom == null) ||
-				!ifNotNullMethods.Any(x => x.Equals(methodSymbol.ReducedFrom) || (x.Equals(methodSymbol.ConstructedFrom))))
+				!ifNotNullMethods.Any(x => x.Equals(methodSymbol.ReducedFrom) || x.Equals(methodSymbol.ConstructedFrom)))
 				return;
 
 			context.ReportDiagnostic(Diagnostic.Create(s_rule, syntax.GetLocation()));

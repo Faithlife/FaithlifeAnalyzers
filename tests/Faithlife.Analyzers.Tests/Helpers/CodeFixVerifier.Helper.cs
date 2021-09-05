@@ -82,4 +82,3 @@ namespace Faithlife.Analyzers.Tests
 		}
 	}
 }
-

@@ -9,9 +9,9 @@ namespace Faithlife.Analyzers
 	[DiagnosticAnalyzer(LanguageNames.CSharp)]
 	public sealed class ToReadOnlyCollectionAnalyzer : DiagnosticAnalyzer
 	{
-		public override void Initialize(AnalysisContext analysisContext)
+		public override void Initialize(AnalysisContext context)
 		{
-			analysisContext.RegisterCompilationStartAction(compilationStartAnalysisContext =>
+			context.RegisterCompilationStartAction(compilationStartAnalysisContext =>
 			{
 				var enumerableUtility = compilationStartAnalysisContext.Compilation.GetTypeByMetadataName("Libronix.Utility.EnumerableUtility");
 				if (enumerableUtility != null)
@@ -50,7 +50,7 @@ namespace Faithlife.Analyzers
 			}
 		}
 
-		static readonly DiagnosticDescriptor s_rule = new DiagnosticDescriptor(
+		private static readonly DiagnosticDescriptor s_rule = new DiagnosticDescriptor(
 			id: DiagnosticId,
 			title: "ToReadOnlyCollection in constructor",
 			messageFormat: "Avoid ToReadOnlyCollection in constructors.",

@@ -37,7 +37,7 @@ namespace Faithlife.Analyzers.Tests
 			}
 
 			var project = solution.GetProject(projectId);
-			var compilation = await project.GetCompilationAsync();
+			var compilation = await project.GetCompilationAsync().ConfigureAwait(false);
 			var compilationWithAnalyzers = compilation.WithAnalyzers(ImmutableArray.CreateRange(typeof(CurrentAsyncWorkItemAnalyzer)
 				.Assembly
 				.GetTypes()
@@ -45,7 +45,7 @@ namespace Faithlife.Analyzers.Tests
 				.Select(Activator.CreateInstance)
 				.Cast<DiagnosticAnalyzer>()));
 
-			var diagnostics = await compilationWithAnalyzers.GetAnalyzerDiagnosticsAsync();
+			var diagnostics = await compilationWithAnalyzers.GetAnalyzerDiagnosticsAsync().ConfigureAwait(false);
 			Assert.IsEmpty(diagnostics);
 		}
 

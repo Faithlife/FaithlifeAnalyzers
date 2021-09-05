@@ -32,7 +32,7 @@ namespace Faithlife.Analyzers
 
 		public const string DiagnosticId = "FL0001";
 
-		public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get { return ImmutableArray.Create(s_rule); } }
+		public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => ImmutableArray.Create(s_rule);
 
 		private static void AnalyzeSyntax(SyntaxNodeAnalysisContext context, INamedTypeSymbol asyncWorkItem, INamedTypeSymbol asyncAction, ISymbol asyncWorkItemCurrent)
 		{
@@ -73,7 +73,7 @@ namespace Faithlife.Analyzers
 			context.ReportDiagnostic(Diagnostic.Create(s_rule, syntax.GetLocation()));
 		}
 
-		static readonly DiagnosticDescriptor s_rule = new DiagnosticDescriptor(
+		private static readonly DiagnosticDescriptor s_rule = new DiagnosticDescriptor(
 			id: DiagnosticId,
 			title: "AsyncWorkItem.Current Usage",
 			messageFormat: "AsyncWorkItem.Current must only be used in methods that return IEnumerable<AsyncAction>.",
