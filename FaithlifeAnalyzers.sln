@@ -13,13 +13,15 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		.gitignore = .gitignore
 		appveyor.yml = appveyor.yml
 		build.ps1 = build.ps1
-		CONTRIBUTING.md = CONTRIBUTING.md
+		.github\workflows\build.yaml = .github\workflows\build.yaml
+		Directory.Build.props = Directory.Build.props
+		dotnet-tools.json = dotnet-tools.json
 		LICENSE = LICENSE
 		README.md = README.md
-		VersionHistory.md = VersionHistory.md
+		ReleaseNotes.md = ReleaseNotes.md
 	EndProjectSection
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Build", "tools\Build\Build.csproj", "{E49957A8-1AFC-4247-8F77-1271197B7001}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Build", "tools\Build\Build.csproj", "{CBD807B4-F49F-4DD1-BC9A-359E90EA913F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -35,10 +37,10 @@ Global
 		{DF559AD1-5287-43B1-AB47-61B6F342B0FE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DF559AD1-5287-43B1-AB47-61B6F342B0FE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DF559AD1-5287-43B1-AB47-61B6F342B0FE}.Release|Any CPU.Build.0 = Release|Any CPU
-		{E49957A8-1AFC-4247-8F77-1271197B7001}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{E49957A8-1AFC-4247-8F77-1271197B7001}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{E49957A8-1AFC-4247-8F77-1271197B7001}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{E49957A8-1AFC-4247-8F77-1271197B7001}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CBD807B4-F49F-4DD1-BC9A-359E90EA913F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CBD807B4-F49F-4DD1-BC9A-359E90EA913F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CBD807B4-F49F-4DD1-BC9A-359E90EA913F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CBD807B4-F49F-4DD1-BC9A-359E90EA913F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

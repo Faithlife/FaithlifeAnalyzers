@@ -1,15 +1,18 @@
 using System;
 using Faithlife.Build;
 
-internal static class Build
+return BuildRunner.Execute(args, build =>
 {
-	public static int Main(string[] args) => BuildRunner.Execute(args, build =>
-	{
-		build.AddDotNetTargets(
-			new DotNetBuildSettings
+	var gitLogin = new GitLoginInfo("faithlifebuildbot", Environment.GetEnvironmentVariable("BUILD_BOT_PASSWORD") ?? "");
+
+	build.AddDotNetTargets(
+		new DotNetBuildSettings
+		{
+			NuGetApiKey = Environment.GetEnvironmentVariable("NUGET_API_KEY"),
+			PackageSettings = new DotNetPackageSettings
 			{
-				NuGetApiKey = Environment.GetEnvironmentVariable("NUGET_API_KEY"),
-				SourceLinkSettings = SourceLinkSettings.Default,
-			});
-	});
-}
+				GitLogin = gitLogin,
+				PushTagOnPublish = x => $"v{x.Version}",
+			},
+		});
+});

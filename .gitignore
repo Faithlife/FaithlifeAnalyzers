@@ -1,9 +1,6 @@
-# ignore output folders
 bin/
 obj/
 release/
-
-# ignore user-specific options/cache files
 .vs/
 _ReSharper.*
 Thumbs.db
@@ -14,3 +11,4 @@ Thumbs.db
 *.ncrunchsolution
 nCrunchTemp*
 _ReSharper*
+.DS_Store

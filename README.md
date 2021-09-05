@@ -1,8 +1,8 @@
 # Faithlife.Analyzers
 
-[![AppVeyor](https://img.shields.io/appveyor/ci/Faithlife/FaithlifeAnalyzers/master.svg)](https://ci.appveyor.com/project/Faithlife/FaithlifeAnalyzers) [![NuGet](https://img.shields.io/nuget/v/Faithlife.Analyzers.svg)](https://www.nuget.org/packages/Faithlife.Analyzers)
-
 Roslyn-based C# code analyzers used on Faithlife source code.
+
+[![Build](https://github.com/Faithlife/FaithlifeAnalyzers/workflows/Build/badge.svg)](https://github.com/Faithlife/FaithlifeAnalyzers/actions?query=workflow%3ABuild) [![NuGet](https://img.shields.io/nuget/v/Faithlife.Analyzers.svg)](https://www.nuget.org/packages/Faithlife.Analyzers)
 
 ## How to Help
 
@@ -11,9 +11,7 @@ Roslyn-based C# code analyzers used on Faithlife source code.
 * Vote for analyzers you would find particularly helpful by adding a 👍 reaction.
 * Implement a new analyzer from [this list of the most popular](https://github.com/Faithlife/FaithlifeAnalyzers/issues?q=is%3Aissue+is%3Aopen+sort%3Areactions-%2B1-desc+label%3A%22new+analyzer%22).
 
-
 ## Documentation
-* https://faithlife.github.io/FaithlifeAnalyzers/
-* License: [MIT](LICENSE)
-* [Version History](VersionHistory.md)
-* [Contributing Guidelines](CONTRIBUTING.md)
+
+* [Documentation](https://faithlife.github.io/FaithlifeAnalyzers/)
+* [Release Notes](ReleaseNotes.md)
