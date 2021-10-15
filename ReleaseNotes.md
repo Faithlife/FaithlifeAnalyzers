@@ -9,12 +9,15 @@ Prefix the description of the change with `[major]`, `[minor]`, or `[patch]` in 
 New analyzers are considered "minor" changes (even though adding a new analyzer is likely to generate warnings
 or errors for existing code when the package is upgraded).
 
-* [minor] Add `FL0005`: detect `.ToReadOnlyCollection()` in constructors: [#17](https://github.com/Faithlife/FaithlifeAnalyzers/issues/17).
-* [minor] Add `FL0006`: detect `.OrderBy` without a `StringComparer`: [#23](https://github.com/Faithlife/FaithlifeAnalyzers/issues/23).
-* [minor] Add `FL0007`: detect `$` in interpolated strings: [#50](https://github.com/Faithlife/FaithlifeAnalyzers/issues/50).
-* [minor] Add `FL0008`: detect usages of `WorkState.None` and `WorkState.ToDo` when alternatives exist: [#4](https://github.com/Faithlife/FaithlifeAnalyzers/issues/4)
-* [minor] Add `FL0009`: prefer `""` over `string.Empty`: [#7](https://github.com/Faithlife/FaithlifeAnalyzers/issues/7)
-* [minor] Add `FL0010`: discourage use of `IfNotNull`: [#13](https://github.com/Faithlife/FaithlifeAnalyzers/issues/13)
+## 1.1.0
+
+* Add `FL0005`: detect `.ToReadOnlyCollection()` in constructors: [#17](https://github.com/Faithlife/FaithlifeAnalyzers/issues/17).
+* Add `FL0006`: detect `.OrderBy` without a `StringComparer`: [#23](https://github.com/Faithlife/FaithlifeAnalyzers/issues/23).
+* Add `FL0007`: detect `$` in interpolated strings: [#50](https://github.com/Faithlife/FaithlifeAnalyzers/issues/50).
+* Add `FL0008`: detect usages of `WorkState.None` and `WorkState.ToDo` when alternatives exist: [#4](https://github.com/Faithlife/FaithlifeAnalyzers/issues/4).
+* Add `FL0009`: prefer `""` over `string.Empty`: [#7](https://github.com/Faithlife/FaithlifeAnalyzers/issues/7).
+* Add `FL0010`: discourage use of `IfNotNull`: [#13](https://github.com/Faithlife/FaithlifeAnalyzers/issues/13).
+* Add `FL0011`: detect `ConcurrentDictionary.GetOrAddValue`: [#68](https://github.com/Faithlife/FaithlifeAnalyzers/pull/68).
 
 ## 1.0.7
 
