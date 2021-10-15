@@ -38,7 +38,7 @@ namespace Faithlife.Analyzers
 			if (targetType?.Equals(concurrentDictionary) != true)
 				return;
 
-			context.ReportDiagnostic(Diagnostic.Create(s_rule, invocation.ArgumentList.GetLocation()));
+			context.ReportDiagnostic(Diagnostic.Create(s_rule, memberAccess.Name.GetLocation()));
 		}
 
 		public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => ImmutableArray.Create(s_rule);
@@ -48,7 +48,7 @@ namespace Faithlife.Analyzers
 		private static readonly DiagnosticDescriptor s_rule = new(
 			id: DiagnosticId,
 			title: "GetOrAddValue() Usage",
-			messageFormat: "GetOrAddValue() may not be used with a ConcurrentDictionary; use GetOrAdd() instead.",
+			messageFormat: "GetOrAddValue() is not threadsafe and should not be used with ConcurrentDictionary; use GetOrAdd() instead.",
 			category: "Usage",
 			defaultSeverity: DiagnosticSeverity.Warning,
 			isEnabledByDefault: true,

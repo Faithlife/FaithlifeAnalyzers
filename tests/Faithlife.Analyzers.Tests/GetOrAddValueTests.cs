@@ -51,9 +51,9 @@ namespace TestApplication
 			var expected = new DiagnosticResult
 			{
 				Id = GetOrAddValueAnalyzer.DiagnosticId,
-				Message = "GetOrAddValue() may not be used with a ConcurrentDictionary; use GetOrAdd() instead.",
+				Message = "GetOrAddValue() is not threadsafe and should not be used with ConcurrentDictionary; use GetOrAdd() instead.",
 				Severity = DiagnosticSeverity.Warning,
-				Locations = new[] { new DiagnosticResultLocation("Test0.cs", c_preambleLength + 8, invalidCall.Length) },
+				Locations = new[] { new DiagnosticResultLocation("Test0.cs", c_preambleLength + 8, invalidCall.Length - "GetOrAddValue".Length) },
 			};
 
 			VerifyCSharpDiagnostic(brokenProgram, expected);
