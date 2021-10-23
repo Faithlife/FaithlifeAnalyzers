@@ -2,7 +2,7 @@ bin/
 obj/
 release/
 .vs/
-_ReSharper.*
+.idea/
 Thumbs.db
 *.cache
 *.user
