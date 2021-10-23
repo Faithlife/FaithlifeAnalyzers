@@ -9,6 +9,10 @@ Prefix the description of the change with `[major]`, `[minor]`, or `[patch]` in 
 New analyzers are considered "minor" changes (even though adding a new analyzer is likely to generate warnings
 or errors for existing code when the package is upgraded).
 
+## 1.2.0
+
+* Add `FL0012`: don't use interpolated string with `DbConnector.Command`: [#17](https://github.com/Faithlife/FaithlifeAnalyzers/issues/69).
+
 ## 1.1.0
 
 * Add `FL0005`: detect `.ToReadOnlyCollection()` in constructors: [#17](https://github.com/Faithlife/FaithlifeAnalyzers/issues/17).
