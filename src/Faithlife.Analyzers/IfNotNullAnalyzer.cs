@@ -12,6 +12,8 @@ namespace Faithlife.Analyzers
 	{
 		public override void Initialize(AnalysisContext context)
 		{
+			context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);
+
 			context.RegisterCompilationStartAction(compilationStartAnalysisContext =>
 			{
 				var ifNotNullExtensionMethodType = compilationStartAnalysisContext.Compilation.GetTypeByMetadataName("Libronix.Utility.IfNotNull.IfNotNullExtensionMethod");

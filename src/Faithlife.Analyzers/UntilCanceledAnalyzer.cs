@@ -13,6 +13,8 @@ namespace Faithlife.Analyzers
 	{
 		public override void Initialize(AnalysisContext context)
 		{
+			context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);
+
 			context.RegisterCompilationStartAction(compilationStartAnalysisContext =>
 			{
 				var asyncEnumerableUtility = compilationStartAnalysisContext.Compilation.GetTypeByMetadataName("Libronix.Utility.Threading.AsyncEnumerableUtility");

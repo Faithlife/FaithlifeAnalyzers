@@ -9,7 +9,10 @@ namespace Faithlife.Analyzers
 	[DiagnosticAnalyzer(LanguageNames.CSharp)]
 	public sealed class DbConnectorCommandInterpolatedAnalyzer : DiagnosticAnalyzer
 	{
-		public override void Initialize(AnalysisContext context) =>
+		public override void Initialize(AnalysisContext context)
+		{
+			context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);
+
 			context.RegisterCompilationStartAction(compilationStartAnalysisContext =>
 			{
 				if (compilationStartAnalysisContext.Compilation.GetTypeByMetadataName("Faithlife.Data.DbConnector") is { } dbConnectorType)
@@ -29,6 +32,7 @@ namespace Faithlife.Analyzers
 					}, SyntaxKind.InvocationExpression);
 				}
 			});
+		}
 
 		public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => ImmutableArray.Create(s_rule);
 
