@@ -14,6 +14,8 @@ namespace Faithlife.Analyzers
 	{
 		public override void Initialize(AnalysisContext context)
 		{
+			context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);
+
 			context.RegisterCompilationStartAction(compilationStartAnalysisContext =>
 			{
 				var stringClass = compilationStartAnalysisContext.Compilation.GetTypeByMetadataName("System.String");
