@@ -18,7 +18,7 @@ namespace TestApplication
 	{
 		public static void UtilityMethod()
 		{
-			var x = new Uri(""http://www.faithlife.com"").ToString();
+			var x = new Uri(""http://www.faithlife.com"").AbsolutePath;
 		}
 	}
 }";
@@ -46,7 +46,7 @@ namespace TestApplication
 				Id = UriToStringAnalyzer.DiagnosticId,
 				Message = "Uri MAY NOT use .ToString()",
 				Severity = DiagnosticSeverity.Warning,
-				Locations = new[] { new DiagnosticResultLocation("Test0.cs", c_preambleLength + 7, 59) },
+				Locations = new[] { new DiagnosticResultLocation("Test0.cs", c_preambleLength + 7, 48) },
 			};
 
 			VerifyCSharpDiagnostic(brokenProgram, expected);
@@ -55,7 +55,6 @@ namespace TestApplication
 		protected override DiagnosticAnalyzer GetCSharpDiagnosticAnalyzer() => new UriToStringAnalyzer();
 
 		private const string c_preamble = @"using System;
-using System.Runtime.Serialization;
 ";
 
 		private static readonly int c_preambleLength = c_preamble.Split('\n').Length;
