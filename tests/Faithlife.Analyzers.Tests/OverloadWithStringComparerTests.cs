@@ -54,7 +54,7 @@ namespace Faithlife.Analyzers.Tests
 		[Test]
 		public void OrderByIntegerWithoutComparer_Valid([Values] Ordering ordering)
 		{
-			string code = GetExtensionMethodCode(ordering, @"new[] { 3, 2, 1 }", "x => x");
+			string code = GetExtensionMethodCode(ordering, "new[] { 3, 2, 1 }", "x => x");
 			VerifyValidExpression(code);
 		}
 
@@ -68,7 +68,7 @@ namespace Faithlife.Analyzers.Tests
 		[Test]
 		public void ExplicitOrderByStringWithComparer_Valid()
 		{
-			VerifyValidExpression(@"Enumerable.OrderBy(new[] { 3, 2, 1 }, x => x.ToString(), StringComparer.CurrentCulture)");
+			VerifyValidExpression("Enumerable.OrderBy(new[] { 3, 2, 1 }, x => x.ToString(), StringComparer.CurrentCulture)");
 		}
 
 		[Test]
@@ -81,7 +81,7 @@ namespace Faithlife.Analyzers.Tests
 		[Test]
 		public void LinqSyntaxOrderByStringFromInteger_Invalid([Values] Ordering ordering)
 		{
-			string code = GetLinqSyntaxCode(ordering, @"new[] { 3, 2, 1 }", "x.ToString()");
+			string code = GetLinqSyntaxCode(ordering, "new[] { 3, 2, 1 }", "x.ToString()");
 			VerifyInvalidExpression(code, code.IndexOf("orderby", StringComparison.Ordinal));
 		}
 
