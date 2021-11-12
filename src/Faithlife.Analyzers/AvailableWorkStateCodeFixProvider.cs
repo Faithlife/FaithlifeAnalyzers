@@ -1,5 +1,3 @@
-using System;
-using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Composition;
 using System.Linq;
@@ -54,9 +52,9 @@ namespace Faithlife.Analyzers
 				{
 					context.RegisterCodeFix(
 						CodeAction.Create(
-							title: $"Use AsyncWorkItem.Current",
+							title: "Use AsyncWorkItem.Current",
 							createChangedDocument: token => ReplaceValueAsync(context.Document, memberAccess, s_currentWorkItemExpression, token),
-							$"use-asyncworkitem-current"),
+							"use-asyncworkitem-current"),
 						diagnostic);
 				}
 			}

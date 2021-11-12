@@ -5,7 +5,6 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Diagnostics;
-using Microsoft.CodeAnalysis.Operations;
 
 namespace Faithlife.Analyzers
 {
@@ -27,18 +26,19 @@ namespace Faithlife.Analyzers
 		private static void AnalyzeSyntax(SyntaxNodeAnalysisContext context)
 		{
 			var literalSyntax = (LiteralExpressionSyntax) context.Node;
-			var text = literalSyntax.Token.Text ?? "";
 
+			var text = literalSyntax.Token.Text ?? "";
 			if (!text.StartsWith("@", StringComparison.Ordinal))
 				return;
 
-			if (charsWhereVerbatimIsntUnnecessary.Any(text.Contains))
+			var valueText = literalSyntax.Token.ValueText ?? "";
+			if (valueText.IndexOfAny(c_charsWhereVerbatimIsntUnnecessary.ToCharArray()) != -1)
 				return;
 
 			context.ReportDiagnostic(Diagnostic.Create(s_rule, literalSyntax.GetLocation()));
 		}
 
-		private const string charsWhereVerbatimIsntUnnecessary = "\n\t\\";
+		private const string c_charsWhereVerbatimIsntUnnecessary = "\n\t\"\\";
 
 		private static readonly DiagnosticDescriptor s_rule = new(
 			id: DiagnosticId,

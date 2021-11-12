@@ -1,5 +1,3 @@
-using System;
-using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Composition;
 using System.Linq;
@@ -8,9 +6,7 @@ using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CodeActions;
 using Microsoft.CodeAnalysis.CodeFixes;
-using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Microsoft.CodeAnalysis.Simplification;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Faithlife.Analyzers
@@ -36,9 +32,9 @@ namespace Faithlife.Analyzers
 
 			context.RegisterCodeFix(
 				CodeAction.Create(
-					title: $"Use \"\"",
+					title: "Use \"\"",
 					createChangedDocument: token => ReplaceValueAsync(context.Document, memberAccess, s_emptyStringExpression, token),
-					$"use-empty-string-literal"),
+					"use-empty-string-literal"),
 				diagnostic);
 		}
 
