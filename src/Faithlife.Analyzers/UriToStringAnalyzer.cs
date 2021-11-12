@@ -43,7 +43,7 @@ namespace Faithlife.Analyzers
 		private static readonly DiagnosticDescriptor s_rule = new(
 			id: DiagnosticId,
 			title: "Uri ToString Usage",
-			messageFormat: "Uri MAY NOT use .ToString()",
+			messageFormat: "Do not use Uri.ToString()",
 			category: "Usage",
 			defaultSeverity: DiagnosticSeverity.Warning,
 			isEnabledByDefault: true,
