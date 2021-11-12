@@ -25,14 +25,22 @@ namespace Faithlife.Analyzers
 			var falseValue = expression.WhenFalse;
 			var trueValue = expression.WhenTrue;
 
-			var eExpression = (BinaryExpressionSyntax) expression.Condition;
-
-			var lExpression = eExpression.Left;
-			var rExpression = eExpression.Right;
-
-			if ((falseValue.Kind() == SyntaxKind.NullLiteralExpression || trueValue.Kind() == SyntaxKind.NullLiteralExpression) && (lExpression.Kind() == SyntaxKind.NullLiteralExpression || rExpression.Kind() == SyntaxKind.NullLiteralExpression))
+			if (expression.Condition is BinaryExpressionSyntax binaryExpression)
 			{
-				context.ReportDiagnostic(Diagnostic.Create(s_rule, expression.GetLocation()));
+				var lExpression = binaryExpression.Left;
+				var rExpression = binaryExpression.Right;
+
+				if ((falseValue.Kind() == SyntaxKind.NullLiteralExpression || trueValue.Kind() == SyntaxKind.NullLiteralExpression) && (lExpression.Kind() == SyntaxKind.NullLiteralExpression || rExpression.Kind() == SyntaxKind.NullLiteralExpression))
+				{
+					context.ReportDiagnostic(Diagnostic.Create(s_rule, expression.GetLocation()));
+				}
+			}
+			else if (expression.Condition is MemberAccessExpressionSyntax memberAccessExpression)
+			{
+				if (memberAccessExpression.Kind() == SyntaxKind.SimpleMemberAccessExpression && memberAccessExpression.Name.Identifier.Text == "HasValue")
+				{
+					context.ReportDiagnostic(Diagnostic.Create(s_rule, expression.GetLocation()));
+				}
 			}
 		}
 

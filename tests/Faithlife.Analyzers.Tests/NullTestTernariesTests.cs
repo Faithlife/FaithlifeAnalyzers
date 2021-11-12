@@ -32,8 +32,9 @@ namespace TestApplication
 			VerifyCSharpDiagnostic(validProgram);
 		}
 
-		[TestCase("var firstName = person != null ? person.FirstName : null;")]
-		[TestCase("var firstName = person == null ? null : person.FirstName;")]
+		[TestCase("var firstName = person.Age != null ? person.FirstName : null;")]
+		[TestCase("var firstName = person.Age == null ? null : person.FirstName;")]
+		[TestCase("var firstName = person.Age.HasValue ? person.FirstName : null;")]
 		public void InvalidUsage(string badExample)
 		{
 			var brokenProgram = c_preamble + $@"
@@ -41,15 +42,16 @@ namespace TestApplication
 {{
 	public class Person
 	{{
-		public string? FirstName {{ get; set; }}
-		public string? LastName {{ get; set; }}
+		public string FirstName {{ get; set; }}
+		public string LastName {{ get; set; }}
+		public int? Age {{ get; set; }}
 	}}
 
 	internal static class TestClass
 	{{
 		public static void UtilityMethod()
 		{{
-			Person person = null;
+			var person = new Person {{ FirstName = ""Bob"", LastName = ""Dole"" }};
 			{badExample}
 		}}
 	}}
