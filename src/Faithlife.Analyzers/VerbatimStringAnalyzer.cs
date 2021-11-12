@@ -38,7 +38,7 @@ namespace Faithlife.Analyzers
 			context.ReportDiagnostic(Diagnostic.Create(s_rule, literalSyntax.GetLocation()));
 		}
 
-		private const string c_charsWhereVerbatimIsntUnnecessary = "\n\t\"\\";
+		private const string c_charsWhereVerbatimIsntUnnecessary = "\n\"\\";
 
 		private static readonly DiagnosticDescriptor s_rule = new(
 			id: DiagnosticId,

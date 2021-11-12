@@ -17,11 +17,11 @@ namespace TestApplication
 	{
 		public TestClass()
 		{
-			@""Hello	World"".Trim();
 			@""Hello
 World"".Trim();
 			@""Hello\World"".Trim();
 			""Hello World"".Trim();
+			@""Hello """"wait for it"""" World"".Trim();
 		}
 	}
 }";
