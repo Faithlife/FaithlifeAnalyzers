@@ -174,10 +174,12 @@ namespace Faithlife.Analyzers.Tests
 
 		private static readonly IReadOnlyList<string> s_assemblyReferences = new[]
 		{
+			"System",
 			"System.Collections",
 			"System.Collections.Concurrent",
 			"System.Linq",
 			"System.Private.CoreLib",
+			"System.Private.Uri",
 			"System.Runtime",
 			"Microsoft.CodeAnalysis",
 			"Microsoft.CodeAnalysis.CSharp",
