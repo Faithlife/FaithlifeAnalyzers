@@ -11,7 +11,7 @@ namespace Faithlife.Analyzers.Tests
 		[TestCase("var person = new Person { FirstName = \"Bob\", LastName = \"Dole\" };", "var firstName = person.Age?.BirthYear;")]
 		public void ValidUsage(string declaration, string ternary)
 		{
-			string validProgram = c_preamble + $@"
+			string validProgram = $@"
 namespace TestApplication
 {{
 	public class Person
@@ -53,7 +53,7 @@ namespace TestApplication
 		[TestCase("var firstName = !person.Age.HasValue ? null : person.Age.Value.BirthYear;")]
 		public void InvalidUsage(string badExample)
 		{
-			var brokenProgram = c_preamble + $@"
+			var brokenProgram = $@"
 namespace TestApplication
 {{
 	public class Person
@@ -91,16 +91,12 @@ namespace TestApplication
 				Id = NullTestTernariesAnalyzer.DiagnosticId,
 				Message = "Prefer null conditional operators over ternaries explicitly checking for null",
 				Severity = DiagnosticSeverity.Warning,
-				Locations = new[] { new DiagnosticResultLocation("Test0.cs", s_preambleLength + 28, 20) },
+				Locations = new[] { new DiagnosticResultLocation("Test0.cs", 29, 20) },
 			};
 
 			VerifyCSharpDiagnostic(brokenProgram, expected);
 		}
 
 		protected override DiagnosticAnalyzer GetCSharpDiagnosticAnalyzer() => new NullTestTernariesAnalyzer();
-
-		private const string c_preamble = @"";
-
-		private static readonly int s_preambleLength = c_preamble.Split('\n').Length;
 	}
 }
