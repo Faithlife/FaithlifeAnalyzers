@@ -7,34 +7,50 @@ namespace Faithlife.Analyzers.Tests
 	[TestFixture]
 	public class NullTestTernariesTests : CodeFixVerifier
 	{
-		[Test]
-		public void ValidUsage()
+		[TestCase("Person person = null;", "var firstName = person?.FirstName;")]
+		[TestCase("var person = new Person { FirstName = \"Bob\", LastName = \"Dole\" };", "var firstName = person.Age?.BirthYear;")]
+		public void ValidUsage(string declaration, string ternary)
 		{
-			const string validProgram = c_preamble + @"
+			string validProgram = c_preamble + $@"
 namespace TestApplication
-{
+{{
 	public class Person
-	{
-		public string FirstName { get; set; }
-		public string LastName { get; set; }
-	}
+	{{
+		public string FirstName {{ get; set; }}
+		public string LastName {{ get; set; }}
+		public Age? Age {{ get; set; }}
+	}}
+
+	public struct Age
+	{{
+		public int? InYears {{ get; set; }}
+
+		public int? BirthYear 
+		{{
+			get
+			{{
+				return System.DateTime.Now.Year - InYears;
+			}}
+		}}
+	}}
 
 	internal static class TestClass
-	{
+	{{
 		public static void UtilityMethod()
-		{
-			Person person = null;
-			var firstName = person?.FirstName;
-		}
-	}
-}";
+		{{
+			{declaration}
+			{ternary}
+		}}
+	}}
+}}";
 
 			VerifyCSharpDiagnostic(validProgram);
 		}
 
-		[TestCase("var firstName = person.Age != null ? person.FirstName : null;")]
-		[TestCase("var firstName = person.Age == null ? null : person.FirstName;")]
-		[TestCase("var firstName = person.Age.HasValue ? person.FirstName : null;")]
+		[TestCase("var firstName = person != null ? person.FirstName : null;")]
+		[TestCase("var firstName = person == null ? null : person.FirstName;")]
+		[TestCase("var firstName = person.Age.HasValue ? person.Age.Value.BirthYear : null;")]
+		[TestCase("var firstName = !person.Age.HasValue ? null : person.Age.Value.BirthYear;")]
 		public void InvalidUsage(string badExample)
 		{
 			var brokenProgram = c_preamble + $@"
@@ -44,7 +60,20 @@ namespace TestApplication
 	{{
 		public string FirstName {{ get; set; }}
 		public string LastName {{ get; set; }}
-		public int? Age {{ get; set; }}
+		public Age? Age {{ get; set; }}
+	}}
+
+	public struct Age
+	{{
+		public int? InYears {{ get; set; }}
+
+		public int? BirthYear 
+		{{
+			get
+			{{
+				return System.DateTime.Now.Year - InYears;
+			}}
+		}}
 	}}
 
 	internal static class TestClass
@@ -62,7 +91,7 @@ namespace TestApplication
 				Id = NullTestTernariesAnalyzer.DiagnosticId,
 				Message = "Prefer null conditional operators over ternaries explicitly checking for null",
 				Severity = DiagnosticSeverity.Warning,
-				Locations = new[] { new DiagnosticResultLocation("Test0.cs", s_preambleLength + 15, 20) },
+				Locations = new[] { new DiagnosticResultLocation("Test0.cs", s_preambleLength + 28, 20) },
 			};
 
 			VerifyCSharpDiagnostic(brokenProgram, expected);

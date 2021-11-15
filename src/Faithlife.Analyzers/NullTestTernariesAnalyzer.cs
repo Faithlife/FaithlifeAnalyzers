@@ -15,7 +15,7 @@ namespace Faithlife.Analyzers
 
 			context.RegisterCompilationStartAction(compilationStartAnalysisContext =>
 			{
-				compilationStartAnalysisContext.RegisterSyntaxNodeAction(c => AnalyzeSyntax(c), SyntaxKind.ConditionalExpression);
+				compilationStartAnalysisContext.RegisterSyntaxNodeAction(AnalyzeSyntax, SyntaxKind.ConditionalExpression);
 			});
 		}
 
@@ -38,6 +38,13 @@ namespace Faithlife.Analyzers
 			else if (expression.Condition is MemberAccessExpressionSyntax memberAccessExpression)
 			{
 				if (memberAccessExpression.Kind() == SyntaxKind.SimpleMemberAccessExpression && memberAccessExpression.Name.Identifier.Text == "HasValue")
+				{
+					context.ReportDiagnostic(Diagnostic.Create(s_rule, expression.GetLocation()));
+				}
+			}
+			else if (expression.Condition is PrefixUnaryExpressionSyntax prefixUnaryExpression && expression.Condition.Kind() == SyntaxKind.LogicalNotExpression)
+			{
+				if (((MemberAccessExpressionSyntax) prefixUnaryExpression.Operand).Name.Identifier.Text == "HasValue")
 				{
 					context.ReportDiagnostic(Diagnostic.Create(s_rule, expression.GetLocation()));
 				}
