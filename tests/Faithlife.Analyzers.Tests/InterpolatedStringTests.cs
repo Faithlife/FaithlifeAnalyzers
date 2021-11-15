@@ -60,7 +60,7 @@ namespace TestApplication
 }";
 			VerifyCSharpDiagnostic(invalidProgram, new DiagnosticResult
 			{
-				Id = InterpolatedStringAnalyzer.DiagnosticId,
+				Id = InterpolatedStringAnalyzer.DiagnosticIdDollar,
 				Message = "Avoid using ${} in interpolated strings.",
 				Severity = DiagnosticSeverity.Warning,
 				Locations = new[] { new DiagnosticResultLocation("Test0.cs", 9, 20) },
@@ -85,14 +85,14 @@ namespace TestApplication
 			VerifyCSharpDiagnostic(invalidProgram,
 				new DiagnosticResult
 				{
-					Id = InterpolatedStringAnalyzer.DiagnosticId,
+					Id = InterpolatedStringAnalyzer.DiagnosticIdDollar,
 					Message = "Avoid using ${} in interpolated strings.",
 					Severity = DiagnosticSeverity.Warning,
 					Locations = new[] { new DiagnosticResultLocation("Test0.cs", 9, 20) },
 				},
 				new DiagnosticResult
 				{
-					Id = InterpolatedStringAnalyzer.DiagnosticId,
+					Id = InterpolatedStringAnalyzer.DiagnosticIdDollar,
 					Message = "Avoid using ${} in interpolated strings.",
 					Severity = DiagnosticSeverity.Warning,
 					Locations = new[] { new DiagnosticResultLocation("Test0.cs", 9, 26) },
@@ -116,10 +116,56 @@ namespace TestApplication
 }";
 			VerifyCSharpDiagnostic(invalidProgram, new DiagnosticResult
 			{
-				Id = InterpolatedStringAnalyzer.DiagnosticId,
+				Id = InterpolatedStringAnalyzer.DiagnosticIdDollar,
 				Message = "Avoid using ${} in interpolated strings.",
 				Severity = DiagnosticSeverity.Warning,
 				Locations = new[] { new DiagnosticResultLocation("Test0.cs", 9, 20) },
+			});
+		}
+
+		[Test]
+		public void UnnecessaryInterpolatedString()
+		{
+			const string invalidProgram = @"
+namespace TestApplication
+{
+	public class TestClass
+	{
+		public TestClass()
+		{
+			string str = $""Hello World"";
+		}
+	}
+}";
+			VerifyCSharpDiagnostic(invalidProgram, new DiagnosticResult
+			{
+				Id = InterpolatedStringAnalyzer.DiagnosticIdUnnecessary,
+				Message = "Avoid using an interpolated string where an equivalent literal string exists.",
+				Severity = DiagnosticSeverity.Warning,
+				Locations = new[] { new DiagnosticResultLocation("Test0.cs", 8, 17) },
+			});
+		}
+
+		[Test]
+		public void EmptyInterpolatedString()
+		{
+			const string invalidProgram = @"
+namespace TestApplication
+{
+	public class TestClass
+	{
+		public TestClass()
+		{
+			string str = $"""";
+		}
+	}
+}";
+			VerifyCSharpDiagnostic(invalidProgram, new DiagnosticResult
+			{
+				Id = InterpolatedStringAnalyzer.DiagnosticIdUnnecessary,
+				Message = "Avoid using an interpolated string where an equivalent literal string exists.",
+				Severity = DiagnosticSeverity.Warning,
+				Locations = new[] { new DiagnosticResultLocation("Test0.cs", 8, 17) },
 			});
 		}
 

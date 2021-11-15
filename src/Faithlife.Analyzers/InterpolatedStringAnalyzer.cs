@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Immutable;
+using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.CodeAnalysis.Operations;
@@ -22,14 +23,18 @@ namespace Faithlife.Analyzers
 			});
 		}
 
-		public const string DiagnosticId = "FL0007";
+		public const string DiagnosticIdDollar = "FL0007";
+		public const string DiagnosticIdUnnecessary = "FL0014";
 
-		public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => ImmutableArray.Create(s_rule);
+		public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => ImmutableArray.Create(s_ruleDollar, s_ruleUnnecessary);
 
 		private static void AnalyzeOperation(OperationAnalysisContext context)
 		{
 			var invocationOperation = (IInterpolatedStringOperation)context.Operation;
 			var foundDollarSign = false;
+
+			if (!invocationOperation.Children.Any(child => child is IInterpolationOperation))
+				context.ReportDiagnostic(Diagnostic.Create(s_ruleUnnecessary, invocationOperation.Syntax.GetLocation()));
 
 			foreach (var child in invocationOperation.Children)
 			{
@@ -40,19 +45,28 @@ namespace Faithlife.Analyzers
 				else
 				{
 					if (child is IInterpolatedStringContentOperation && foundDollarSign)
-						context.ReportDiagnostic(Diagnostic.Create(s_rule, child.Syntax.GetLocation()));
+						context.ReportDiagnostic(Diagnostic.Create(s_ruleDollar, child.Syntax.GetLocation()));
 					foundDollarSign = false;
 				}
 			}
 		}
 
-		private static readonly DiagnosticDescriptor s_rule = new DiagnosticDescriptor(
-			id: DiagnosticId,
+		private static readonly DiagnosticDescriptor s_ruleDollar = new(
+			id: DiagnosticIdDollar,
 			title: "Unintentional ${} in interpolated strings",
 			messageFormat: "Avoid using ${} in interpolated strings.",
 			category: "Usage",
 			defaultSeverity: DiagnosticSeverity.Warning,
 			isEnabledByDefault: true,
-			helpLinkUri: $"https://github.com/Faithlife/FaithlifeAnalyzers/wiki/{DiagnosticId}");
+			helpLinkUri: $"https://github.com/Faithlife/FaithlifeAnalyzers/wiki/{DiagnosticIdDollar}");
+
+		private static readonly DiagnosticDescriptor s_ruleUnnecessary = new(
+			id: DiagnosticIdUnnecessary,
+			title: "Unnecessary interpolated string",
+			messageFormat: "Avoid using an interpolated string where an equivalent literal string exists.",
+			category: "Usage",
+			defaultSeverity: DiagnosticSeverity.Warning,
+			isEnabledByDefault: true,
+			helpLinkUri: $"https://github.com/Faithlife/FaithlifeAnalyzers/wiki/{DiagnosticIdUnnecessary}");
 	}
 }
