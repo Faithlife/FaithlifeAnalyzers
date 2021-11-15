@@ -15,7 +15,7 @@ namespace Faithlife.Analyzers
 
 			context.RegisterCompilationStartAction(compilationStartAnalysisContext =>
 			{
-				compilationStartAnalysisContext.RegisterSyntaxNodeAction(c => AnalyzeSyntax(c), SyntaxKind.ConditionalExpression);
+				compilationStartAnalysisContext.RegisterSyntaxNodeAction(AnalyzeSyntax, SyntaxKind.ConditionalExpression);
 			});
 		}
 
