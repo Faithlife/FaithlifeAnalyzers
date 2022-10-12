@@ -39,8 +39,18 @@ namespace Faithlife.Analyzers
 			{
 				var invocation = (InvocationExpressionSyntax) context.Node;
 
+				var name = invocation.Expression switch
+				{
+					MemberAccessExpressionSyntax memberAccess => memberAccess.Name,
+					MemberBindingExpressionSyntax memberBinding => memberBinding.Name,
+					_ => null,
+				};
+
+				if (name?.Identifier.Text != "UntilCanceled")
+					return;
+
 				var method = context.SemanticModel.GetSymbolInfo(invocation.Expression).Symbol as IMethodSymbol;
-				if (method?.Name != "UntilCanceled" || method.ContainingType != asyncEnumerableUtility)
+				if (method?.ContainingType != asyncEnumerableUtility)
 					return;
 
 				if (invocation.ArgumentList.Arguments.Count != 0)

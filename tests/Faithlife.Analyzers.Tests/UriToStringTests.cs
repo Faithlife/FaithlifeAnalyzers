@@ -45,7 +45,7 @@ namespace TestApplication
 				Id = UriToStringAnalyzer.DiagnosticId,
 				Message = "Do not use Uri.ToString()",
 				Severity = DiagnosticSeverity.Warning,
-				Locations = new[] { new DiagnosticResultLocation("Test0.cs", 8, 55) },
+				Locations = new[] { new DiagnosticResultLocation("Test0.cs", 8, 12) },
 			};
 
 			VerifyCSharpDiagnostic(brokenProgram, expected);
@@ -71,7 +71,7 @@ namespace TestApplication
 				Id = UriToStringAnalyzer.DiagnosticId,
 				Message = "Do not use Uri.ToString()",
 				Severity = DiagnosticSeverity.Warning,
-				Locations = new[] { new DiagnosticResultLocation("Test0.cs", 8, 17) },
+				Locations = new[] { new DiagnosticResultLocation("Test0.cs", 8, 16) },
 			};
 
 			VerifyCSharpDiagnostic(brokenProgram, expected);

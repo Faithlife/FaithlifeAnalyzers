@@ -1,8 +1,7 @@
 using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Diagnostics;
+using Microsoft.CodeAnalysis.Operations;
 
 namespace Faithlife.Analyzers
 {
@@ -19,26 +18,18 @@ namespace Faithlife.Analyzers
 				if (uriType is null)
 					return;
 
-				compilationStartAnalysisContext.RegisterSyntaxNodeAction(c => AnalyzeSyntax(c, uriType), SyntaxKind.InvocationExpression);
+				if (uriType.GetMembers("ToString") is { Length: 1 } members)
+					compilationStartAnalysisContext.RegisterOperationAction(x => AnalyzeOperation(x, members[0]), OperationKind.Invocation);
 			});
 		}
 
-		private static void AnalyzeSyntax(SyntaxNodeAnalysisContext context, INamedTypeSymbol uriType)
+		private static void AnalyzeOperation(OperationAnalysisContext context, ISymbol uriToStringMethod)
 		{
-			var invocation = (InvocationExpressionSyntax) context.Node;
-
-			var method = context.SemanticModel.GetSymbolInfo(invocation.Expression).Symbol as IMethodSymbol;
-			if (method?.Name != "ToString" || method.ContainingType != uriType)
+			var invocation = (IInvocationOperation) context.Operation;
+			if (!uriToStringMethod.Equals(invocation.TargetMethod))
 				return;
 
-			var location = invocation.Expression switch
-			{
-				MemberAccessExpressionSyntax memberAccess => memberAccess.Name.GetLocation(),
-				MemberBindingExpressionSyntax memberBinding => memberBinding.Name.GetLocation(),
-				_ => null,
-			};
-
-			context.ReportDiagnostic(Diagnostic.Create(s_rule, location));
+			context.ReportDiagnostic(Diagnostic.Create(s_rule, invocation.Syntax.GetLocation()));
 		}
 
 		public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => ImmutableArray.Create(s_rule);

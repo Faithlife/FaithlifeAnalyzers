@@ -44,14 +44,6 @@ namespace Faithlife.Analyzers
 		{
 			var syntax = (MemberAccessExpressionSyntax)context.Node;
 
-			var symbolInfo = context.SemanticModel.GetSymbolInfo(syntax.Expression);
-			if (symbolInfo.Symbol == null || !symbolInfo.Symbol.Equals(workStateClass))
-				return;
-
-			var memberSymbolInfo = context.SemanticModel.GetSymbolInfo(syntax.Name);
-			if (memberSymbolInfo.Symbol == null || (!memberSymbolInfo.Symbol.Equals(workStateNone) && !memberSymbolInfo.Symbol.Equals(workStateToDo)))
-				return;
-
 			var containingMethod = syntax.Ancestors().OfType<MethodDeclarationSyntax>().FirstOrDefault();
 			if (containingMethod == null)
 				return;
@@ -68,6 +60,14 @@ namespace Faithlife.Analyzers
 					return;
 				}
 			}
+
+			var symbolInfo = context.SemanticModel.GetSymbolInfo(syntax.Expression);
+			if (symbolInfo.Symbol == null || !symbolInfo.Symbol.Equals(workStateClass))
+				return;
+
+			var memberSymbolInfo = context.SemanticModel.GetSymbolInfo(syntax.Name);
+			if (memberSymbolInfo.Symbol == null || (!memberSymbolInfo.Symbol.Equals(workStateNone) && !memberSymbolInfo.Symbol.Equals(workStateToDo)))
+				return;
 
 			var cancellationToken = context.SemanticModel.Compilation.GetTypeByMetadataName("System.Threading.CancellationToken");
 			var asyncMethodContext = context.SemanticModel.Compilation.GetTypeByMetadataName("Libronix.Utility.Threading.AsyncMethodContext");
