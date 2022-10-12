@@ -9,6 +9,13 @@ Prefix the description of the change with `[major]`, `[minor]`, or `[patch]` in 
 New analyzers are considered "minor" changes (even though adding a new analyzer is likely to generate warnings
 or errors for existing code when the package is upgraded).
 
+## 1.3.0
+
+* Improve performance of analyzers.
+* Add FL0013: `Uri.ToString` should not be used: [#66](https://github.com/Faithlife/FaithlifeAnalyzers/issues/66).
+* Add FL0014: Interpolated strings should not be used without interpolation: [#63](https://github.com/Faithlife/FaithlifeAnalyzers/issues/63).
+* Add FL0016: Verbatim strings should only be used when necessary: [#74](https://github.com/Faithlife/FaithlifeAnalyzers/pull/74).
+
 ## 1.2.1
 
 * Set flag in all analyzers to stop analyzing generated code.
