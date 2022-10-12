@@ -31,9 +31,14 @@ namespace Faithlife.Analyzers
 			if (method?.Name != "ToString" || method.ContainingType != uriType)
 				return;
 
-			var memberAccess = (MemberAccessExpressionSyntax) invocation.Expression;
+			var location = invocation.Expression switch
+			{
+				MemberAccessExpressionSyntax memberAccess => memberAccess.Name.GetLocation(),
+				MemberBindingExpressionSyntax memberBinding => memberBinding.Name.GetLocation(),
+				_ => null,
+			};
 
-			context.ReportDiagnostic(Diagnostic.Create(s_rule, memberAccess.Name.GetLocation()));
+			context.ReportDiagnostic(Diagnostic.Create(s_rule, location));
 		}
 
 		public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => ImmutableArray.Create(s_rule);

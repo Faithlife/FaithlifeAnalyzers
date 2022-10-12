@@ -51,6 +51,32 @@ namespace TestApplication
 			VerifyCSharpDiagnostic(brokenProgram, expected);
 		}
 
+		[Test]
+		public void InvalidNullableUsage()
+		{
+			var brokenProgram = @"
+namespace TestApplication
+{
+	internal static class TestClass
+	{
+		public static void UtilityMethod(System.Uri uri)
+		{
+			var x = uri?.ToString();
+		}
+	}
+}";
+
+			var expected = new DiagnosticResult
+			{
+				Id = UriToStringAnalyzer.DiagnosticId,
+				Message = "Do not use Uri.ToString()",
+				Severity = DiagnosticSeverity.Warning,
+				Locations = new[] { new DiagnosticResultLocation("Test0.cs", 8, 17) },
+			};
+
+			VerifyCSharpDiagnostic(brokenProgram, expected);
+		}
+
 		protected override DiagnosticAnalyzer GetCSharpDiagnosticAnalyzer() => new UriToStringAnalyzer();
 	}
 }
