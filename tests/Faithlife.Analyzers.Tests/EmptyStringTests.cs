@@ -3,15 +3,15 @@ using Microsoft.CodeAnalysis.CodeFixes;
 using Microsoft.CodeAnalysis.Diagnostics;
 using NUnit.Framework;
 
-namespace Faithlife.Analyzers.Tests
+namespace Faithlife.Analyzers.Tests;
+
+[TestFixture]
+public sealed class EmptyStringTests : CodeFixVerifier
 {
-	[TestFixture]
-	public sealed class EmptyStringTests : CodeFixVerifier
+	[Test]
+	public void ValidEmptyString()
 	{
-		[Test]
-		public void ValidEmptyString()
-		{
-			const string validProgram = @"
+		const string validProgram = @"
 namespace TestApplication
 {
 	public class TestClass
@@ -26,15 +26,15 @@ namespace TestApplication
 		}
 	}
 }";
-			VerifyCSharpDiagnostic(validProgram);
-		}
+		VerifyCSharpDiagnostic(validProgram);
+	}
 
-		[TestCase("String.Empty")]
-		[TestCase("string.Empty")]
-		[TestCase("System.String.Empty")]
-		public void InvalidEmptyString(string parameter)
-		{
-			string invalidProgram = @"using System;
+	[TestCase("String.Empty")]
+	[TestCase("string.Empty")]
+	[TestCase("System.String.Empty")]
+	public void InvalidEmptyString(string parameter)
+	{
+		string invalidProgram = @"using System;
 
 namespace TestApplication
 {
@@ -50,17 +50,17 @@ namespace TestApplication
 		}
 	}
 }";
-			var expected = new DiagnosticResult
-			{
-				Id = EmptyStringAnalyzer.DiagnosticId,
-				Message = "Prefer \"\" over string.Empty.",
-				Severity = DiagnosticSeverity.Warning,
-				Locations = new[] { new DiagnosticResultLocation("Test0.cs", 9, 11) },
-			};
+		var expected = new DiagnosticResult
+		{
+			Id = EmptyStringAnalyzer.DiagnosticId,
+			Message = "Prefer \"\" over string.Empty.",
+			Severity = DiagnosticSeverity.Warning,
+			Locations = new[] { new DiagnosticResultLocation("Test0.cs", 9, 11) },
+		};
 
-			VerifyCSharpDiagnostic(invalidProgram, expected);
+		VerifyCSharpDiagnostic(invalidProgram, expected);
 
-			const string fixedProgram = @"using System;
+		const string fixedProgram = @"using System;
 
 namespace TestApplication
 {
@@ -77,11 +77,10 @@ namespace TestApplication
 	}
 }";
 
-			VerifyCSharpFix(invalidProgram, fixedProgram, 0);
-		}
-
-		protected override DiagnosticAnalyzer GetCSharpDiagnosticAnalyzer() => new EmptyStringAnalyzer();
-
-		protected override CodeFixProvider GetCSharpCodeFixProvider() => new EmptyStringCodeFixProvider();
+		VerifyCSharpFix(invalidProgram, fixedProgram, 0);
 	}
+
+	protected override DiagnosticAnalyzer GetCSharpDiagnosticAnalyzer() => new EmptyStringAnalyzer();
+
+	protected override CodeFixProvider GetCSharpCodeFixProvider() => new EmptyStringCodeFixProvider();
 }

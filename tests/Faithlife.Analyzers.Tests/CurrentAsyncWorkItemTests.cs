@@ -3,15 +3,15 @@ using Microsoft.CodeAnalysis.CodeFixes;
 using Microsoft.CodeAnalysis.Diagnostics;
 using NUnit.Framework;
 
-namespace Faithlife.Analyzers.Tests
+namespace Faithlife.Analyzers.Tests;
+
+[TestFixture]
+public class CurrentAsyncWorkItemTests : CodeFixVerifier
 {
-	[TestFixture]
-	public class CurrentAsyncWorkItemTests : CodeFixVerifier
+	[Test]
+	public void ValidUsage()
 	{
-		[Test]
-		public void ValidUsage()
-		{
-			const string validProgram = preamble + @"
+		const string validProgram = preamble + @"
 namespace TestApplication
 {
 	internal static class TestClass
@@ -28,13 +28,13 @@ namespace TestApplication
 		}
 	}
 }";
-			VerifyCSharpDiagnostic(validProgram);
-		}
+		VerifyCSharpDiagnostic(validProgram);
+	}
 
-		[Test]
-		public void AsyncWorkItemCurrentInAsyncWorkItemStartLambdaIsValid()
-		{
-			const string validProgram = preamble + @"
+	[Test]
+	public void AsyncWorkItemCurrentInAsyncWorkItemStartLambdaIsValid()
+	{
+		const string validProgram = preamble + @"
 namespace TestApplication
 {
 	internal static class TestClass
@@ -49,13 +49,13 @@ namespace TestApplication
 		}
 	}
 }";
-			VerifyCSharpDiagnostic(validProgram);
-		}
+		VerifyCSharpDiagnostic(validProgram);
+	}
 
-		[Test]
-		public void AsyncWorkItemCurrentInAsyncWorkItemStartLambdaIsValid2()
-		{
-			const string validProgram = preamble + @"
+	[Test]
+	public void AsyncWorkItemCurrentInAsyncWorkItemStartLambdaIsValid2()
+	{
+		const string validProgram = preamble + @"
 namespace TestApplication
 {
 	internal static class TestClass
@@ -70,13 +70,13 @@ namespace TestApplication
 		}
 	}
 }";
-			VerifyCSharpDiagnostic(validProgram);
-		}
+		VerifyCSharpDiagnostic(validProgram);
+	}
 
-		[Test]
-		public void InvalidUsage()
-		{
-			const string brokenProgram = preamble + @"
+	[Test]
+	public void InvalidUsage()
+	{
+		const string brokenProgram = preamble + @"
 namespace TestApplication
 {
 	internal static class TestClass
@@ -93,17 +93,17 @@ namespace TestApplication
 }
 ";
 
-			var expected = new DiagnosticResult
-			{
-				Id = CurrentAsyncWorkItemAnalyzer.DiagnosticId,
-				Message = "AsyncWorkItem.Current must only be used in methods that return IEnumerable<AsyncAction>.",
-				Severity = DiagnosticSeverity.Warning,
-				Locations = new[] { new DiagnosticResultLocation("Test0.cs", c_preambleLength + 7, 17) },
-			};
+		var expected = new DiagnosticResult
+		{
+			Id = CurrentAsyncWorkItemAnalyzer.DiagnosticId,
+			Message = "AsyncWorkItem.Current must only be used in methods that return IEnumerable<AsyncAction>.",
+			Severity = DiagnosticSeverity.Warning,
+			Locations = new[] { new DiagnosticResultLocation("Test0.cs", c_preambleLength + 7, 17) },
+		};
 
-			VerifyCSharpDiagnostic(brokenProgram, expected);
+		VerifyCSharpDiagnostic(brokenProgram, expected);
 
-			const string firstFix = preamble + @"
+		const string firstFix = preamble + @"
 namespace TestApplication
 {
 	internal static class TestClass
@@ -120,9 +120,9 @@ namespace TestApplication
 }
 ";
 
-			VerifyCSharpFix(brokenProgram, firstFix, 0);
+		VerifyCSharpFix(brokenProgram, firstFix, 0);
 
-			const string secondFix = preamble + @"
+		const string secondFix = preamble + @"
 namespace TestApplication
 {
 	internal static class TestClass
@@ -138,13 +138,13 @@ namespace TestApplication
 	}
 }
 ";
-			VerifyCSharpFix(brokenProgram, secondFix, 1);
-		}
+		VerifyCSharpFix(brokenProgram, secondFix, 1);
+	}
 
-		[Test]
-		public void FixAsyncWorkItemCurrentCanceled()
-		{
-			const string brokenProgram = preamble + @"
+	[Test]
+	public void FixAsyncWorkItemCurrentCanceled()
+	{
+		const string brokenProgram = preamble + @"
 namespace TestApplication
 {
 	internal static class TestClass
@@ -158,17 +158,17 @@ namespace TestApplication
 }
 ";
 
-			var expected = new DiagnosticResult
-			{
-				Id = CurrentAsyncWorkItemAnalyzer.DiagnosticId,
-				Message = "AsyncWorkItem.Current must only be used in methods that return IEnumerable<AsyncAction>.",
-				Severity = DiagnosticSeverity.Warning,
-				Locations = new[] { new DiagnosticResultLocation("Test0.cs", c_preambleLength + 7, 8) },
-			};
+		var expected = new DiagnosticResult
+		{
+			Id = CurrentAsyncWorkItemAnalyzer.DiagnosticId,
+			Message = "AsyncWorkItem.Current must only be used in methods that return IEnumerable<AsyncAction>.",
+			Severity = DiagnosticSeverity.Warning,
+			Locations = new[] { new DiagnosticResultLocation("Test0.cs", c_preambleLength + 7, 8) },
+		};
 
-			VerifyCSharpDiagnostic(brokenProgram, expected);
+		VerifyCSharpDiagnostic(brokenProgram, expected);
 
-			const string firstFix = preamble + @"
+		const string firstFix = preamble + @"
 namespace TestApplication
 {
 	internal static class TestClass
@@ -182,9 +182,9 @@ namespace TestApplication
 }
 ";
 
-			VerifyCSharpFix(brokenProgram, firstFix, 0);
+		VerifyCSharpFix(brokenProgram, firstFix, 0);
 
-			const string secondFix = preamble + @"
+		const string secondFix = preamble + @"
 namespace TestApplication
 {
 	internal static class TestClass
@@ -197,13 +197,13 @@ namespace TestApplication
 	}
 }
 ";
-			VerifyCSharpFix(brokenProgram, secondFix, 1);
-		}
+		VerifyCSharpFix(brokenProgram, secondFix, 1);
+	}
 
-		[Test]
-		public void GenerateUniqueName()
-		{
-			const string brokenProgram = preamble + @"
+	[Test]
+	public void GenerateUniqueName()
+	{
+		const string brokenProgram = preamble + @"
 namespace TestApplication
 {
 	internal static class TestClass
@@ -218,17 +218,17 @@ namespace TestApplication
 }
 ";
 
-			var expected = new DiagnosticResult
-			{
-				Id = CurrentAsyncWorkItemAnalyzer.DiagnosticId,
-				Message = "AsyncWorkItem.Current must only be used in methods that return IEnumerable<AsyncAction>.",
-				Severity = DiagnosticSeverity.Warning,
-				Locations = new[] { new DiagnosticResultLocation("Test0.cs", c_preambleLength + 8, 8) },
-			};
+		var expected = new DiagnosticResult
+		{
+			Id = CurrentAsyncWorkItemAnalyzer.DiagnosticId,
+			Message = "AsyncWorkItem.Current must only be used in methods that return IEnumerable<AsyncAction>.",
+			Severity = DiagnosticSeverity.Warning,
+			Locations = new[] { new DiagnosticResultLocation("Test0.cs", c_preambleLength + 8, 8) },
+		};
 
-			VerifyCSharpDiagnostic(brokenProgram, expected);
+		VerifyCSharpDiagnostic(brokenProgram, expected);
 
-			const string firstFix = preamble + @"
+		const string firstFix = preamble + @"
 namespace TestApplication
 {
 	internal static class TestClass
@@ -243,9 +243,9 @@ namespace TestApplication
 }
 ";
 
-			VerifyCSharpFix(brokenProgram, firstFix, 0);
+		VerifyCSharpFix(brokenProgram, firstFix, 0);
 
-			const string secondFix = preamble + @"
+		const string secondFix = preamble + @"
 namespace TestApplication
 {
 	internal static class TestClass
@@ -259,20 +259,20 @@ namespace TestApplication
 	}
 }
 ";
-			VerifyCSharpFix(brokenProgram, secondFix, 1);
-		}
+		VerifyCSharpFix(brokenProgram, secondFix, 1);
+	}
 
-		protected override CodeFixProvider GetCSharpCodeFixProvider()
-		{
-			return new CurrentAsyncWorkItemCodeFixProvider();
-		}
+	protected override CodeFixProvider GetCSharpCodeFixProvider()
+	{
+		return new CurrentAsyncWorkItemCodeFixProvider();
+	}
 
-		protected override DiagnosticAnalyzer GetCSharpDiagnosticAnalyzer()
-		{
-			return new CurrentAsyncWorkItemAnalyzer();
-		}
+	protected override DiagnosticAnalyzer GetCSharpDiagnosticAnalyzer()
+	{
+		return new CurrentAsyncWorkItemAnalyzer();
+	}
 
-		private const string preamble = @"using System;
+	private const string preamble = @"using System;
 using System.Collections.Generic;
 using Libronix.Utility.Threading;
 
@@ -298,6 +298,5 @@ namespace Libronix.Utility.Threading
 }
 ";
 
-		private static readonly int c_preambleLength = preamble.Split('\n').Length;
-	}
+	private static readonly int c_preambleLength = preamble.Split('\n').Length;
 }

@@ -3,15 +3,15 @@ using Microsoft.CodeAnalysis.CodeFixes;
 using Microsoft.CodeAnalysis.Diagnostics;
 using NUnit.Framework;
 
-namespace Faithlife.Analyzers.Tests
+namespace Faithlife.Analyzers.Tests;
+
+[TestFixture]
+public class UntilCanceledTests : CodeFixVerifier
 {
-	[TestFixture]
-	public class UntilCanceledTests : CodeFixVerifier
+	[Test]
+	public void ValidUsage()
 	{
-		[Test]
-		public void ValidUsage()
-		{
-			const string validProgram = preamble + @"
+		const string validProgram = preamble + @"
 namespace TestApplication
 {
 	internal static class TestClass
@@ -26,13 +26,13 @@ namespace TestApplication
 		}
 	}
 }";
-			VerifyCSharpDiagnostic(validProgram);
-		}
+		VerifyCSharpDiagnostic(validProgram);
+	}
 
-		[Test]
-		public void InvalidUsage()
-		{
-			const string brokenProgram = preamble + @"
+	[Test]
+	public void InvalidUsage()
+	{
+		const string brokenProgram = preamble + @"
 namespace TestApplication
 {
 	internal static class TestClass
@@ -47,17 +47,17 @@ namespace TestApplication
 }
 ";
 
-			var expected = new DiagnosticResult
-			{
-				Id = UntilCanceledAnalyzer.DiagnosticId,
-				Message = "UntilCanceled() may only be used in methods that return IEnumerable<AsyncAction>.",
-				Severity = DiagnosticSeverity.Warning,
-				Locations = new[] { new DiagnosticResultLocation("Test0.cs", c_preambleLength + 7, 46) },
-			};
+		var expected = new DiagnosticResult
+		{
+			Id = UntilCanceledAnalyzer.DiagnosticId,
+			Message = "UntilCanceled() may only be used in methods that return IEnumerable<AsyncAction>.",
+			Severity = DiagnosticSeverity.Warning,
+			Locations = new[] { new DiagnosticResultLocation("Test0.cs", c_preambleLength + 7, 46) },
+		};
 
-			VerifyCSharpDiagnostic(brokenProgram, expected);
+		VerifyCSharpDiagnostic(brokenProgram, expected);
 
-			const string firstFix = preamble + @"
+		const string firstFix = preamble + @"
 namespace TestApplication
 {
 	internal static class TestClass
@@ -72,9 +72,9 @@ namespace TestApplication
 }
 ";
 
-			VerifyCSharpFix(brokenProgram, firstFix, 0);
+		VerifyCSharpFix(brokenProgram, firstFix, 0);
 
-			const string secondFix = preamble + @"
+		const string secondFix = preamble + @"
 namespace TestApplication
 {
 	internal static class TestClass
@@ -88,13 +88,13 @@ namespace TestApplication
 	}
 }
 ";
-			VerifyCSharpFix(brokenProgram, secondFix, 1);
-		}
+		VerifyCSharpFix(brokenProgram, secondFix, 1);
+	}
 
-		[Test]
-		public void InvalidMultiLineUsage()
-		{
-			const string brokenProgram = preamble + @"
+	[Test]
+	public void InvalidMultiLineUsage()
+	{
+		const string brokenProgram = preamble + @"
 namespace TestApplication
 {
 	internal static class TestClass
@@ -111,17 +111,17 @@ namespace TestApplication
 }
 ";
 
-			var expected = new DiagnosticResult
-			{
-				Id = UntilCanceledAnalyzer.DiagnosticId,
-				Message = "UntilCanceled() may only be used in methods that return IEnumerable<AsyncAction>.",
-				Severity = DiagnosticSeverity.Warning,
-				Locations = new[] { new DiagnosticResultLocation("Test0.cs", c_preambleLength + 8, 19) },
-			};
+		var expected = new DiagnosticResult
+		{
+			Id = UntilCanceledAnalyzer.DiagnosticId,
+			Message = "UntilCanceled() may only be used in methods that return IEnumerable<AsyncAction>.",
+			Severity = DiagnosticSeverity.Warning,
+			Locations = new[] { new DiagnosticResultLocation("Test0.cs", c_preambleLength + 8, 19) },
+		};
 
-			VerifyCSharpDiagnostic(brokenProgram, expected);
+		VerifyCSharpDiagnostic(brokenProgram, expected);
 
-			const string firstFix = preamble + @"
+		const string firstFix = preamble + @"
 namespace TestApplication
 {
 	internal static class TestClass
@@ -138,9 +138,9 @@ namespace TestApplication
 }
 ";
 
-			VerifyCSharpFix(brokenProgram, firstFix, 0);
+		VerifyCSharpFix(brokenProgram, firstFix, 0);
 
-			const string secondFix = preamble + @"
+		const string secondFix = preamble + @"
 namespace TestApplication
 {
 	internal static class TestClass
@@ -156,14 +156,14 @@ namespace TestApplication
 	}
 }
 ";
-			VerifyCSharpFix(brokenProgram, secondFix, 1);
-		}
+		VerifyCSharpFix(brokenProgram, secondFix, 1);
+	}
 
-		protected override CodeFixProvider GetCSharpCodeFixProvider() => new UntilCanceledCodeFixProvider();
+	protected override CodeFixProvider GetCSharpCodeFixProvider() => new UntilCanceledCodeFixProvider();
 
-		protected override DiagnosticAnalyzer GetCSharpDiagnosticAnalyzer() => new UntilCanceledAnalyzer();
+	protected override DiagnosticAnalyzer GetCSharpDiagnosticAnalyzer() => new UntilCanceledAnalyzer();
 
-		private const string preamble = @"using System;
+	private const string preamble = @"using System;
 using System.Collections.Generic;
 using System.Linq;
 using Libronix.Utility.Threading;
@@ -180,6 +180,5 @@ namespace Libronix.Utility.Threading
 }
 ";
 
-		private static readonly int c_preambleLength = preamble.Split('\n').Length;
-	}
+	private static readonly int c_preambleLength = preamble.Split('\n').Length;
 }

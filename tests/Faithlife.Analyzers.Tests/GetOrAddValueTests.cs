@@ -2,15 +2,15 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Diagnostics;
 using NUnit.Framework;
 
-namespace Faithlife.Analyzers.Tests
+namespace Faithlife.Analyzers.Tests;
+
+[TestFixture]
+public class GetOrAddValueTests : CodeFixVerifier
 {
-	[TestFixture]
-	public class GetOrAddValueTests : CodeFixVerifier
+	[Test]
+	public void ValidUsage()
 	{
-		[Test]
-		public void ValidUsage()
-		{
-			const string validProgram = c_preamble + @"
+		const string validProgram = c_preamble + @"
 namespace TestApplication
 {
 	internal static class TestClass
@@ -23,15 +23,15 @@ namespace TestApplication
 	}
 }";
 
-			VerifyCSharpDiagnostic(validProgram);
-		}
+		VerifyCSharpDiagnostic(validProgram);
+	}
 
-		[TestCase("localDictionary.GetOrAddValue(0);")]
-		[TestCase("DictionaryFromFunction().GetOrAddValue(0);")]
-		[TestCase("DictionaryFromProperty.GetOrAddValue(0);")]
-		public void InvalidUsage(string invalidCall)
-		{
-			var brokenProgram = c_preamble + @"
+	[TestCase("localDictionary.GetOrAddValue(0);")]
+	[TestCase("DictionaryFromFunction().GetOrAddValue(0);")]
+	[TestCase("DictionaryFromProperty.GetOrAddValue(0);")]
+	public void InvalidUsage(string invalidCall)
+	{
+		var brokenProgram = c_preamble + @"
 namespace TestApplication
 {
 	internal static class TestClass
@@ -48,23 +48,23 @@ namespace TestApplication
 	}
 }";
 
-			var expected = new DiagnosticResult
-			{
-				Id = GetOrAddValueAnalyzer.DiagnosticId,
-				Message = "GetOrAddValue() is not threadsafe and should not be used with ConcurrentDictionary; use GetOrAdd() instead.",
-				Severity = DiagnosticSeverity.Warning,
-				Locations = new[] { new DiagnosticResultLocation("Test0.cs", c_preambleLength + 8, invalidCall.Length - "GetOrAddValue".Length) },
-			};
-
-			VerifyCSharpDiagnostic(brokenProgram, expected);
-		}
-
-		[TestCase("localDictionary?.GetOrAddValue(0);")]
-		[TestCase("DictionaryFromFunction()?.GetOrAddValue(0);")]
-		[TestCase("DictionaryFromProperty?.GetOrAddValue(0);")]
-		public void InvalidNullableUsage(string invalidCall)
+		var expected = new DiagnosticResult
 		{
-			var brokenProgram = c_preamble + @"
+			Id = GetOrAddValueAnalyzer.DiagnosticId,
+			Message = "GetOrAddValue() is not threadsafe and should not be used with ConcurrentDictionary; use GetOrAdd() instead.",
+			Severity = DiagnosticSeverity.Warning,
+			Locations = new[] { new DiagnosticResultLocation("Test0.cs", c_preambleLength + 8, invalidCall.Length - "GetOrAddValue".Length) },
+		};
+
+		VerifyCSharpDiagnostic(brokenProgram, expected);
+	}
+
+	[TestCase("localDictionary?.GetOrAddValue(0);")]
+	[TestCase("DictionaryFromFunction()?.GetOrAddValue(0);")]
+	[TestCase("DictionaryFromProperty?.GetOrAddValue(0);")]
+	public void InvalidNullableUsage(string invalidCall)
+	{
+		var brokenProgram = c_preamble + @"
 namespace TestApplication
 {
 	internal static class TestClass
@@ -81,20 +81,20 @@ namespace TestApplication
 	}
 }";
 
-			var expected = new DiagnosticResult
-			{
-				Id = GetOrAddValueAnalyzer.DiagnosticId,
-				Message = "GetOrAddValue() is not threadsafe and should not be used with ConcurrentDictionary; use GetOrAdd() instead.",
-				Severity = DiagnosticSeverity.Warning,
-				Locations = new[] { new DiagnosticResultLocation("Test0.cs", c_preambleLength + 8, invalidCall.Length - "GetOrAddValue".Length) },
-			};
+		var expected = new DiagnosticResult
+		{
+			Id = GetOrAddValueAnalyzer.DiagnosticId,
+			Message = "GetOrAddValue() is not threadsafe and should not be used with ConcurrentDictionary; use GetOrAdd() instead.",
+			Severity = DiagnosticSeverity.Warning,
+			Locations = new[] { new DiagnosticResultLocation("Test0.cs", c_preambleLength + 8, invalidCall.Length - "GetOrAddValue".Length) },
+		};
 
-			VerifyCSharpDiagnostic(brokenProgram, expected);
-		}
+		VerifyCSharpDiagnostic(brokenProgram, expected);
+	}
 
-		protected override DiagnosticAnalyzer GetCSharpDiagnosticAnalyzer() => new GetOrAddValueAnalyzer();
+	protected override DiagnosticAnalyzer GetCSharpDiagnosticAnalyzer() => new GetOrAddValueAnalyzer();
 
-		private const string c_preamble = @"using System;
+	private const string c_preamble = @"using System;
 using System.Collections.Generic;
 using System.Collections.Concurrent;
 using Libronix.Utility;
@@ -110,6 +110,5 @@ namespace Libronix.Utility
 }
 ";
 
-		private static readonly int c_preambleLength = c_preamble.Split('\n').Length;
-	}
+	private static readonly int c_preambleLength = c_preamble.Split('\n').Length;
 }

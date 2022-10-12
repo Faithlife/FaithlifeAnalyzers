@@ -2,15 +2,15 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Diagnostics;
 using NUnit.Framework;
 
-namespace Faithlife.Analyzers.Tests
+namespace Faithlife.Analyzers.Tests;
+
+[TestFixture]
+public sealed class VerbatimStringTests : DiagnosticVerifier
 {
-	[TestFixture]
-	public sealed class VerbatimStringTests : DiagnosticVerifier
+	[Test]
+	public void ValidStrings()
 	{
-		[Test]
-		public void ValidStrings()
-		{
-			const string validProgram = @"
+		const string validProgram = @"
 namespace TestApplication
 {
 	public class TestClass
@@ -25,13 +25,13 @@ World"".Trim();
 		}
 	}
 }";
-			VerifyCSharpDiagnostic(validProgram);
-		}
+		VerifyCSharpDiagnostic(validProgram);
+	}
 
-		[Test]
-		public void UnnecessaryVerbatimString()
-		{
-			const string invalidProgram = @"
+	[Test]
+	public void UnnecessaryVerbatimString()
+	{
+		const string invalidProgram = @"
 namespace TestApplication
 {
 	public class TestClass
@@ -42,19 +42,19 @@ namespace TestApplication
 		}
 	}
 }";
-			VerifyCSharpDiagnostic(invalidProgram, new DiagnosticResult
-			{
-				Id = VerbatimStringAnalyzer.DiagnosticId,
-				Message = "Avoid using verbatim string literals without special characters.",
-				Severity = DiagnosticSeverity.Warning,
-				Locations = new[] { new DiagnosticResultLocation("Test0.cs", 8, 4) },
-			});
-		}
-
-		[Test]
-		public void EmptyString()
+		VerifyCSharpDiagnostic(invalidProgram, new DiagnosticResult
 		{
-			const string invalidProgram = @"
+			Id = VerbatimStringAnalyzer.DiagnosticId,
+			Message = "Avoid using verbatim string literals without special characters.",
+			Severity = DiagnosticSeverity.Warning,
+			Locations = new[] { new DiagnosticResultLocation("Test0.cs", 8, 4) },
+		});
+	}
+
+	[Test]
+	public void EmptyString()
+	{
+		const string invalidProgram = @"
 namespace TestApplication
 {
 	public class TestClass
@@ -65,15 +65,14 @@ namespace TestApplication
 		}
 	}
 }";
-			VerifyCSharpDiagnostic(invalidProgram, new DiagnosticResult
-			{
-				Id = VerbatimStringAnalyzer.DiagnosticId,
-				Message = "Avoid using verbatim string literals without special characters.",
-				Severity = DiagnosticSeverity.Warning,
-				Locations = new[] { new DiagnosticResultLocation("Test0.cs", 8, 4) },
-			});
-		}
-
-		protected override DiagnosticAnalyzer GetCSharpDiagnosticAnalyzer() => new VerbatimStringAnalyzer();
+		VerifyCSharpDiagnostic(invalidProgram, new DiagnosticResult
+		{
+			Id = VerbatimStringAnalyzer.DiagnosticId,
+			Message = "Avoid using verbatim string literals without special characters.",
+			Severity = DiagnosticSeverity.Warning,
+			Locations = new[] { new DiagnosticResultLocation("Test0.cs", 8, 4) },
+		});
 	}
+
+	protected override DiagnosticAnalyzer GetCSharpDiagnosticAnalyzer() => new VerbatimStringAnalyzer();
 }

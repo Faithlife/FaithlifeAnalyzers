@@ -2,15 +2,15 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Diagnostics;
 using NUnit.Framework;
 
-namespace Faithlife.Analyzers.Tests
+namespace Faithlife.Analyzers.Tests;
+
+[TestFixture]
+public class DbConnectorCommandInterpolatedTests : CodeFixVerifier
 {
-	[TestFixture]
-	public class DbConnectorCommandInterpolatedTests : CodeFixVerifier
+	[Test]
+	public void ValidUsage()
 	{
-		[Test]
-		public void ValidUsage()
-		{
-			const string validProgram = c_preamble + @"
+		const string validProgram = c_preamble + @"
 namespace TestApplication
 {
 	internal static class TestClass
@@ -23,14 +23,14 @@ namespace TestApplication
 	}
 }";
 
-			VerifyCSharpDiagnostic(validProgram);
-		}
+		VerifyCSharpDiagnostic(validProgram);
+	}
 
-		[TestCase("connector.Command($\"invalid\");")]
-		[TestCase("connector.Command($\"invalid\", (\"value\", true));")]
-		public void InvalidUsage(string invalidCall)
-		{
-			var brokenProgram = c_preamble + @"
+	[TestCase("connector.Command($\"invalid\");")]
+	[TestCase("connector.Command($\"invalid\", (\"value\", true));")]
+	public void InvalidUsage(string invalidCall)
+	{
+		var brokenProgram = c_preamble + @"
 namespace TestApplication
 {
 	internal static class TestClass
@@ -43,20 +43,20 @@ namespace TestApplication
 	}
 }";
 
-			var expected = new DiagnosticResult
-			{
-				Id = DbConnectorCommandInterpolatedAnalyzer.DiagnosticId,
-				Message = "Command should not be used with an interpolated string; use CommandFormat instead.",
-				Severity = DiagnosticSeverity.Warning,
-				Locations = new[] { new DiagnosticResultLocation("Test0.cs", s_preambleLength + 8, 4) },
-			};
+		var expected = new DiagnosticResult
+		{
+			Id = DbConnectorCommandInterpolatedAnalyzer.DiagnosticId,
+			Message = "Command should not be used with an interpolated string; use CommandFormat instead.",
+			Severity = DiagnosticSeverity.Warning,
+			Locations = new[] { new DiagnosticResultLocation("Test0.cs", s_preambleLength + 8, 4) },
+		};
 
-			VerifyCSharpDiagnostic(brokenProgram, expected);
-		}
+		VerifyCSharpDiagnostic(brokenProgram, expected);
+	}
 
-		protected override DiagnosticAnalyzer GetCSharpDiagnosticAnalyzer() => new DbConnectorCommandInterpolatedAnalyzer();
+	protected override DiagnosticAnalyzer GetCSharpDiagnosticAnalyzer() => new DbConnectorCommandInterpolatedAnalyzer();
 
-		private const string c_preamble = @"using System;
+	private const string c_preamble = @"using System;
 using Faithlife.Data;
 
 namespace Faithlife.Data
@@ -69,6 +69,5 @@ namespace Faithlife.Data
 }
 ";
 
-		private static readonly int s_preambleLength = c_preamble.Split('\n').Length;
-	}
+	private static readonly int s_preambleLength = c_preamble.Split('\n').Length;
 }

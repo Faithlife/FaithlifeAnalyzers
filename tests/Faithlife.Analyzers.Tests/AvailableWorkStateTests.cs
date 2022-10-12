@@ -3,16 +3,16 @@ using Microsoft.CodeAnalysis.CodeFixes;
 using Microsoft.CodeAnalysis.Diagnostics;
 using NUnit.Framework;
 
-namespace Faithlife.Analyzers.Tests
+namespace Faithlife.Analyzers.Tests;
+
+[TestFixture]
+public class AvailableWorkStateTests : CodeFixVerifier
 {
-	[TestFixture]
-	public class AvailableWorkStateTests : CodeFixVerifier
+	[TestCase("None")]
+	[TestCase("ToDo")]
+	public void ValidUsage(string property)
 	{
-		[TestCase("None")]
-		[TestCase("ToDo")]
-		public void ValidUsage(string property)
-		{
-			string validProgram = preamble + @"
+		string validProgram = preamble + @"
 namespace TestApplication
 {
 	internal static class TestClass
@@ -27,14 +27,14 @@ namespace TestApplication
 		}
 	}
 }";
-			VerifyCSharpDiagnostic(validProgram);
-		}
+		VerifyCSharpDiagnostic(validProgram);
+	}
 
-		[TestCase("None")]
-		[TestCase("ToDo")]
-		public void IgnoredCurrentWorkState(string property)
-		{
-			string brokenProgram = preamble + @"
+	[TestCase("None")]
+	[TestCase("ToDo")]
+	public void IgnoredCurrentWorkState(string property)
+	{
+		string brokenProgram = preamble + @"
 namespace TestApplication
 {
 	internal static class TestClass
@@ -52,17 +52,17 @@ namespace TestApplication
 }
 ";
 
-			var expected = new DiagnosticResult
-			{
-				Id = AvailableWorkStateAnalyzer.DiagnosticId,
-				Message = "WorkState.None and WorkState.ToDo must not be used when an IWorkState is available.",
-				Severity = DiagnosticSeverity.Error,
-				Locations = new[] { new DiagnosticResultLocation("Test0.cs", c_preambleLength + 7, 17) },
-			};
+		var expected = new DiagnosticResult
+		{
+			Id = AvailableWorkStateAnalyzer.DiagnosticId,
+			Message = "WorkState.None and WorkState.ToDo must not be used when an IWorkState is available.",
+			Severity = DiagnosticSeverity.Error,
+			Locations = new[] { new DiagnosticResultLocation("Test0.cs", c_preambleLength + 7, 17) },
+		};
 
-			VerifyCSharpDiagnostic(brokenProgram, expected);
+		VerifyCSharpDiagnostic(brokenProgram, expected);
 
-			const string firstFix = preamble + @"
+		const string firstFix = preamble + @"
 namespace TestApplication
 {
 	internal static class TestClass
@@ -80,14 +80,14 @@ namespace TestApplication
 }
 ";
 
-			VerifyCSharpFix(brokenProgram, firstFix, 0);
-		}
+		VerifyCSharpFix(brokenProgram, firstFix, 0);
+	}
 
-		[TestCase("None")]
-		[TestCase("ToDo")]
-		public void IgnoredIWorkState(string property)
-		{
-			string brokenProgram = preamble + @"
+	[TestCase("None")]
+	[TestCase("ToDo")]
+	public void IgnoredIWorkState(string property)
+	{
+		string brokenProgram = preamble + @"
 namespace TestApplication
 {
 	internal static class TestClass
@@ -104,17 +104,17 @@ namespace TestApplication
 }
 ";
 
-			var expected = new DiagnosticResult
-			{
-				Id = AvailableWorkStateAnalyzer.DiagnosticId,
-				Message = "WorkState.None and WorkState.ToDo must not be used when an IWorkState is available.",
-				Severity = DiagnosticSeverity.Error,
-				Locations = new[] { new DiagnosticResultLocation("Test0.cs", c_preambleLength + 7, 17) },
-			};
+		var expected = new DiagnosticResult
+		{
+			Id = AvailableWorkStateAnalyzer.DiagnosticId,
+			Message = "WorkState.None and WorkState.ToDo must not be used when an IWorkState is available.",
+			Severity = DiagnosticSeverity.Error,
+			Locations = new[] { new DiagnosticResultLocation("Test0.cs", c_preambleLength + 7, 17) },
+		};
 
-			VerifyCSharpDiagnostic(brokenProgram, expected);
+		VerifyCSharpDiagnostic(brokenProgram, expected);
 
-			const string firstFix = preamble + @"
+		const string firstFix = preamble + @"
 namespace TestApplication
 {
 	internal static class TestClass
@@ -131,14 +131,14 @@ namespace TestApplication
 }
 ";
 
-			VerifyCSharpFix(brokenProgram, firstFix, 0);
-		}
+		VerifyCSharpFix(brokenProgram, firstFix, 0);
+	}
 
-		[TestCase("None")]
-		[TestCase("ToDo")]
-		public void IgnoredConcreteWorkState(string property)
-		{
-			string brokenProgram = preamble + @"
+	[TestCase("None")]
+	[TestCase("ToDo")]
+	public void IgnoredConcreteWorkState(string property)
+	{
+		string brokenProgram = preamble + @"
 namespace TestApplication
 {
 	internal static class TestClass
@@ -155,17 +155,17 @@ namespace TestApplication
 }
 ";
 
-			var expected = new DiagnosticResult
-			{
-				Id = AvailableWorkStateAnalyzer.DiagnosticId,
-				Message = "WorkState.None and WorkState.ToDo must not be used when an IWorkState is available.",
-				Severity = DiagnosticSeverity.Error,
-				Locations = new[] { new DiagnosticResultLocation("Test0.cs", c_preambleLength + 7, 17) },
-			};
+		var expected = new DiagnosticResult
+		{
+			Id = AvailableWorkStateAnalyzer.DiagnosticId,
+			Message = "WorkState.None and WorkState.ToDo must not be used when an IWorkState is available.",
+			Severity = DiagnosticSeverity.Error,
+			Locations = new[] { new DiagnosticResultLocation("Test0.cs", c_preambleLength + 7, 17) },
+		};
 
-			VerifyCSharpDiagnostic(brokenProgram, expected);
+		VerifyCSharpDiagnostic(brokenProgram, expected);
 
-			const string firstFix = preamble + @"
+		const string firstFix = preamble + @"
 namespace TestApplication
 {
 	internal static class TestClass
@@ -182,14 +182,14 @@ namespace TestApplication
 }
 ";
 
-			VerifyCSharpFix(brokenProgram, firstFix, 0);
-		}
+		VerifyCSharpFix(brokenProgram, firstFix, 0);
+	}
 
-		[TestCase("None")]
-		[TestCase("ToDo")]
-		public void IgnoredCancellationToken(string property)
-		{
-			string brokenProgram = preamble + @"
+	[TestCase("None")]
+	[TestCase("ToDo")]
+	public void IgnoredCancellationToken(string property)
+	{
+		string brokenProgram = preamble + @"
 namespace TestApplication
 {
 	internal static class TestClass
@@ -206,17 +206,17 @@ namespace TestApplication
 }
 ";
 
-			var expected = new DiagnosticResult
-			{
-				Id = AvailableWorkStateAnalyzer.DiagnosticId,
-				Message = "WorkState.None and WorkState.ToDo must not be used when an IWorkState is available.",
-				Severity = DiagnosticSeverity.Error,
-				Locations = new[] { new DiagnosticResultLocation("Test0.cs", c_preambleLength + 7, 17) },
-			};
+		var expected = new DiagnosticResult
+		{
+			Id = AvailableWorkStateAnalyzer.DiagnosticId,
+			Message = "WorkState.None and WorkState.ToDo must not be used when an IWorkState is available.",
+			Severity = DiagnosticSeverity.Error,
+			Locations = new[] { new DiagnosticResultLocation("Test0.cs", c_preambleLength + 7, 17) },
+		};
 
-			VerifyCSharpDiagnostic(brokenProgram, expected);
+		VerifyCSharpDiagnostic(brokenProgram, expected);
 
-			const string firstFix = preamble + @"
+		const string firstFix = preamble + @"
 namespace TestApplication
 {
 	internal static class TestClass
@@ -233,14 +233,14 @@ namespace TestApplication
 }
 ";
 
-			VerifyCSharpFix(brokenProgram, firstFix, 0);
-		}
+		VerifyCSharpFix(brokenProgram, firstFix, 0);
+	}
 
-		[TestCase("None")]
-		[TestCase("ToDo")]
-		public void IgnoredAsyncMethodContext(string property)
-		{
-			string brokenProgram = preamble + @"
+	[TestCase("None")]
+	[TestCase("ToDo")]
+	public void IgnoredAsyncMethodContext(string property)
+	{
+		string brokenProgram = preamble + @"
 namespace TestApplication
 {
 	internal static class TestClass
@@ -257,17 +257,17 @@ namespace TestApplication
 }
 ";
 
-			var expected = new DiagnosticResult
-			{
-				Id = AvailableWorkStateAnalyzer.DiagnosticId,
-				Message = "WorkState.None and WorkState.ToDo must not be used when an IWorkState is available.",
-				Severity = DiagnosticSeverity.Error,
-				Locations = new[] { new DiagnosticResultLocation("Test0.cs", c_preambleLength + 7, 17) },
-			};
+		var expected = new DiagnosticResult
+		{
+			Id = AvailableWorkStateAnalyzer.DiagnosticId,
+			Message = "WorkState.None and WorkState.ToDo must not be used when an IWorkState is available.",
+			Severity = DiagnosticSeverity.Error,
+			Locations = new[] { new DiagnosticResultLocation("Test0.cs", c_preambleLength + 7, 17) },
+		};
 
-			VerifyCSharpDiagnostic(brokenProgram, expected);
+		VerifyCSharpDiagnostic(brokenProgram, expected);
 
-			const string firstFix = preamble + @"
+		const string firstFix = preamble + @"
 namespace TestApplication
 {
 	internal static class TestClass
@@ -284,15 +284,15 @@ namespace TestApplication
 }
 ";
 
-			VerifyCSharpFix(brokenProgram, firstFix, 0);
-		}
+		VerifyCSharpFix(brokenProgram, firstFix, 0);
+	}
 
-		[TestCase("None")]
-		[TestCase("ToDo")]
-		public void MultipleOptions(string property)
-		{
-			string CreateProgramWithParameter(string expectedParameter) =>
-				preamble + @"
+	[TestCase("None")]
+	[TestCase("ToDo")]
+	public void MultipleOptions(string property)
+	{
+		string CreateProgramWithParameter(string expectedParameter) =>
+			preamble + @"
 namespace TestApplication
 {
 	internal static class TestClass
@@ -310,43 +310,43 @@ namespace TestApplication
 }
 ";
 
-			string brokenProgram = CreateProgramWithParameter($"WorkState.{property}");
+		string brokenProgram = CreateProgramWithParameter($"WorkState.{property}");
 
-			var expected = new DiagnosticResult
-			{
-				Id = AvailableWorkStateAnalyzer.DiagnosticId,
-				Message = "WorkState.None and WorkState.ToDo must not be used when an IWorkState is available.",
-				Severity = DiagnosticSeverity.Error,
-				Locations = new[] { new DiagnosticResultLocation("Test0.cs", c_preambleLength + 7, 17) },
-			};
-
-			VerifyCSharpDiagnostic(brokenProgram, expected);
-			VerifyCSharpFixes(
-				brokenProgram,
-				CreateProgramWithParameter("AsyncWorkItem.Current"),
-				CreateProgramWithParameter("ignored1"),
-				CreateProgramWithParameter("ignored2"),
-				CreateProgramWithParameter("WorkState.FromCancellationToken(ignored3)"),
-				CreateProgramWithParameter("ignored4.WorkState"));
-		}
-
-		protected override CodeFixProvider GetCSharpCodeFixProvider()
+		var expected = new DiagnosticResult
 		{
-			return new AvailableWorkStateCodeFixProvider();
-		}
+			Id = AvailableWorkStateAnalyzer.DiagnosticId,
+			Message = "WorkState.None and WorkState.ToDo must not be used when an IWorkState is available.",
+			Severity = DiagnosticSeverity.Error,
+			Locations = new[] { new DiagnosticResultLocation("Test0.cs", c_preambleLength + 7, 17) },
+		};
 
-		protected override DiagnosticAnalyzer GetCSharpDiagnosticAnalyzer()
-		{
-			return new AvailableWorkStateAnalyzer();
-		}
+		VerifyCSharpDiagnostic(brokenProgram, expected);
+		VerifyCSharpFixes(
+			brokenProgram,
+			CreateProgramWithParameter("AsyncWorkItem.Current"),
+			CreateProgramWithParameter("ignored1"),
+			CreateProgramWithParameter("ignored2"),
+			CreateProgramWithParameter("WorkState.FromCancellationToken(ignored3)"),
+			CreateProgramWithParameter("ignored4.WorkState"));
+	}
 
-		private void VerifyCSharpFixes(string brokenProgram, params string[] fixedPrograms)
-		{
-			for (var currentFix = 0; currentFix < fixedPrograms.Length; currentFix++)
-				VerifyCSharpFix(brokenProgram, fixedPrograms[currentFix], currentFix);
-		}
+	protected override CodeFixProvider GetCSharpCodeFixProvider()
+	{
+		return new AvailableWorkStateCodeFixProvider();
+	}
 
-		private const string preamble = @"using System;
+	protected override DiagnosticAnalyzer GetCSharpDiagnosticAnalyzer()
+	{
+		return new AvailableWorkStateAnalyzer();
+	}
+
+	private void VerifyCSharpFixes(string brokenProgram, params string[] fixedPrograms)
+	{
+		for (var currentFix = 0; currentFix < fixedPrograms.Length; currentFix++)
+			VerifyCSharpFix(brokenProgram, fixedPrograms[currentFix], currentFix);
+	}
+
+	private const string preamble = @"using System;
 using System.Collections.Generic;
 using System.Threading;
 using Libronix.Utility.Threading;
@@ -385,6 +385,5 @@ namespace Libronix.Utility.Threading
 }
 ";
 
-		private static readonly int c_preambleLength = preamble.Split('\n').Length;
-	}
+	private static readonly int c_preambleLength = preamble.Split('\n').Length;
 }

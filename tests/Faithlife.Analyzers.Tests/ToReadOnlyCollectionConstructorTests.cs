@@ -3,15 +3,15 @@ using Microsoft.CodeAnalysis.CodeFixes;
 using Microsoft.CodeAnalysis.Diagnostics;
 using NUnit.Framework;
 
-namespace Faithlife.Analyzers.Tests
+namespace Faithlife.Analyzers.Tests;
+
+[TestFixture]
+public class ToReadOnlyCollectionConstructorTests : CodeFixVerifier
 {
-	[TestFixture]
-	public class ToReadOnlyCollectionConstructorTests : CodeFixVerifier
+	[Test]
+	public void EnumerationIsValid()
 	{
-		[Test]
-		public void EnumerationIsValid()
-		{
-			const string validProgram = c_preamble + @"
+		const string validProgram = c_preamble + @"
 namespace TestApplication
 {
 	public class TestClass
@@ -24,13 +24,13 @@ namespace TestApplication
 		}
 	}
 }";
-			VerifyCSharpDiagnostic(validProgram);
-		}
+		VerifyCSharpDiagnostic(validProgram);
+	}
 
-		[Test]
-		public void VariableDeclarationIsValid()
-		{
-			const string validProgram = c_preamble + @"
+	[Test]
+	public void VariableDeclarationIsValid()
+	{
+		const string validProgram = c_preamble + @"
 namespace TestApplication
 {
 	public class TestClass
@@ -41,13 +41,13 @@ namespace TestApplication
 		}
 	}
 }";
-			VerifyCSharpDiagnostic(validProgram);
-		}
+		VerifyCSharpDiagnostic(validProgram);
+	}
 
-		[Test]
-		public void AssignLocalIsValid()
-		{
-			const string validProgram = c_preamble + @"
+	[Test]
+	public void AssignLocalIsValid()
+	{
+		const string validProgram = c_preamble + @"
 namespace TestApplication
 {
 	public class TestClass
@@ -59,13 +59,13 @@ namespace TestApplication
 		}
 	}
 }";
-			VerifyCSharpDiagnostic(validProgram);
-		}
+		VerifyCSharpDiagnostic(validProgram);
+	}
 
-		[Test]
-		public void AssignField()
-		{
-			const string program = c_preamble + @"
+	[Test]
+	public void AssignField()
+	{
+		const string program = c_preamble + @"
 namespace TestApplication
 {
 	public class TestClass
@@ -79,17 +79,17 @@ namespace TestApplication
 	}
 }";
 
-			var expected = new DiagnosticResult
-			{
-				Id = ToReadOnlyCollectionAnalyzer.DiagnosticId,
-				Message = "Avoid ToReadOnlyCollection in constructors.",
-				Severity = DiagnosticSeverity.Warning,
-				Locations = new[] { new DiagnosticResultLocation("Test0.cs", 20, 19) },
-			};
+		var expected = new DiagnosticResult
+		{
+			Id = ToReadOnlyCollectionAnalyzer.DiagnosticId,
+			Message = "Avoid ToReadOnlyCollection in constructors.",
+			Severity = DiagnosticSeverity.Warning,
+			Locations = new[] { new DiagnosticResultLocation("Test0.cs", 20, 19) },
+		};
 
-			VerifyCSharpDiagnostic(program, expected);
+		VerifyCSharpDiagnostic(program, expected);
 
-			const string fix = c_preamble + @"
+		const string fix = c_preamble + @"
 namespace TestApplication
 {
 	public class TestClass
@@ -103,13 +103,13 @@ namespace TestApplication
 	}
 }";
 
-			VerifyCSharpFix(program, fix, 0);
-		}
+		VerifyCSharpFix(program, fix, 0);
+	}
 
-		[Test]
-		public void AssignFieldConditionalNull()
-		{
-			const string program = c_preamble + @"
+	[Test]
+	public void AssignFieldConditionalNull()
+	{
+		const string program = c_preamble + @"
 namespace TestApplication
 {
 	public class TestClass
@@ -123,17 +123,17 @@ namespace TestApplication
 	}
 }";
 
-			var expected = new DiagnosticResult
-			{
-				Id = ToReadOnlyCollectionAnalyzer.DiagnosticId,
-				Message = "Avoid ToReadOnlyCollection in constructors.",
-				Severity = DiagnosticSeverity.Warning,
-				Locations = new[] { new DiagnosticResultLocation("Test0.cs", 20, 20) },
-			};
+		var expected = new DiagnosticResult
+		{
+			Id = ToReadOnlyCollectionAnalyzer.DiagnosticId,
+			Message = "Avoid ToReadOnlyCollection in constructors.",
+			Severity = DiagnosticSeverity.Warning,
+			Locations = new[] { new DiagnosticResultLocation("Test0.cs", 20, 20) },
+		};
 
-			VerifyCSharpDiagnostic(program, expected);
+		VerifyCSharpDiagnostic(program, expected);
 
-			const string fix = c_preamble + @"
+		const string fix = c_preamble + @"
 namespace TestApplication
 {
 	public class TestClass
@@ -147,13 +147,13 @@ namespace TestApplication
 	}
 }";
 
-			VerifyCSharpFix(program, fix, 0);
-		}
+		VerifyCSharpFix(program, fix, 0);
+	}
 
-		[Test]
-		public void AssignProperty()
-		{
-			const string program = c_preamble + @"
+	[Test]
+	public void AssignProperty()
+	{
+		const string program = c_preamble + @"
 namespace TestApplication
 {
 	public class TestClass
@@ -167,17 +167,17 @@ namespace TestApplication
 	}
 }";
 
-			var expected = new DiagnosticResult
-			{
-				Id = ToReadOnlyCollectionAnalyzer.DiagnosticId,
-				Message = "Avoid ToReadOnlyCollection in constructors.",
-				Severity = DiagnosticSeverity.Warning,
-				Locations = new[] { new DiagnosticResultLocation("Test0.cs", 20, 20) },
-			};
+		var expected = new DiagnosticResult
+		{
+			Id = ToReadOnlyCollectionAnalyzer.DiagnosticId,
+			Message = "Avoid ToReadOnlyCollection in constructors.",
+			Severity = DiagnosticSeverity.Warning,
+			Locations = new[] { new DiagnosticResultLocation("Test0.cs", 20, 20) },
+		};
 
-			VerifyCSharpDiagnostic(program, expected);
+		VerifyCSharpDiagnostic(program, expected);
 
-			const string fix = c_preamble + @"
+		const string fix = c_preamble + @"
 namespace TestApplication
 {
 	public class TestClass
@@ -191,14 +191,14 @@ namespace TestApplication
 	}
 }";
 
-			VerifyCSharpFix(program, fix, 0);
-		}
+		VerifyCSharpFix(program, fix, 0);
+	}
 
-		protected override DiagnosticAnalyzer GetCSharpDiagnosticAnalyzer() => new ToReadOnlyCollectionAnalyzer();
+	protected override DiagnosticAnalyzer GetCSharpDiagnosticAnalyzer() => new ToReadOnlyCollectionAnalyzer();
 
-		protected override CodeFixProvider GetCSharpCodeFixProvider() => new ToReadOnlyCollectionCodeFixProvider();
+	protected override CodeFixProvider GetCSharpCodeFixProvider() => new ToReadOnlyCollectionCodeFixProvider();
 
-		private const string c_preamble = @"using System;
+	private const string c_preamble = @"using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using Libronix.Utility;
@@ -211,5 +211,4 @@ namespace Libronix.Utility
 	}
 }
 ";
-	}
 }
