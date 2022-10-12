@@ -40,14 +40,6 @@ namespace Faithlife.Analyzers
 		{
 			var syntax = (MemberAccessExpressionSyntax) context.Node;
 
-			var symbolInfo = context.SemanticModel.GetSymbolInfo(syntax.Expression);
-			if (symbolInfo.Symbol == null || !symbolInfo.Symbol.Equals(asyncWorkItem))
-				return;
-
-			var memberSymbolInfo = context.SemanticModel.GetSymbolInfo(syntax.Name);
-			if (memberSymbolInfo.Symbol == null || !memberSymbolInfo.Symbol.Equals(asyncWorkItemCurrent))
-				return;
-
 			var containingMethod = syntax.Ancestors().OfType<MethodDeclarationSyntax>().FirstOrDefault();
 			if (containingMethod == null)
 				return;
@@ -59,6 +51,14 @@ namespace Faithlife.Analyzers
 			{
 				return;
 			}
+
+			var symbolInfo = context.SemanticModel.GetSymbolInfo(syntax.Expression);
+			if (symbolInfo.Symbol == null || !symbolInfo.Symbol.Equals(asyncWorkItem))
+				return;
+
+			var memberSymbolInfo = context.SemanticModel.GetSymbolInfo(syntax.Name);
+			if (memberSymbolInfo.Symbol == null || !memberSymbolInfo.Symbol.Equals(asyncWorkItemCurrent))
+				return;
 
 			// check for AsyncWorkItem.Current being used in a lambda passed as an argument to AsyncWorkItem.Start
 			var invocation = syntax.FirstAncestorOrSelf<LambdaExpressionSyntax>()?.FirstAncestorOrSelf<ArgumentSyntax>()?.FirstAncestorOrSelf<InvocationExpressionSyntax>();

@@ -38,6 +38,9 @@ namespace Faithlife.Analyzers
 		{
 			var syntax = (MemberAccessExpressionSyntax)context.Node;
 
+			if (syntax.Name.Identifier.Text != "Empty")
+				return;
+
 			var symbolInfo = context.SemanticModel.GetSymbolInfo(syntax.Name);
 			if (symbolInfo.Symbol == null || !symbolInfo.Symbol.Equals(emptyString))
 				return;
