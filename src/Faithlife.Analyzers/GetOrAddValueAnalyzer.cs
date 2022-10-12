@@ -1,4 +1,6 @@
+using System;
 using System.Collections.Immutable;
+using System.Linq.Expressions;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -31,16 +33,31 @@ namespace Faithlife.Analyzers
 		{
 			var invocation = (InvocationExpressionSyntax) context.Node;
 
+			var name = invocation.Expression switch
+			{
+				MemberAccessExpressionSyntax memberAccess => memberAccess.Name,
+				MemberBindingExpressionSyntax memberBinding => memberBinding.Name,
+				_ => null,
+			};
+
+			if (name?.Identifier.Text != "GetOrAddValue")
+				return;
+
 			var method = context.SemanticModel.GetSymbolInfo(invocation.Expression).Symbol as IMethodSymbol;
-			if (method?.Name != "GetOrAddValue" || method.ContainingType != dictionaryUtility)
+			if (method?.ContainingType != dictionaryUtility)
 				return;
 
-			var memberAccess = (MemberAccessExpressionSyntax) invocation.Expression;
-			var targetType = context.SemanticModel.GetTypeInfo(memberAccess.Expression).Type.OriginalDefinition;
-			if (targetType?.Equals(concurrentDictionary) != true)
+			var target = invocation.Expression switch
+			{
+				MemberAccessExpressionSyntax memberAccess => memberAccess.Expression,
+				MemberBindingExpressionSyntax memberBinding => (memberBinding.Parent.Parent as ConditionalAccessExpressionSyntax)?.Expression,
+				_ => null,
+			};
+			var targetType = target is null ? null : context.SemanticModel.GetTypeInfo(target).Type.OriginalDefinition;
+			if (targetType?.Equals(concurrentDictionary) is not true)
 				return;
 
-			context.ReportDiagnostic(Diagnostic.Create(s_rule, memberAccess.Name.GetLocation()));
+			context.ReportDiagnostic(Diagnostic.Create(s_rule, name.GetLocation()));
 		}
 
 		public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => ImmutableArray.Create(s_rule);

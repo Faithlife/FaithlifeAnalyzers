@@ -59,6 +59,39 @@ namespace TestApplication
 			VerifyCSharpDiagnostic(brokenProgram, expected);
 		}
 
+		[TestCase("localDictionary?.GetOrAddValue(0);")]
+		[TestCase("DictionaryFromFunction()?.GetOrAddValue(0);")]
+		[TestCase("DictionaryFromProperty?.GetOrAddValue(0);")]
+		public void InvalidNullableUsage(string invalidCall)
+		{
+			var brokenProgram = c_preamble + @"
+namespace TestApplication
+{
+	internal static class TestClass
+	{
+		public static void UtilityMethod()
+		{
+			var localDictionary = new ConcurrentDictionary<int, List<int>>();
+			" + invalidCall + @"
+		}
+
+		public static ConcurrentDictionary<int, List<int>> DictionaryFromFunction() => new ConcurrentDictionary<int, List<int>>();
+
+		public static ConcurrentDictionary<int, List<int>> DictionaryFromProperty => new ConcurrentDictionary<int, List<int>>();
+	}
+}";
+
+			var expected = new DiagnosticResult
+			{
+				Id = GetOrAddValueAnalyzer.DiagnosticId,
+				Message = "GetOrAddValue() is not threadsafe and should not be used with ConcurrentDictionary; use GetOrAdd() instead.",
+				Severity = DiagnosticSeverity.Warning,
+				Locations = new[] { new DiagnosticResultLocation("Test0.cs", c_preambleLength + 8, invalidCall.Length - "GetOrAddValue".Length) },
+			};
+
+			VerifyCSharpDiagnostic(brokenProgram, expected);
+		}
+
 		protected override DiagnosticAnalyzer GetCSharpDiagnosticAnalyzer() => new GetOrAddValueAnalyzer();
 
 		private const string c_preamble = @"using System;
