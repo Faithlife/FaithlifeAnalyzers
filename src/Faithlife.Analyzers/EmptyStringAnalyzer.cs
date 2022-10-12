@@ -1,9 +1,5 @@
-using System;
 using System.Collections.Immutable;
-using System.Linq;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.CodeAnalysis.Operations;
 
@@ -26,7 +22,7 @@ namespace Faithlife.Analyzers
 				if (emptyString.Length != 1)
 					return;
 
-				compilationStartAnalysisContext.RegisterSyntaxNodeAction(c => AnalyzeSyntax(c, emptyString[0]), SyntaxKind.SimpleMemberAccessExpression);
+				compilationStartAnalysisContext.RegisterOperationAction(x => AnalyzeOperation(x, emptyString[0]), OperationKind.FieldReference);
 			});
 		}
 
@@ -34,18 +30,13 @@ namespace Faithlife.Analyzers
 
 		public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => ImmutableArray.Create(s_rule);
 
-		private static void AnalyzeSyntax(SyntaxNodeAnalysisContext context, ISymbol emptyString)
+		private static void AnalyzeOperation(OperationAnalysisContext context, ISymbol emptyString)
 		{
-			var syntax = (MemberAccessExpressionSyntax)context.Node;
-
-			if (syntax.Name.Identifier.Text != "Empty")
+			var fieldReferenceOperation = (IFieldReferenceOperation) context.Operation;
+			if (!fieldReferenceOperation.Field.Equals(emptyString))
 				return;
 
-			var symbolInfo = context.SemanticModel.GetSymbolInfo(syntax.Name);
-			if (symbolInfo.Symbol == null || !symbolInfo.Symbol.Equals(emptyString))
-				return;
-
-			context.ReportDiagnostic(Diagnostic.Create(s_rule, syntax.GetLocation()));
+			context.ReportDiagnostic(Diagnostic.Create(s_rule, context.Operation.Syntax.GetLocation()));
 		}
 
 		private static readonly DiagnosticDescriptor s_rule = new DiagnosticDescriptor(
