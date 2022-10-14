@@ -8,6 +8,26 @@ namespace Faithlife.Analyzers.Tests;
 [TestFixture]
 public class AvailableWorkStateTests : CodeFixVerifier
 {
+	[Test]
+	public void NoDiagnosticWhenNotUsed()
+	{
+		string validProgram = preamble + @"
+namespace TestApplication
+{
+	internal class TestClass
+	{
+		public static IEnumerable<AsyncAction> Method(TestClass testClass)
+		{
+			testClass.Property = 1;
+			yield break;
+		}
+
+		public int Property { get; set; }
+	}
+}";
+		VerifyCSharpDiagnostic(validProgram);
+	}
+
 	[TestCase("None")]
 	[TestCase("ToDo")]
 	public void ValidUsage(string property)

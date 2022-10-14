@@ -9,6 +9,11 @@ Prefix the description of the change with `[major]`, `[minor]`, or `[patch]` in 
 New analyzers are considered "minor" changes (even though adding a new analyzer is likely to generate warnings
 or errors for existing code when the package is upgraded).
 
+## 1.3.1
+
+* Fix false positive diagnostic for FL0008.
+  * This bug was introduced in 1.3.0.
+
 ## 1.3.0
 
 * Improve performance of analyzers.
