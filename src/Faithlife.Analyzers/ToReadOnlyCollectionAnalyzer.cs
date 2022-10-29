@@ -11,6 +11,7 @@ public sealed class ToReadOnlyCollectionAnalyzer : DiagnosticAnalyzer
 {
 	public override void Initialize(AnalysisContext context)
 	{
+		context.EnableConcurrentExecution();
 		context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);
 
 		context.RegisterCompilationStartAction(compilationStartAnalysisContext =>
@@ -35,7 +36,7 @@ public sealed class ToReadOnlyCollectionAnalyzer : DiagnosticAnalyzer
 	{
 		var invocationOperation = (IInvocationOperation) context.Operation;
 		var targetMethod = invocationOperation.TargetMethod;
-		if (targetMethod.ContainingType == enumerableUtility && targetMethod.Name == "ToReadOnlyCollection")
+		if (Equals(targetMethod.ContainingType, enumerableUtility) && targetMethod.Name == "ToReadOnlyCollection")
 		{
 			var expressionStatement = invocationOperation.Syntax.FirstAncestorOrSelf<ExpressionStatementSyntax>();
 			if (expressionStatement?.Expression is AssignmentExpressionSyntax assignmentExpression)

@@ -12,6 +12,7 @@ public sealed class OverloadWithStringComparisonAnalyzer : DiagnosticAnalyzer
 {
 	public override void Initialize(AnalysisContext context)
 	{
+		context.EnableConcurrentExecution();
 		context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);
 
 		// NOTE: some parts of this implementation derived from https://github.com/dotnet/roslyn-analyzers/blob/7a2540618fc32c5b38bdb43bc3a70ba6401ed135/src/Microsoft.NetCore.Analyzers/Core/Runtime/UseOrdinalStringComparison.cs
@@ -41,7 +42,7 @@ public sealed class OverloadWithStringComparisonAnalyzer : DiagnosticAnalyzer
 							if (lastArgument.Value.Kind == OperationKind.FieldReference)
 							{
 								var fieldSymbol = ((IFieldReferenceOperation) lastArgument.Value).Field;
-								if (fieldSymbol?.ContainingType == stringComparisonType && fieldSymbol.Name == "Ordinal")
+								if (Equals(fieldSymbol?.ContainingType, stringComparisonType) && fieldSymbol.Name == "Ordinal")
 								{
 									// right overload, wrong value
 									operationContext.ReportDiagnostic(Diagnostic.Create(s_avoidStringEqualsRule, operation.GetMethodNameLocation()));

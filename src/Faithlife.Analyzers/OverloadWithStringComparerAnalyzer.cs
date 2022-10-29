@@ -11,6 +11,7 @@ public sealed class OverloadWithStringComparerAnalyzer : DiagnosticAnalyzer
 {
 	public override void Initialize(AnalysisContext context)
 	{
+		context.EnableConcurrentExecution();
 		context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);
 
 		context.RegisterCompilationStartAction(compilationStartAnalysisContext =>
@@ -24,7 +25,7 @@ public sealed class OverloadWithStringComparerAnalyzer : DiagnosticAnalyzer
 					var targetMethod = operation.TargetMethod;
 
 					if (targetMethod != null &&
-						targetMethod.ContainingType == enumerableType &&
+						Equals(targetMethod.ContainingType, enumerableType) &&
 						(targetMethod.Name == "OrderBy" || targetMethod.Name == "OrderByDescending" || targetMethod.Name == "ThenBy" || targetMethod.Name == "ThenByDescending") &&
 						targetMethod.TypeArguments.Length == 2 &&
 						targetMethod.TypeArguments[1].SpecialType == SpecialType.System_String &&
