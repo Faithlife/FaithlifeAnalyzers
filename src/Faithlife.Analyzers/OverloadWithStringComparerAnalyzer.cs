@@ -45,7 +45,7 @@ public sealed class OverloadWithStringComparerAnalyzer : DiagnosticAnalyzer
 	private static readonly DiagnosticDescriptor s_useStringComparerRule = new DiagnosticDescriptor(
 		id: UseStringComparerDiagnosticId,
 		title: "Use IComparer<string> overload",
-		messageFormat: "Use the overload that takes an IComparer<string>.",
+		messageFormat: "Use the overload that takes an IComparer<string>",
 		category: "Usage",
 		defaultSeverity: DiagnosticSeverity.Warning,
 		isEnabledByDefault: true,

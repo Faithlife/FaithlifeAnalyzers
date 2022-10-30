@@ -82,7 +82,7 @@ public sealed class OverloadWithStringComparisonAnalyzer : DiagnosticAnalyzer
 	private static readonly DiagnosticDescriptor s_useStringComparisonRule = new DiagnosticDescriptor(
 		id: UseStringComparisonDiagnosticId,
 		title: "Use StringComparison overload",
-		messageFormat: "Use an overload that takes a StringComparison.",
+		messageFormat: "Use an overload that takes a StringComparison",
 		category: "Usage",
 		defaultSeverity: DiagnosticSeverity.Warning,
 		isEnabledByDefault: true,
@@ -92,7 +92,7 @@ public sealed class OverloadWithStringComparisonAnalyzer : DiagnosticAnalyzer
 	private static readonly DiagnosticDescriptor s_avoidStringEqualsRule = new DiagnosticDescriptor(
 		id: AvoidStringEqualsDiagnosticId,
 		title: "Avoid string.Equals(string, string)",
-		messageFormat: "Use operator== or a non-ordinal StringComparison.",
+		messageFormat: "Use operator== or a non-ordinal StringComparison",
 		category: "Usage",
 		defaultSeverity: DiagnosticSeverity.Warning,
 		isEnabledByDefault: true,

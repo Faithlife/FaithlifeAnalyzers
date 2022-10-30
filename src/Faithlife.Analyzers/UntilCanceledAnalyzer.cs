@@ -79,7 +79,7 @@ public sealed class UntilCanceledAnalyzer : DiagnosticAnalyzer
 	private static readonly DiagnosticDescriptor s_rule = new DiagnosticDescriptor(
 		id: DiagnosticId,
 		title: "UntilCanceled() Usage",
-		messageFormat: "UntilCanceled() may only be used in methods that return IEnumerable<AsyncAction>.",
+		messageFormat: "UntilCanceled() may only be used in methods that return IEnumerable<AsyncAction>",
 		category: "Usage",
 		defaultSeverity: DiagnosticSeverity.Warning,
 		isEnabledByDefault: true,

@@ -75,7 +75,7 @@ namespace TestApplication
 		var expected = new DiagnosticResult
 		{
 			Id = AvailableWorkStateAnalyzer.DiagnosticId,
-			Message = "WorkState.None and WorkState.ToDo must not be used when an IWorkState is available.",
+			Message = "WorkState.None and WorkState.ToDo must not be used when an IWorkState is available",
 			Severity = DiagnosticSeverity.Error,
 			Locations = new[] { new DiagnosticResultLocation("Test0.cs", c_preambleLength + 7, 17) },
 		};
@@ -127,7 +127,7 @@ namespace TestApplication
 		var expected = new DiagnosticResult
 		{
 			Id = AvailableWorkStateAnalyzer.DiagnosticId,
-			Message = "WorkState.None and WorkState.ToDo must not be used when an IWorkState is available.",
+			Message = "WorkState.None and WorkState.ToDo must not be used when an IWorkState is available",
 			Severity = DiagnosticSeverity.Error,
 			Locations = new[] { new DiagnosticResultLocation("Test0.cs", c_preambleLength + 7, 17) },
 		};
@@ -178,7 +178,7 @@ namespace TestApplication
 		var expected = new DiagnosticResult
 		{
 			Id = AvailableWorkStateAnalyzer.DiagnosticId,
-			Message = "WorkState.None and WorkState.ToDo must not be used when an IWorkState is available.",
+			Message = "WorkState.None and WorkState.ToDo must not be used when an IWorkState is available",
 			Severity = DiagnosticSeverity.Error,
 			Locations = new[] { new DiagnosticResultLocation("Test0.cs", c_preambleLength + 7, 17) },
 		};
@@ -229,7 +229,7 @@ namespace TestApplication
 		var expected = new DiagnosticResult
 		{
 			Id = AvailableWorkStateAnalyzer.DiagnosticId,
-			Message = "WorkState.None and WorkState.ToDo must not be used when an IWorkState is available.",
+			Message = "WorkState.None and WorkState.ToDo must not be used when an IWorkState is available",
 			Severity = DiagnosticSeverity.Error,
 			Locations = new[] { new DiagnosticResultLocation("Test0.cs", c_preambleLength + 7, 17) },
 		};
@@ -280,7 +280,7 @@ namespace TestApplication
 		var expected = new DiagnosticResult
 		{
 			Id = AvailableWorkStateAnalyzer.DiagnosticId,
-			Message = "WorkState.None and WorkState.ToDo must not be used when an IWorkState is available.",
+			Message = "WorkState.None and WorkState.ToDo must not be used when an IWorkState is available",
 			Severity = DiagnosticSeverity.Error,
 			Locations = new[] { new DiagnosticResultLocation("Test0.cs", c_preambleLength + 7, 17) },
 		};
@@ -335,7 +335,7 @@ namespace TestApplication
 		var expected = new DiagnosticResult
 		{
 			Id = AvailableWorkStateAnalyzer.DiagnosticId,
-			Message = "WorkState.None and WorkState.ToDo must not be used when an IWorkState is available.",
+			Message = "WorkState.None and WorkState.ToDo must not be used when an IWorkState is available",
 			Severity = DiagnosticSeverity.Error,
 			Locations = new[] { new DiagnosticResultLocation("Test0.cs", c_preambleLength + 7, 17) },
 		};

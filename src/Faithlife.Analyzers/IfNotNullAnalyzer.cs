@@ -49,7 +49,7 @@ public sealed class IfNotNullAnalyzer : DiagnosticAnalyzer
 	private static readonly DiagnosticDescriptor s_rule = new DiagnosticDescriptor(
 		id: DiagnosticId,
 		title: "IfNotNull deprecation",
-		messageFormat: "Prefer modern language features over IfNotNull usage.",
+		messageFormat: "Prefer modern language features over IfNotNull usage",
 		category: "Usage",
 		defaultSeverity: DiagnosticSeverity.Info,
 		isEnabledByDefault: true,

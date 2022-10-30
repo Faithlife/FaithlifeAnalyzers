@@ -96,7 +96,7 @@ namespace TestApplication
 		var expected = new DiagnosticResult
 		{
 			Id = CurrentAsyncWorkItemAnalyzer.DiagnosticId,
-			Message = "AsyncWorkItem.Current must only be used in methods that return IEnumerable<AsyncAction>.",
+			Message = "AsyncWorkItem.Current must only be used in methods that return IEnumerable<AsyncAction>",
 			Severity = DiagnosticSeverity.Warning,
 			Locations = new[] { new DiagnosticResultLocation("Test0.cs", c_preambleLength + 7, 17) },
 		};
@@ -161,7 +161,7 @@ namespace TestApplication
 		var expected = new DiagnosticResult
 		{
 			Id = CurrentAsyncWorkItemAnalyzer.DiagnosticId,
-			Message = "AsyncWorkItem.Current must only be used in methods that return IEnumerable<AsyncAction>.",
+			Message = "AsyncWorkItem.Current must only be used in methods that return IEnumerable<AsyncAction>",
 			Severity = DiagnosticSeverity.Warning,
 			Locations = new[] { new DiagnosticResultLocation("Test0.cs", c_preambleLength + 7, 8) },
 		};
@@ -221,7 +221,7 @@ namespace TestApplication
 		var expected = new DiagnosticResult
 		{
 			Id = CurrentAsyncWorkItemAnalyzer.DiagnosticId,
-			Message = "AsyncWorkItem.Current must only be used in methods that return IEnumerable<AsyncAction>.",
+			Message = "AsyncWorkItem.Current must only be used in methods that return IEnumerable<AsyncAction>",
 			Severity = DiagnosticSeverity.Warning,
 			Locations = new[] { new DiagnosticResultLocation("Test0.cs", c_preambleLength + 8, 8) },
 		};

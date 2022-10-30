@@ -82,7 +82,7 @@ namespace TestApplication
 		var expected = new DiagnosticResult
 		{
 			Id = ToReadOnlyCollectionAnalyzer.DiagnosticId,
-			Message = "Avoid ToReadOnlyCollection in constructors.",
+			Message = "Avoid ToReadOnlyCollection in constructors",
 			Severity = DiagnosticSeverity.Warning,
 			Locations = new[] { new DiagnosticResultLocation("Test0.cs", 20, 19) },
 		};
@@ -126,7 +126,7 @@ namespace TestApplication
 		var expected = new DiagnosticResult
 		{
 			Id = ToReadOnlyCollectionAnalyzer.DiagnosticId,
-			Message = "Avoid ToReadOnlyCollection in constructors.",
+			Message = "Avoid ToReadOnlyCollection in constructors",
 			Severity = DiagnosticSeverity.Warning,
 			Locations = new[] { new DiagnosticResultLocation("Test0.cs", 20, 20) },
 		};
@@ -170,7 +170,7 @@ namespace TestApplication
 		var expected = new DiagnosticResult
 		{
 			Id = ToReadOnlyCollectionAnalyzer.DiagnosticId,
-			Message = "Avoid ToReadOnlyCollection in constructors.",
+			Message = "Avoid ToReadOnlyCollection in constructors",
 			Severity = DiagnosticSeverity.Warning,
 			Locations = new[] { new DiagnosticResultLocation("Test0.cs", 20, 20) },
 		};

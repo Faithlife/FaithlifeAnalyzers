@@ -53,7 +53,7 @@ namespace TestApplication
 		var expected = new DiagnosticResult
 		{
 			Id = EmptyStringAnalyzer.DiagnosticId,
-			Message = "Prefer \"\" over string.Empty.",
+			Message = "Prefer \"\" over string.Empty",
 			Severity = DiagnosticSeverity.Warning,
 			Locations = new[] { new DiagnosticResultLocation("Test0.cs", 9, 11) },
 		};
