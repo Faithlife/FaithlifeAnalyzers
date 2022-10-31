@@ -13,6 +13,7 @@ public sealed class UntilCanceledAnalyzer : DiagnosticAnalyzer
 {
 	public override void Initialize(AnalysisContext context)
 	{
+		context.EnableConcurrentExecution();
 		context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);
 
 		context.RegisterCompilationStartAction(compilationStartAnalysisContext =>
@@ -50,7 +51,7 @@ public sealed class UntilCanceledAnalyzer : DiagnosticAnalyzer
 				return;
 
 			var method = context.SemanticModel.GetSymbolInfo(invocation.Expression).Symbol as IMethodSymbol;
-			if (method?.ContainingType != asyncEnumerableUtility)
+			if (!Equals(method?.ContainingType, asyncEnumerableUtility))
 				return;
 
 			if (invocation.ArgumentList.Arguments.Count != 0)
@@ -62,7 +63,7 @@ public sealed class UntilCanceledAnalyzer : DiagnosticAnalyzer
 
 			var ienumerable = context.SemanticModel.Compilation.GetTypeByMetadataName("System.Collections.Generic.IEnumerable`1");
 			var returnTypeSymbol = ModelExtensions.GetSymbolInfo(context.SemanticModel, containingMethod.ReturnType).Symbol as INamedTypeSymbol;
-			if (returnTypeSymbol?.ConstructedFrom == ienumerable && returnTypeSymbol?.TypeArguments[0] == asyncAction)
+			if (Equals(returnTypeSymbol?.ConstructedFrom, ienumerable) && Equals(returnTypeSymbol?.TypeArguments[0], asyncAction))
 				return;
 
 			context.ReportDiagnostic(Diagnostic.Create(s_rule, invocation.ArgumentList.GetLocation()));
@@ -78,7 +79,7 @@ public sealed class UntilCanceledAnalyzer : DiagnosticAnalyzer
 	private static readonly DiagnosticDescriptor s_rule = new DiagnosticDescriptor(
 		id: DiagnosticId,
 		title: "UntilCanceled() Usage",
-		messageFormat: "UntilCanceled() may only be used in methods that return IEnumerable<AsyncAction>.",
+		messageFormat: "UntilCanceled() may only be used in methods that return IEnumerable<AsyncAction>",
 		category: "Usage",
 		defaultSeverity: DiagnosticSeverity.Warning,
 		isEnabledByDefault: true,

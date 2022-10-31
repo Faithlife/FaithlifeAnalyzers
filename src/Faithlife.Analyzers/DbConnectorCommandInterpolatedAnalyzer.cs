@@ -11,6 +11,7 @@ public sealed class DbConnectorCommandInterpolatedAnalyzer : DiagnosticAnalyzer
 {
 	public override void Initialize(AnalysisContext context)
 	{
+		context.EnableConcurrentExecution();
 		context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);
 
 		context.RegisterCompilationStartAction(compilationStartAnalysisContext =>
@@ -21,7 +22,7 @@ public sealed class DbConnectorCommandInterpolatedAnalyzer : DiagnosticAnalyzer
 				{
 					if (syntaxNodeAnalysisContext.Node is InvocationExpressionSyntax invocation &&
 						syntaxNodeAnalysisContext.SemanticModel.GetSymbolInfo(invocation.Expression).Symbol is IMethodSymbol method &&
-						method.ContainingType == dbConnectorType &&
+						Equals(method.ContainingType, dbConnectorType) &&
 						method.Name == "Command" &&
 						method.Parameters.Length != 0 &&
 						method.Parameters[0].Type.SpecialType == SpecialType.System_String &&

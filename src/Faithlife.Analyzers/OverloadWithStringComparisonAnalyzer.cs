@@ -12,6 +12,7 @@ public sealed class OverloadWithStringComparisonAnalyzer : DiagnosticAnalyzer
 {
 	public override void Initialize(AnalysisContext context)
 	{
+		context.EnableConcurrentExecution();
 		context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);
 
 		// NOTE: some parts of this implementation derived from https://github.com/dotnet/roslyn-analyzers/blob/7a2540618fc32c5b38bdb43bc3a70ba6401ed135/src/Microsoft.NetCore.Analyzers/Core/Runtime/UseOrdinalStringComparison.cs
@@ -41,7 +42,7 @@ public sealed class OverloadWithStringComparisonAnalyzer : DiagnosticAnalyzer
 							if (lastArgument.Value.Kind == OperationKind.FieldReference)
 							{
 								var fieldSymbol = ((IFieldReferenceOperation) lastArgument.Value).Field;
-								if (fieldSymbol?.ContainingType == stringComparisonType && fieldSymbol.Name == "Ordinal")
+								if (Equals(fieldSymbol?.ContainingType, stringComparisonType) && fieldSymbol.Name == "Ordinal")
 								{
 									// right overload, wrong value
 									operationContext.ReportDiagnostic(Diagnostic.Create(s_avoidStringEqualsRule, operation.GetMethodNameLocation()));
@@ -81,7 +82,7 @@ public sealed class OverloadWithStringComparisonAnalyzer : DiagnosticAnalyzer
 	private static readonly DiagnosticDescriptor s_useStringComparisonRule = new DiagnosticDescriptor(
 		id: UseStringComparisonDiagnosticId,
 		title: "Use StringComparison overload",
-		messageFormat: "Use an overload that takes a StringComparison.",
+		messageFormat: "Use an overload that takes a StringComparison",
 		category: "Usage",
 		defaultSeverity: DiagnosticSeverity.Warning,
 		isEnabledByDefault: true,
@@ -91,7 +92,7 @@ public sealed class OverloadWithStringComparisonAnalyzer : DiagnosticAnalyzer
 	private static readonly DiagnosticDescriptor s_avoidStringEqualsRule = new DiagnosticDescriptor(
 		id: AvoidStringEqualsDiagnosticId,
 		title: "Avoid string.Equals(string, string)",
-		messageFormat: "Use operator== or a non-ordinal StringComparison.",
+		messageFormat: "Use operator== or a non-ordinal StringComparison",
 		category: "Usage",
 		defaultSeverity: DiagnosticSeverity.Warning,
 		isEnabledByDefault: true,

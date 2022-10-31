@@ -13,6 +13,7 @@ public sealed class GetOrAddValueAnalyzer : DiagnosticAnalyzer
 {
 	public override void Initialize(AnalysisContext context)
 	{
+		context.EnableConcurrentExecution();
 		context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);
 
 		context.RegisterCompilationStartAction(compilationStartAnalysisContext =>
@@ -44,7 +45,7 @@ public sealed class GetOrAddValueAnalyzer : DiagnosticAnalyzer
 			return;
 
 		var method = context.SemanticModel.GetSymbolInfo(invocation.Expression).Symbol as IMethodSymbol;
-		if (method?.ContainingType != dictionaryUtility)
+		if (!Equals(method?.ContainingType, dictionaryUtility))
 			return;
 
 		var target = invocation.Expression switch

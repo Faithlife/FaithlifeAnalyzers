@@ -25,7 +25,7 @@ public abstract partial class CodeFixVerifier : DiagnosticVerifier
 	{
 		var operations = codeAction.GetOperationsAsync(CancellationToken.None).GetAwaiter().GetResult();
 		var solution = operations.OfType<ApplyChangesOperation>().Single().ChangedSolution;
-		return solution.GetDocument(document.Id);
+		return solution.GetDocument(document.Id)!;
 	}
 
 	/// <summary>
@@ -65,7 +65,7 @@ public abstract partial class CodeFixVerifier : DiagnosticVerifier
 	/// <returns>The compiler diagnostics that were found in the code</returns>
 	private static IEnumerable<Diagnostic> GetCompilerDiagnostics(Document document)
 	{
-		return document.GetSemanticModelAsync().GetAwaiter().GetResult().GetDiagnostics();
+		return document.GetSemanticModelAsync().GetAwaiter().GetResult()!.GetDiagnostics();
 	}
 
 	/// <summary>
@@ -76,7 +76,7 @@ public abstract partial class CodeFixVerifier : DiagnosticVerifier
 	private static string GetStringFromDocument(Document document)
 	{
 		var simplifiedDoc = Simplifier.ReduceAsync(document, Simplifier.Annotation).GetAwaiter().GetResult();
-		var root = simplifiedDoc.GetSyntaxRootAsync().GetAwaiter().GetResult();
+		var root = simplifiedDoc.GetSyntaxRootAsync().GetAwaiter().GetResult()!;
 		root = Formatter.Format(root, Formatter.Annotation, simplifiedDoc.Project.Solution.Workspace);
 		return root.GetText().ToString();
 	}

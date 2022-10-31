@@ -246,7 +246,7 @@ namespace TestProgram
 		var expected = new DiagnosticResult
 		{
 			Id = IfNotNullAnalyzer.DiagnosticId,
-			Message = "Prefer modern language features over IfNotNull usage.",
+			Message = "Prefer modern language features over IfNotNull usage",
 			Severity = DiagnosticSeverity.Info,
 			Locations = new[] { new DiagnosticResultLocation("Test0.cs", c_preambleLength + 8, 17) },
 		};
@@ -300,7 +300,7 @@ namespace TestProgram
 			new DiagnosticResult
 			{
 				Id = IfNotNullAnalyzer.DiagnosticId,
-				Message = "Prefer modern language features over IfNotNull usage.",
+				Message = "Prefer modern language features over IfNotNull usage",
 				Severity = DiagnosticSeverity.Info,
 				Locations = new[] { new DiagnosticResultLocation("Test0.cs", c_preambleLength + 8, column) },
 			};
@@ -349,7 +349,7 @@ namespace TestProgram
 		var expected = new DiagnosticResult
 		{
 			Id = IfNotNullAnalyzer.DiagnosticId,
-			Message = "Prefer modern language features over IfNotNull usage.",
+			Message = "Prefer modern language features over IfNotNull usage",
 			Severity = DiagnosticSeverity.Info,
 			Locations = new[] { new DiagnosticResultLocation("Test0.cs", c_preambleLength + 8, 4) },
 		};
@@ -382,7 +382,7 @@ namespace TestProgram
 		var expected = new DiagnosticResult
 		{
 			Id = IfNotNullAnalyzer.DiagnosticId,
-			Message = "Prefer modern language features over IfNotNull usage.",
+			Message = "Prefer modern language features over IfNotNull usage",
 			Severity = DiagnosticSeverity.Info,
 			Locations = new[] { new DiagnosticResultLocation("Test0.cs", c_preambleLength + 8, 4) },
 		};
@@ -429,7 +429,7 @@ namespace TestProgram
 		var expected = new DiagnosticResult
 		{
 			Id = IfNotNullAnalyzer.DiagnosticId,
-			Message = "Prefer modern language features over IfNotNull usage.",
+			Message = "Prefer modern language features over IfNotNull usage",
 			Severity = DiagnosticSeverity.Info,
 			Locations = new[] { new DiagnosticResultLocation("Test0.cs", c_preambleLength + 8, 17) },
 		};

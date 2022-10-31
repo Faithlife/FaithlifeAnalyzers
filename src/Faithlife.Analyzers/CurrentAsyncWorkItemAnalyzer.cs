@@ -12,6 +12,7 @@ public sealed class CurrentAsyncWorkItemAnalyzer : DiagnosticAnalyzer
 {
 	public override void Initialize(AnalysisContext context)
 	{
+		context.EnableConcurrentExecution();
 		context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);
 
 		context.RegisterCompilationStartAction(compilationStartAnalysisContext =>
@@ -78,7 +79,7 @@ public sealed class CurrentAsyncWorkItemAnalyzer : DiagnosticAnalyzer
 	private static readonly DiagnosticDescriptor s_rule = new DiagnosticDescriptor(
 		id: DiagnosticId,
 		title: "AsyncWorkItem.Current Usage",
-		messageFormat: "AsyncWorkItem.Current must only be used in methods that return IEnumerable<AsyncAction>.",
+		messageFormat: "AsyncWorkItem.Current must only be used in methods that return IEnumerable<AsyncAction>",
 		category: "Usage",
 		defaultSeverity: DiagnosticSeverity.Warning,
 		isEnabledByDefault: true,

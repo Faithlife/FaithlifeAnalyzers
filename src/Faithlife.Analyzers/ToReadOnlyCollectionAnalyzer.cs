@@ -11,6 +11,7 @@ public sealed class ToReadOnlyCollectionAnalyzer : DiagnosticAnalyzer
 {
 	public override void Initialize(AnalysisContext context)
 	{
+		context.EnableConcurrentExecution();
 		context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);
 
 		context.RegisterCompilationStartAction(compilationStartAnalysisContext =>
@@ -35,15 +36,14 @@ public sealed class ToReadOnlyCollectionAnalyzer : DiagnosticAnalyzer
 	{
 		var invocationOperation = (IInvocationOperation) context.Operation;
 		var targetMethod = invocationOperation.TargetMethod;
-		if (targetMethod.ContainingType == enumerableUtility && targetMethod.Name == "ToReadOnlyCollection")
+		if (Equals(targetMethod.ContainingType, enumerableUtility) && targetMethod.Name == "ToReadOnlyCollection")
 		{
 			var expressionStatement = invocationOperation.Syntax.FirstAncestorOrSelf<ExpressionStatementSyntax>();
 			if (expressionStatement?.Expression is AssignmentExpressionSyntax assignmentExpression)
 			{
 				if (assignmentExpression.Left is IdentifierNameSyntax identifierName)
 				{
-					var semanticModel = context.Compilation.GetSemanticModel(identifierName.SyntaxTree);
-					var symbolInfo = semanticModel.GetSymbolInfo(identifierName);
+					var symbolInfo = context.Operation.SemanticModel.GetSymbolInfo(identifierName);
 					var kind = symbolInfo.Symbol.Kind;
 					if (kind == SymbolKind.Field || kind == SymbolKind.Property)
 						context.ReportDiagnostic(Diagnostic.Create(s_rule, invocationOperation.GetMethodNameLocation()));
@@ -55,7 +55,7 @@ public sealed class ToReadOnlyCollectionAnalyzer : DiagnosticAnalyzer
 	private static readonly DiagnosticDescriptor s_rule = new DiagnosticDescriptor(
 		id: DiagnosticId,
 		title: "ToReadOnlyCollection in constructor",
-		messageFormat: "Avoid ToReadOnlyCollection in constructors.",
+		messageFormat: "Avoid ToReadOnlyCollection in constructors",
 		category: "Usage",
 		defaultSeverity: DiagnosticSeverity.Warning,
 		isEnabledByDefault: true,

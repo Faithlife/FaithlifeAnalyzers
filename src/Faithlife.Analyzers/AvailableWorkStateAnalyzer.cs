@@ -12,6 +12,7 @@ public sealed class AvailableWorkStateAnalyzer : DiagnosticAnalyzer
 {
 	public override void Initialize(AnalysisContext context)
 	{
+		context.EnableConcurrentExecution();
 		context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);
 
 		context.RegisterCompilationStartAction(compilationStartAnalysisContext =>
@@ -52,7 +53,7 @@ public sealed class AvailableWorkStateAnalyzer : DiagnosticAnalyzer
 		if (containingMethod == null)
 			return;
 
-		var semanticModel = context.Compilation.GetSemanticModel(context.Operation.Syntax.SyntaxTree);
+		var semanticModel = context.Operation.SemanticModel;
 
 		var asyncAction = context.Compilation.GetTypeByMetadataName("Libronix.Utility.Threading.AsyncAction");
 		var ienumerable = context.Compilation.GetTypeByMetadataName("System.Collections.Generic.IEnumerable`1");
@@ -94,7 +95,7 @@ public sealed class AvailableWorkStateAnalyzer : DiagnosticAnalyzer
 	private static readonly DiagnosticDescriptor s_rule = new DiagnosticDescriptor(
 		id: DiagnosticId,
 		title: "WorkState.None and WorkState.ToDo Usage",
-		messageFormat: "WorkState.None and WorkState.ToDo must not be used when an IWorkState is available.",
+		messageFormat: "WorkState.None and WorkState.ToDo must not be used when an IWorkState is available",
 		category: "Usage",
 		defaultSeverity: DiagnosticSeverity.Error,
 		isEnabledByDefault: true,

@@ -50,7 +50,7 @@ namespace TestApplication
 		var expected = new DiagnosticResult
 		{
 			Id = UntilCanceledAnalyzer.DiagnosticId,
-			Message = "UntilCanceled() may only be used in methods that return IEnumerable<AsyncAction>.",
+			Message = "UntilCanceled() may only be used in methods that return IEnumerable<AsyncAction>",
 			Severity = DiagnosticSeverity.Warning,
 			Locations = new[] { new DiagnosticResultLocation("Test0.cs", c_preambleLength + 7, 46) },
 		};
@@ -114,7 +114,7 @@ namespace TestApplication
 		var expected = new DiagnosticResult
 		{
 			Id = UntilCanceledAnalyzer.DiagnosticId,
-			Message = "UntilCanceled() may only be used in methods that return IEnumerable<AsyncAction>.",
+			Message = "UntilCanceled() may only be used in methods that return IEnumerable<AsyncAction>",
 			Severity = DiagnosticSeverity.Warning,
 			Locations = new[] { new DiagnosticResultLocation("Test0.cs", c_preambleLength + 8, 19) },
 		};
