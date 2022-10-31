@@ -36,7 +36,7 @@ public sealed class ToReadOnlyCollectionAnalyzer : DiagnosticAnalyzer
 	{
 		var invocationOperation = (IInvocationOperation) context.Operation;
 		var targetMethod = invocationOperation.TargetMethod;
-		if (Equals(targetMethod.ContainingType, enumerableUtility) && targetMethod.Name == "ToReadOnlyCollection")
+		if (SymbolEqualityComparer.Default.Equals(targetMethod.ContainingType, enumerableUtility) && targetMethod.Name == "ToReadOnlyCollection")
 		{
 			var expressionStatement = invocationOperation.Syntax.FirstAncestorOrSelf<ExpressionStatementSyntax>();
 			if (expressionStatement?.Expression is AssignmentExpressionSyntax assignmentExpression)

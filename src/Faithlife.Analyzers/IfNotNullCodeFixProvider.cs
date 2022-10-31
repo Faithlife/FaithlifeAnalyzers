@@ -63,7 +63,7 @@ public sealed class IfNotNullCodeFixProvider : CodeFixProvider
 
 		// Handle default value generators.
 		if (methodSymbol.Parameters.Length > defaultArgumentIndex &&
-			(methodSymbol.Arity == 1 || !Equals(methodSymbol.Parameters[defaultArgumentIndex].Type, outputTypeArgument)))
+			(methodSymbol.Arity == 1 || !SymbolEqualityComparer.Default.Equals(methodSymbol.Parameters[defaultArgumentIndex].Type, outputTypeArgument)))
 		{
 			if (defaultValueExpression is LambdaExpressionSyntax lambda)
 			{
@@ -116,7 +116,7 @@ public sealed class IfNotNullCodeFixProvider : CodeFixProvider
 			// evaluates to the correct type.
 			if (outputTypeIsNullable &&
 				(defaultValueExpression is DefaultExpressionSyntax ||
-					 (defaultValueExpression is LiteralExpressionSyntax defaultLiteral && defaultLiteral.IsKind(SyntaxKind.NullLiteralExpression))))
+					(defaultValueExpression is LiteralExpressionSyntax defaultLiteral && defaultLiteral.IsKind(SyntaxKind.NullLiteralExpression))))
 			{
 				defaultValueExpression = null;
 			}

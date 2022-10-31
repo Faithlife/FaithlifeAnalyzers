@@ -22,7 +22,7 @@ public sealed class DbConnectorCommandInterpolatedAnalyzer : DiagnosticAnalyzer
 				{
 					if (syntaxNodeAnalysisContext.Node is InvocationExpressionSyntax invocation &&
 						syntaxNodeAnalysisContext.SemanticModel.GetSymbolInfo(invocation.Expression).Symbol is IMethodSymbol method &&
-						Equals(method.ContainingType, dbConnectorType) &&
+						SymbolEqualityComparer.Default.Equals(method.ContainingType, dbConnectorType) &&
 						method.Name == "Command" &&
 						method.Parameters.Length != 0 &&
 						method.Parameters[0].Type.SpecialType == SpecialType.System_String &&

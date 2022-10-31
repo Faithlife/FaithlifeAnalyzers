@@ -25,7 +25,7 @@ public sealed class OverloadWithStringComparerAnalyzer : DiagnosticAnalyzer
 					var targetMethod = operation.TargetMethod;
 
 					if (targetMethod != null &&
-						Equals(targetMethod.ContainingType, enumerableType) &&
+						SymbolEqualityComparer.Default.Equals(targetMethod.ContainingType, enumerableType) &&
 						(targetMethod.Name == "OrderBy" || targetMethod.Name == "OrderByDescending" || targetMethod.Name == "ThenBy" || targetMethod.Name == "ThenByDescending") &&
 						targetMethod.TypeArguments.Length == 2 &&
 						targetMethod.TypeArguments[1].SpecialType == SpecialType.System_String &&

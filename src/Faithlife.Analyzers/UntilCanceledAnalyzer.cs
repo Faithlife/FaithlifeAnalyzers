@@ -51,7 +51,7 @@ public sealed class UntilCanceledAnalyzer : DiagnosticAnalyzer
 				return;
 
 			var method = context.SemanticModel.GetSymbolInfo(invocation.Expression).Symbol as IMethodSymbol;
-			if (!Equals(method?.ContainingType, asyncEnumerableUtility))
+			if (!SymbolEqualityComparer.Default.Equals(method?.ContainingType, asyncEnumerableUtility))
 				return;
 
 			if (invocation.ArgumentList.Arguments.Count != 0)
@@ -63,7 +63,7 @@ public sealed class UntilCanceledAnalyzer : DiagnosticAnalyzer
 
 			var ienumerable = context.SemanticModel.Compilation.GetTypeByMetadataName("System.Collections.Generic.IEnumerable`1");
 			var returnTypeSymbol = ModelExtensions.GetSymbolInfo(context.SemanticModel, containingMethod.ReturnType).Symbol as INamedTypeSymbol;
-			if (Equals(returnTypeSymbol?.ConstructedFrom, ienumerable) && Equals(returnTypeSymbol?.TypeArguments[0], asyncAction))
+			if (SymbolEqualityComparer.Default.Equals(returnTypeSymbol?.ConstructedFrom, ienumerable) && SymbolEqualityComparer.Default.Equals(returnTypeSymbol?.TypeArguments[0], asyncAction))
 				return;
 
 			context.ReportDiagnostic(Diagnostic.Create(s_rule, invocation.ArgumentList.GetLocation()));

@@ -47,18 +47,18 @@ public sealed class CurrentAsyncWorkItemAnalyzer : DiagnosticAnalyzer
 
 		var ienumerable = context.SemanticModel.Compilation.GetTypeByMetadataName("System.Collections.Generic.IEnumerable`1");
 		var returnTypeSymbol = context.SemanticModel.GetSymbolInfo(containingMethod.ReturnType).Symbol as INamedTypeSymbol;
-		if (returnTypeSymbol != null && returnTypeSymbol.ConstructedFrom != null && returnTypeSymbol.ConstructedFrom.Equals(ienumerable) &&
-			returnTypeSymbol.TypeArguments[0].Equals(asyncAction))
+		if (returnTypeSymbol != null && returnTypeSymbol.ConstructedFrom != null && SymbolEqualityComparer.Default.Equals(returnTypeSymbol.ConstructedFrom, ienumerable) &&
+			SymbolEqualityComparer.Default.Equals(returnTypeSymbol.TypeArguments[0], asyncAction))
 		{
 			return;
 		}
 
 		var symbolInfo = context.SemanticModel.GetSymbolInfo(syntax.Expression);
-		if (symbolInfo.Symbol == null || !symbolInfo.Symbol.Equals(asyncWorkItem))
+		if (symbolInfo.Symbol == null || !SymbolEqualityComparer.Default.Equals(symbolInfo.Symbol, asyncWorkItem))
 			return;
 
 		var memberSymbolInfo = context.SemanticModel.GetSymbolInfo(syntax.Name);
-		if (memberSymbolInfo.Symbol == null || !memberSymbolInfo.Symbol.Equals(asyncWorkItemCurrent))
+		if (memberSymbolInfo.Symbol == null || !SymbolEqualityComparer.Default.Equals(memberSymbolInfo.Symbol, asyncWorkItemCurrent))
 			return;
 
 		// check for AsyncWorkItem.Current being used in a lambda passed as an argument to AsyncWorkItem.Start
@@ -68,7 +68,7 @@ public sealed class CurrentAsyncWorkItemAnalyzer : DiagnosticAnalyzer
 			if (memberAccess.Name.Identifier.Text == "Start")
 			{
 				symbolInfo = context.SemanticModel.GetSymbolInfo(memberAccess.Expression);
-				if (symbolInfo.Symbol.Equals(asyncWorkItem))
+				if (SymbolEqualityComparer.Default.Equals(symbolInfo.Symbol, asyncWorkItem))
 					return;
 			}
 		}

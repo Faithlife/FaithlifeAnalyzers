@@ -42,7 +42,7 @@ public sealed class OverloadWithStringComparisonAnalyzer : DiagnosticAnalyzer
 							if (lastArgument.Value.Kind == OperationKind.FieldReference)
 							{
 								var fieldSymbol = ((IFieldReferenceOperation) lastArgument.Value).Field;
-								if (Equals(fieldSymbol?.ContainingType, stringComparisonType) && fieldSymbol.Name == "Ordinal")
+								if (SymbolEqualityComparer.Default.Equals(fieldSymbol?.ContainingType, stringComparisonType) && fieldSymbol.Name == "Ordinal")
 								{
 									// right overload, wrong value
 									operationContext.ReportDiagnostic(Diagnostic.Create(s_avoidStringEqualsRule, operation.GetMethodNameLocation()));
@@ -68,9 +68,9 @@ public sealed class OverloadWithStringComparisonAnalyzer : DiagnosticAnalyzer
 				return true;
 			if (parameter.Type.SpecialType == SpecialType.System_Char)
 				return true;
-			if (parameter.Type.Equals(stringComparisonType))
+			if (SymbolEqualityComparer.Default.Equals(parameter.Type, stringComparisonType))
 				return true;
-			if (parameter.Type.Equals(cultureInfoType))
+			if (SymbolEqualityComparer.Default.Equals(parameter.Type, cultureInfoType))
 				return true;
 		}
 

@@ -58,8 +58,11 @@ public abstract partial class DiagnosticVerifier
 		foreach (var project in projects)
 		{
 			var compilation = project.GetCompilationAsync().GetAwaiter().GetResult();
-			foreach (var diagnostic in compilation.GetDiagnostics())
+
+			// warnings for default usings have Severity == DiagnosticSeverity.Hidden
+			foreach (var diagnostic in compilation.GetDiagnostics().Where(x => x.Severity != DiagnosticSeverity.Hidden))
 				Assert.GreaterOrEqual(diagnostic.WarningLevel, 4, diagnostic.GetMessage());
+
 			var compilationWithAnalyzers = compilation.WithAnalyzers(ImmutableArray.Create(analyzer));
 			var diags = compilationWithAnalyzers.GetAnalyzerDiagnosticsAsync().GetAwaiter().GetResult();
 			foreach (var diag in diags)
@@ -150,10 +153,10 @@ public abstract partial class DiagnosticVerifier
 		var projectId = ProjectId.CreateNewId(debugName: TestProjectName);
 
 		var workspace = new AdhocWorkspace();
-		workspace.Options = workspace.Options
+		workspace.TryApplyChanges(workspace.CurrentSolution.WithOptions(workspace.Options
 			.WithChangedOption(FormattingOptions.NewLine, LanguageNames.CSharp, "\n")
 			.WithChangedOption(FormattingOptions.UseTabs, LanguageNames.CSharp, true)
-			.WithChangedOption(FormattingOptions.SmartIndent, LanguageNames.CSharp, FormattingOptions.IndentStyle.None);
+			.WithChangedOption(FormattingOptions.SmartIndent, LanguageNames.CSharp, FormattingOptions.IndentStyle.None)));
 		var solution = workspace
 			.CurrentSolution
 			.AddProject(projectId, TestProjectName, TestProjectName, language)

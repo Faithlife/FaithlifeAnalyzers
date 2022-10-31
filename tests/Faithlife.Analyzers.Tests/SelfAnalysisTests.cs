@@ -36,9 +36,9 @@ public class SelfAnalysisTests
 			solution = solution.AddDocument(documentId, fileName, SourceText.From(File.OpenRead(source)), filePath: source);
 		}
 
-		var project = solution.GetProject(projectId);
+		var project = solution.GetProject(projectId)!;
 		var compilation = await project.GetCompilationAsync().ConfigureAwait(false);
-		var compilationWithAnalyzers = compilation.WithAnalyzers(ImmutableArray.CreateRange(typeof(CurrentAsyncWorkItemAnalyzer)
+		var compilationWithAnalyzers = compilation!.WithAnalyzers(ImmutableArray.CreateRange(typeof(CurrentAsyncWorkItemAnalyzer)
 			.Assembly
 			.GetTypes()
 			.Where(x => x.BaseType == typeof(DiagnosticAnalyzer))

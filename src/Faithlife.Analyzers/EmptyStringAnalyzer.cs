@@ -34,7 +34,7 @@ public sealed class EmptyStringAnalyzer : DiagnosticAnalyzer
 	private static void AnalyzeOperation(OperationAnalysisContext context, ISymbol emptyString)
 	{
 		var fieldReferenceOperation = (IFieldReferenceOperation) context.Operation;
-		if (!fieldReferenceOperation.Field.Equals(emptyString))
+		if (!SymbolEqualityComparer.Default.Equals(fieldReferenceOperation.Field, emptyString))
 			return;
 
 		context.ReportDiagnostic(Diagnostic.Create(s_rule, context.Operation.Syntax.GetLocation()));

@@ -45,7 +45,7 @@ public sealed class GetOrAddValueAnalyzer : DiagnosticAnalyzer
 			return;
 
 		var method = context.SemanticModel.GetSymbolInfo(invocation.Expression).Symbol as IMethodSymbol;
-		if (!Equals(method?.ContainingType, dictionaryUtility))
+		if (!SymbolEqualityComparer.Default.Equals(method?.ContainingType, dictionaryUtility))
 			return;
 
 		var target = invocation.Expression switch
@@ -55,7 +55,7 @@ public sealed class GetOrAddValueAnalyzer : DiagnosticAnalyzer
 			_ => null,
 		};
 		var targetType = target is null ? null : context.SemanticModel.GetTypeInfo(target).Type.OriginalDefinition;
-		if (targetType?.Equals(concurrentDictionary) is not true)
+		if (!SymbolEqualityComparer.Default.Equals(targetType, concurrentDictionary))
 			return;
 
 		context.ReportDiagnostic(Diagnostic.Create(s_rule, name.GetLocation()));

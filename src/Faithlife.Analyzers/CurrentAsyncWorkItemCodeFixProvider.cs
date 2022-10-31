@@ -49,14 +49,14 @@ public class CurrentAsyncWorkItemCodeFixProvider : CodeFixProvider
 			if (symbolInfo.Symbol is null)
 				return false;
 
-			if (symbolInfo.Symbol.Equals(iworkState))
+			if (SymbolEqualityComparer.Default.Equals(symbolInfo.Symbol, iworkState))
 				return true;
 
 			var namedTypeSymbol = symbolInfo.Symbol as INamedTypeSymbol;
 			if (namedTypeSymbol is null)
 				return false;
 
-			return namedTypeSymbol.AllInterfaces.Any(x => x.Equals(iworkState));
+			return namedTypeSymbol.AllInterfaces.Any(x => SymbolEqualityComparer.Default.Equals(x, iworkState));
 		});
 
 		foreach (var parameter in workStateParameters)

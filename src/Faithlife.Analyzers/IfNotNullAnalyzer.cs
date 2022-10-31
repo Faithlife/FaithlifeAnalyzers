@@ -40,7 +40,7 @@ public sealed class IfNotNullAnalyzer : DiagnosticAnalyzer
 		var methodSymbol = context.SemanticModel.GetSymbolInfo(syntax.Expression).Symbol as IMethodSymbol;
 		if (methodSymbol == null ||
 			(methodSymbol.ReducedFrom == null && methodSymbol.ConstructedFrom == null) ||
-			!ifNotNullMethods.Any(x => x.Equals(methodSymbol.ReducedFrom) || x.Equals(methodSymbol.ConstructedFrom)))
+			!ifNotNullMethods.Any(x => SymbolEqualityComparer.Default.Equals(x, methodSymbol.ReducedFrom) || SymbolEqualityComparer.Default.Equals(x, methodSymbol.ConstructedFrom)))
 			return;
 
 		context.ReportDiagnostic(Diagnostic.Create(s_rule, syntax.GetLocation()));

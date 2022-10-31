@@ -44,7 +44,7 @@ public sealed class AvailableWorkStateAnalyzer : DiagnosticAnalyzer
 	private static void AnalyzeOperation(OperationAnalysisContext context, INamedTypeSymbol iworkState, ISymbol workStateNone, ISymbol workStateToDo)
 	{
 		var propertyReferenceOperation = (IPropertyReferenceOperation) context.Operation;
-		if (!propertyReferenceOperation.Property.Equals(workStateNone) && !propertyReferenceOperation.Property.Equals(workStateToDo))
+		if (!SymbolEqualityComparer.Default.Equals(propertyReferenceOperation.Property, workStateNone) && !SymbolEqualityComparer.Default.Equals(propertyReferenceOperation.Property, workStateToDo))
 			return;
 
 		var syntax = (MemberAccessExpressionSyntax) propertyReferenceOperation.Syntax;
@@ -58,7 +58,7 @@ public sealed class AvailableWorkStateAnalyzer : DiagnosticAnalyzer
 		var asyncAction = context.Compilation.GetTypeByMetadataName("Libronix.Utility.Threading.AsyncAction");
 		var ienumerable = context.Compilation.GetTypeByMetadataName("System.Collections.Generic.IEnumerable`1");
 		var returnTypeSymbol = semanticModel.GetSymbolInfo(containingMethod.ReturnType).Symbol as INamedTypeSymbol;
-		var returnsIEnumerableAsyncAction = ienumerable?.Equals(returnTypeSymbol?.ConstructedFrom) is true && asyncAction?.Equals(returnTypeSymbol.TypeArguments[0]) is true;
+		var returnsIEnumerableAsyncAction = SymbolEqualityComparer.Default.Equals(ienumerable, returnTypeSymbol?.ConstructedFrom) && SymbolEqualityComparer.Default.Equals(asyncAction, returnTypeSymbol.TypeArguments[0]);
 		if (returnsIEnumerableAsyncAction)
 		{
 			context.ReportDiagnostic(Diagnostic.Create(s_rule, syntax.GetLocation()));
@@ -73,17 +73,17 @@ public sealed class AvailableWorkStateAnalyzer : DiagnosticAnalyzer
 			if (parameterSymbolInfo.Symbol is null)
 				return false;
 
-			if (parameterSymbolInfo.Symbol.Equals(iworkState))
+			if (SymbolEqualityComparer.Default.Equals(parameterSymbolInfo.Symbol, iworkState))
 				return true;
 
 			var namedTypeSymbol = parameterSymbolInfo.Symbol as INamedTypeSymbol;
 			if (namedTypeSymbol is null)
 				return false;
 
-			if (namedTypeSymbol.Equals(iworkState) || namedTypeSymbol.Equals(cancellationToken) || namedTypeSymbol.Equals(asyncMethodContext))
+			if (SymbolEqualityComparer.Default.Equals(namedTypeSymbol, iworkState) || SymbolEqualityComparer.Default.Equals(namedTypeSymbol, cancellationToken) || SymbolEqualityComparer.Default.Equals(namedTypeSymbol, asyncMethodContext))
 				return true;
 
-			return namedTypeSymbol.AllInterfaces.Any(x => x.Equals(iworkState));
+			return namedTypeSymbol.AllInterfaces.Any(x => SymbolEqualityComparer.Default.Equals(x, iworkState));
 		});
 
 		if (!hasWorkStateParameters)

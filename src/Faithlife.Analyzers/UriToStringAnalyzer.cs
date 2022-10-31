@@ -27,7 +27,7 @@ public sealed class UriToStringAnalyzer : DiagnosticAnalyzer
 	private static void AnalyzeOperation(OperationAnalysisContext context, ISymbol uriToStringMethod)
 	{
 		var invocation = (IInvocationOperation) context.Operation;
-		if (!uriToStringMethod.Equals(invocation.TargetMethod))
+		if (!SymbolEqualityComparer.Default.Equals(uriToStringMethod, invocation.TargetMethod))
 			return;
 
 		context.ReportDiagnostic(Diagnostic.Create(s_rule, invocation.Syntax.GetLocation()));

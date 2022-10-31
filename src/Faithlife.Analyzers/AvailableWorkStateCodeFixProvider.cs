@@ -47,8 +47,8 @@ public class AvailableWorkStateCodeFixProvider : CodeFixProvider
 		{
 			var ienumerable = semanticModel.Compilation.GetTypeByMetadataName("System.Collections.Generic.IEnumerable`1");
 			var returnTypeSymbol = semanticModel.GetSymbolInfo(containingMethod.ReturnType).Symbol as INamedTypeSymbol;
-			if (returnTypeSymbol != null && returnTypeSymbol.ConstructedFrom != null && returnTypeSymbol.ConstructedFrom.Equals(ienumerable) &&
-				returnTypeSymbol.TypeArguments[0].Equals(asyncAction))
+			if (returnTypeSymbol != null && returnTypeSymbol.ConstructedFrom != null && SymbolEqualityComparer.Default.Equals(returnTypeSymbol.ConstructedFrom, ienumerable) &&
+				SymbolEqualityComparer.Default.Equals(returnTypeSymbol.TypeArguments[0], asyncAction))
 			{
 				context.RegisterCodeFix(
 					CodeAction.Create(
@@ -66,7 +66,7 @@ public class AvailableWorkStateCodeFixProvider : CodeFixProvider
 			if (symbolInfo.Symbol is null)
 				continue;
 
-			if (symbolInfo.Symbol.Equals(iworkState) || (symbolInfo.Symbol is INamedTypeSymbol namedTypeSymbol && namedTypeSymbol.AllInterfaces.Any(x => x.Equals(iworkState))))
+			if (SymbolEqualityComparer.Default.Equals(symbolInfo.Symbol, iworkState) || (symbolInfo.Symbol is INamedTypeSymbol namedTypeSymbol && namedTypeSymbol.AllInterfaces.Any(x => SymbolEqualityComparer.Default.Equals(x, iworkState))))
 			{
 				context.RegisterCodeFix(
 					CodeAction.Create(
@@ -75,7 +75,7 @@ public class AvailableWorkStateCodeFixProvider : CodeFixProvider
 						$"use-{parameter.Identifier.Text}"),
 					diagnostic);
 			}
-			else if (symbolInfo.Symbol.Equals(cancellationToken))
+			else if (SymbolEqualityComparer.Default.Equals(symbolInfo.Symbol, cancellationToken))
 			{
 				context.RegisterCodeFix(
 					CodeAction.Create(
@@ -88,7 +88,7 @@ public class AvailableWorkStateCodeFixProvider : CodeFixProvider
 						$"use-{parameter.Identifier.Text}"),
 					diagnostic);
 			}
-			else if (symbolInfo.Symbol.Equals(asyncMethodContext))
+			else if (SymbolEqualityComparer.Default.Equals(symbolInfo.Symbol, asyncMethodContext))
 			{
 				context.RegisterCodeFix(
 					CodeAction.Create(
