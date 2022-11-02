@@ -51,7 +51,8 @@ public class TestClass
 {
 	public TestClass()
 	{
-		new System.Text.StringBuilder().AppendLine(System.Globalization.CultureInfo.CurrentCulture, $""{""environment""}"");
+		string one = ""one"";
+		new System.Text.StringBuilder().AppendLine(System.Globalization.CultureInfo.CurrentCulture, $""{one} costs $0.00"");
 	}
 }
 ";
