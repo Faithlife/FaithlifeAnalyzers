@@ -44,6 +44,21 @@ namespace TestApplication
 	}
 
 	[Test]
+	public void ValidAppendLine()
+	{
+		const string validProgram = @"
+public class TestClass
+{
+	public TestClass()
+	{
+		new System.Text.StringBuilder().AppendLine(System.Globalization.CultureInfo.CurrentCulture, $""{""environment""}"");
+	}
+}
+";
+		VerifyCSharpDiagnostic(validProgram);
+	}
+
+	[Test]
 	public void InvalidInterpolatedString()
 	{
 		const string invalidProgram = @"
