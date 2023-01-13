@@ -65,10 +65,10 @@ public sealed class FormatInvariantCodeFixProvider : CodeFixProvider
 			}
 
 			var interpolation = Interpolation(SyntaxUtility.SimplifiableParentheses(arg.Expression));
-			if (match.Groups[2].Success)
-				interpolation = interpolation.WithAlignmentClause(InterpolationAlignmentClause(Token(SyntaxKind.CommaToken), ParseExpression(match.Groups[2].Value.Substring(1))));
-			if (match.Groups[3].Success)
-				interpolation = interpolation.WithFormatClause(InterpolationFormatClause(Token(SyntaxKind.ColonToken), InterpolatedStringTextToken(match.Groups[3].Value.Substring(1))));
+			if (match.Groups[2] is { Success: true, Value: { } alignment })
+				interpolation = interpolation.WithAlignmentClause(InterpolationAlignmentClause(Token(SyntaxKind.CommaToken), ParseExpression(alignment.Substring(1))));
+			if (match.Groups[3] is { Success: true, Value: { } format })
+				interpolation = interpolation.WithFormatClause(InterpolationFormatClause(Token(SyntaxKind.ColonToken), InterpolatedStringTextToken(format.Substring(1))));
 			interpolatedStringExpression = interpolatedStringExpression.AddContents(interpolation);
 
 			index = match.Index + match.Length;
