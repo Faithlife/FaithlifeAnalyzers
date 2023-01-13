@@ -1,4 +1,5 @@
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CodeFixes;
 using Microsoft.CodeAnalysis.Diagnostics;
 using NUnit.Framework;
 
@@ -50,7 +51,7 @@ namespace TestApplication
 		public TestClass()
 		{
 			var foo = ""foo"";
-			Method(""{0}"".FormatInvariant(foo));
+			Method(""pre {0} post"".FormatInvariant(foo));
 		}
 
 		private void Method(string parameter)
@@ -67,7 +68,105 @@ namespace TestApplication
 		};
 
 		VerifyCSharpDiagnostic(invalidProgram, expected);
+
+		const string fixedProgram = @"using System;
+
+namespace Libronix.Utility
+{
+	public static class StringUtility
+	{
+		public static string FormatInvariant(this string format, params object[] args) => throw new NotImplementedException();
+	}
+}
+
+namespace TestApplication
+{
+	public class TestClass
+	{
+		public TestClass()
+		{
+			var foo = ""foo"";
+			Method($""pre {foo} post"");
+		}
+
+		private void Method(string parameter)
+		{
+		}
+	}
+}";
+
+		VerifyCSharpFix(invalidProgram, fixedProgram, 0);
+	}
+
+	[Test]
+	public void InvalidFormatComplex()
+	{
+		const string invalidProgram = @"using System;
+using Libronix.Utility;
+
+namespace Libronix.Utility
+{
+	public static class StringUtility
+	{
+		public static string FormatInvariant(this string format, params object[] args) => throw new NotImplementedException();
+	}
+}
+
+namespace TestApplication
+{
+	public class TestClass
+	{
+		public TestClass(bool b)
+		{
+			var foo = ""foo"";
+			Method(""pre {0} mid {1} dup {0} format {1:D1} parens {2} post"".FormatInvariant(foo, 10, b ? 1 : 2));
+		}
+
+		private void Method(string parameter)
+		{
+		}
+	}
+}";
+		var expected = new DiagnosticResult
+		{
+			Id = FormatInvariantAnalyzer.DiagnosticId,
+			Message = "Prefer string interpolation over FormatInvariant",
+			Severity = DiagnosticSeverity.Info,
+			Locations = new[] { new DiagnosticResultLocation("Test0.cs", 19, 11) },
+		};
+
+		VerifyCSharpDiagnostic(invalidProgram, expected);
+
+		const string fixedProgram = @"using System;
+
+namespace Libronix.Utility
+{
+	public static class StringUtility
+	{
+		public static string FormatInvariant(this string format, params object[] args) => throw new NotImplementedException();
+	}
+}
+
+namespace TestApplication
+{
+	public class TestClass
+	{
+		public TestClass(bool b)
+		{
+			var foo = ""foo"";
+			Method($""pre {foo} mid {10} dup {foo} format {10:D1} parens {(b ? 1 : 2)} post"");
+		}
+
+		private void Method(string parameter)
+		{
+		}
+	}
+}";
+
+		VerifyCSharpFix(invalidProgram, fixedProgram, 0);
 	}
 
 	protected override DiagnosticAnalyzer GetCSharpDiagnosticAnalyzer() => new FormatInvariantAnalyzer();
+
+	protected override CodeFixProvider GetCSharpCodeFixProvider() => new FormatInvariantCodeFixProvider();
 }
