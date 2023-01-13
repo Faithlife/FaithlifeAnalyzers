@@ -32,6 +32,8 @@ namespace TestApplication
 
 	[TestCase(@"""pre {0} post"".FormatInvariant(foo)", @"$""pre {foo} post""")]
 	[TestCase(@"""pre {0} mid {1} dup {0} format {1:D1} parens {2} alignment {1,-10} alignment+format {1,10:D1} post"".FormatInvariant(foo, 10, b ? 1 : 2)", @"FormattableString.Invariant($""pre {foo} mid {10} dup {foo} format {10:D1} parens {(b ? 1 : 2)} alignment {10,-10} alignment+format {10,10:D1} post"")")]
+	[TestCase(@"""with quotes \""{0}\"" post"".FormatInvariant(foo)", @"$""with quotes \""{foo}\"" post""")]
+	[TestCase(@"""with newline \n{0} post"".FormatInvariant(foo)", @"$""with newline \n{foo} post""")]
 	public void InvalidFormat(string invalidCode, string fixedCode)
 	{
 		var invalidProgram = $@"using System;

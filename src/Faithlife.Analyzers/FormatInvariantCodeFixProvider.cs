@@ -103,13 +103,20 @@ public sealed class FormatInvariantCodeFixProvider : CodeFixProvider
 	private static InterpolatedStringTextSyntax InterpolatedStringText(string text) =>
 		SyntaxFactory.InterpolatedStringText().WithTextToken(InterpolatedStringTextToken(text));
 
-	private static SyntaxToken InterpolatedStringTextToken(string text) =>
-		Token(
+	private static SyntaxToken InterpolatedStringTextToken(string text)
+	{
+		var escapedText = text
+			.Replace("\\", "\\\\")
+			.Replace("\r", "\\r")
+			.Replace("\n", "\\n")
+			.Replace("\"", "\\\"");
+		return Token(
 			TriviaList(),
 			SyntaxKind.InterpolatedStringTextToken,
-			text,
-			text,
+			escapedText,
+			escapedText,
 			TriviaList());
+	}
 
 	private static async Task<Document> ReplaceValueAsync(Document document, SyntaxNode replacementTarget, SyntaxNode replacementNode, CancellationToken cancellationToken)
 	{
