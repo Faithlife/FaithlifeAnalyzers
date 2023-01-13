@@ -119,7 +119,7 @@ namespace TestApplication
 		public TestClass(bool b)
 		{
 			var foo = ""foo"";
-			Method(""pre {0} mid {1} dup {0} format {1:D1} parens {2} post"".FormatInvariant(foo, 10, b ? 1 : 2));
+			Method(""pre {0} mid {1} dup {0} format {1:D1} parens {2} alignment {1,-10} alignment+format {1,10:D1} post"".FormatInvariant(foo, 10, b ? 1 : 2));
 		}
 
 		private void Method(string parameter)
@@ -154,7 +154,7 @@ namespace TestApplication
 		public TestClass(bool b)
 		{
 			var foo = ""foo"";
-			Method(FormattableString.Invariant($""pre {foo} mid {10} dup {foo} format {10:D1} parens {(b ? 1 : 2)} post""));
+			Method(FormattableString.Invariant($""pre {foo} mid {10} dup {foo} format {10:D1} parens {(b ? 1 : 2)} alignment {10,-10} alignment+format {10,10:D1} post""));
 		}
 
 		private void Method(string parameter)

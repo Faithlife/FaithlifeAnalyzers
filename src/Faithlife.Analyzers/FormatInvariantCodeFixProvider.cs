@@ -40,7 +40,7 @@ public sealed class FormatInvariantCodeFixProvider : CodeFixProvider
 			return;
 
 		var interpolatedStringExpression = InterpolatedStringExpression(Token(SyntaxKind.InterpolatedStringStartToken));
-		var matches = Regex.Matches(formatString, @"(?!\\){\s*(\d+)(:[^}]+)?\s*}");
+		var matches = Regex.Matches(formatString, @"(?!\\){\s*(\d+)(,-?\d+)?(:[^}]+)?\s*}");
 		if (matches.Count == 0)
 			return;
 
@@ -66,7 +66,9 @@ public sealed class FormatInvariantCodeFixProvider : CodeFixProvider
 
 			var interpolation = Interpolation(SyntaxUtility.SimplifiableParentheses(arg.Expression));
 			if (match.Groups[2].Success)
-				interpolation = interpolation.WithFormatClause(InterpolationFormatClause(Token(SyntaxKind.ColonToken), InterpolatedStringTextToken(match.Groups[2].Value.Substring(1))));
+				interpolation = interpolation.WithAlignmentClause(InterpolationAlignmentClause(Token(SyntaxKind.CommaToken), ParseExpression(match.Groups[2].Value.Substring(1))));
+			if (match.Groups[3].Success)
+				interpolation = interpolation.WithFormatClause(InterpolationFormatClause(Token(SyntaxKind.ColonToken), InterpolatedStringTextToken(match.Groups[3].Value.Substring(1))));
 			interpolatedStringExpression = interpolatedStringExpression.AddContents(interpolation);
 
 			index = match.Index + match.Length;
