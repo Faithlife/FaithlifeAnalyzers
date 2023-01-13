@@ -21,6 +21,7 @@ public sealed class FormatInvariantCodeFixProvider : CodeFixProvider
 	public override async Task RegisterCodeFixesAsync(CodeFixContext context)
 	{
 		var root = await context.Document.GetSyntaxRootAsync(context.CancellationToken).ConfigureAwait(false);
+		var semanticModel = await context.Document.GetSemanticModelAsync(context.CancellationToken).ConfigureAwait(false);
 
 		var diagnostic = context.Diagnostics.First();
 		var diagnosticSpan = diagnostic.Location.SourceSpan;
@@ -38,31 +39,52 @@ public sealed class FormatInvariantCodeFixProvider : CodeFixProvider
 		if (formatString is null)
 			return;
 
-		var replacementExpression = InterpolatedStringExpression(Token(SyntaxKind.InterpolatedStringStartToken));
+		var interpolatedStringExpression = InterpolatedStringExpression(Token(SyntaxKind.InterpolatedStringStartToken));
 		var matches = Regex.Matches(formatString, @"(?!\\){\s*(\d+)(:[^}]+)?\s*}");
 		if (matches.Count == 0)
 			return;
+
+		var requiresInvariant = false;
+		var stringType = semanticModel.Compilation.GetSpecialType(SpecialType.System_String);
 
 		var index = 0;
 		foreach (Match match in matches)
 		{
 			if (index < match.Index)
-				replacementExpression = replacementExpression.AddContents(InterpolatedStringText(formatString.Substring(index, match.Index - index)));
+				interpolatedStringExpression = interpolatedStringExpression.AddContents(InterpolatedStringText(formatString.Substring(index, match.Index - index)));
 
 			if (!int.TryParse(match.Groups[1].Value, out var argIndex) || argIndex < 0 || argIndex > invocation.ArgumentList.Arguments.Count )
 				return;
 
 			var arg = invocation.ArgumentList.Arguments[argIndex];
+			if (!requiresInvariant)
+			{
+				var typeInfo = semanticModel.GetTypeInfo(arg.Expression);
+				if (!SymbolEqualityComparer.Default.Equals(typeInfo.Type, stringType))
+					requiresInvariant = true;
+			}
+
 			var interpolation = Interpolation(SyntaxUtility.SimplifiableParentheses(arg.Expression));
 			if (match.Groups[2].Success)
 				interpolation = interpolation.WithFormatClause(InterpolationFormatClause(Token(SyntaxKind.ColonToken), InterpolatedStringTextToken(match.Groups[2].Value.Substring(1))));
-			replacementExpression = replacementExpression.AddContents(interpolation);
+			interpolatedStringExpression = interpolatedStringExpression.AddContents(interpolation);
 
 			index = match.Index + match.Length;
 		}
 
 		if (index < formatString.Length)
-			replacementExpression = replacementExpression.AddContents(InterpolatedStringText(formatString.Substring(index)));
+			interpolatedStringExpression = interpolatedStringExpression.AddContents(InterpolatedStringText(formatString.Substring(index)));
+
+		ExpressionSyntax replacement = interpolatedStringExpression;
+		if (requiresInvariant)
+		{
+			replacement = InvocationExpression(
+				MemberAccessExpression(
+					SyntaxKind.SimpleMemberAccessExpression,
+					ParseExpression("global::System.FormattableString").WithAdditionalAnnotations(Simplifier.Annotation),
+					IdentifierName("Invariant")),
+				ArgumentList().AddArguments(Argument(interpolatedStringExpression)));
+		}
 
 		context.RegisterCodeFix(
 			CodeAction.Create(
@@ -70,7 +92,7 @@ public sealed class FormatInvariantCodeFixProvider : CodeFixProvider
 				createChangedDocument: token => ReplaceValueAsync(
 					context.Document,
 					invocation,
-					SyntaxUtility.SimplifiableParentheses(replacementExpression),
+					SyntaxUtility.SimplifiableParentheses(replacement),
 					token),
 				c_fixName),
 			diagnostic);

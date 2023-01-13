@@ -154,7 +154,7 @@ namespace TestApplication
 		public TestClass(bool b)
 		{
 			var foo = ""foo"";
-			Method($""pre {foo} mid {10} dup {foo} format {10:D1} parens {(b ? 1 : 2)} post"");
+			Method(FormattableString.Invariant($""pre {foo} mid {10} dup {foo} format {10:D1} parens {(b ? 1 : 2)} post""));
 		}
 
 		private void Method(string parameter)
