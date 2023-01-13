@@ -30,35 +30,36 @@ namespace TestApplication
 		VerifyCSharpDiagnostic(validProgram);
 	}
 
-	[Test]
-	public void InvalidFormat()
+	[TestCase(@"""pre {0} post"".FormatInvariant(foo)", @"$""pre {foo} post""")]
+	[TestCase(@"""pre {0} mid {1} dup {0} format {1:D1} parens {2} alignment {1,-10} alignment+format {1,10:D1} post"".FormatInvariant(foo, 10, b ? 1 : 2)", @"FormattableString.Invariant($""pre {foo} mid {10} dup {foo} format {10:D1} parens {(b ? 1 : 2)} alignment {10,-10} alignment+format {10,10:D1} post"")")]
+	public void InvalidFormat(string invalidCode, string fixedCode)
 	{
-		const string invalidProgram = @"using System;
+		var invalidProgram = $@"using System;
 using Libronix.Utility;
 
 namespace Libronix.Utility
-{
+{{
 	public static class StringUtility
-	{
+	{{
 		public static string FormatInvariant(this string format, params object[] args) => throw new NotImplementedException();
-	}
-}
+	}}
+}}
 
 namespace TestApplication
-{
+{{
 	public class TestClass
-	{
-		public TestClass()
-		{
+	{{
+		public TestClass(bool b)
+		{{
 			var foo = ""foo"";
-			Method(""pre {0} post"".FormatInvariant(foo));
-		}
+			Method({invalidCode});
+		}}
 
 		private void Method(string parameter)
-		{
-		}
-	}
-}";
+		{{
+		}}
+	}}
+}}";
 		var expected = new DiagnosticResult
 		{
 			Id = FormatInvariantAnalyzer.DiagnosticId,
@@ -69,99 +70,31 @@ namespace TestApplication
 
 		VerifyCSharpDiagnostic(invalidProgram, expected);
 
-		const string fixedProgram = @"using System;
+		var fixedProgram = $@"using System;
 
 namespace Libronix.Utility
-{
+{{
 	public static class StringUtility
-	{
+	{{
 		public static string FormatInvariant(this string format, params object[] args) => throw new NotImplementedException();
-	}
-}
+	}}
+}}
 
 namespace TestApplication
-{
+{{
 	public class TestClass
-	{
-		public TestClass()
-		{
-			var foo = ""foo"";
-			Method($""pre {foo} post"");
-		}
-
-		private void Method(string parameter)
-		{
-		}
-	}
-}";
-
-		VerifyCSharpFix(invalidProgram, fixedProgram, 0);
-	}
-
-	[Test]
-	public void InvalidFormatComplex()
-	{
-		const string invalidProgram = @"using System;
-using Libronix.Utility;
-
-namespace Libronix.Utility
-{
-	public static class StringUtility
-	{
-		public static string FormatInvariant(this string format, params object[] args) => throw new NotImplementedException();
-	}
-}
-
-namespace TestApplication
-{
-	public class TestClass
-	{
+	{{
 		public TestClass(bool b)
-		{
+		{{
 			var foo = ""foo"";
-			Method(""pre {0} mid {1} dup {0} format {1:D1} parens {2} alignment {1,-10} alignment+format {1,10:D1} post"".FormatInvariant(foo, 10, b ? 1 : 2));
-		}
+			Method({fixedCode});
+		}}
 
 		private void Method(string parameter)
-		{
-		}
-	}
-}";
-		var expected = new DiagnosticResult
-		{
-			Id = FormatInvariantAnalyzer.DiagnosticId,
-			Message = "Prefer string interpolation over FormatInvariant",
-			Severity = DiagnosticSeverity.Info,
-			Locations = new[] { new DiagnosticResultLocation("Test0.cs", 19, 11) },
-		};
-
-		VerifyCSharpDiagnostic(invalidProgram, expected);
-
-		const string fixedProgram = @"using System;
-
-namespace Libronix.Utility
-{
-	public static class StringUtility
-	{
-		public static string FormatInvariant(this string format, params object[] args) => throw new NotImplementedException();
-	}
-}
-
-namespace TestApplication
-{
-	public class TestClass
-	{
-		public TestClass(bool b)
-		{
-			var foo = ""foo"";
-			Method(FormattableString.Invariant($""pre {foo} mid {10} dup {foo} format {10:D1} parens {(b ? 1 : 2)} alignment {10,-10} alignment+format {10,10:D1} post""));
-		}
-
-		private void Method(string parameter)
-		{
-		}
-	}
-}";
+		{{
+		}}
+	}}
+}}";
 
 		VerifyCSharpFix(invalidProgram, fixedProgram, 0);
 	}
