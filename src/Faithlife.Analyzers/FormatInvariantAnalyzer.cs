@@ -42,6 +42,13 @@ public sealed class FormatInvariantAnalyzer : DiagnosticAnalyzer
 			!formatInvariantMethods.Any(x => SymbolEqualityComparer.Default.Equals(x, methodSymbol.ReducedFrom) || SymbolEqualityComparer.Default.Equals(x, methodSymbol.ConstructedFrom)))
 			return;
 
+		var memberAccessExpression = syntax.Expression as MemberAccessExpressionSyntax;
+		if (memberAccessExpression is null)
+			return;
+
+		if (!memberAccessExpression.Expression.IsKind(SyntaxKind.StringLiteralExpression))
+			return;
+
 		context.ReportDiagnostic(Diagnostic.Create(s_rule, syntax.GetLocation()));
 	}
 

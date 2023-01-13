@@ -11,7 +11,17 @@ public sealed class FormatInvariantTests : CodeFixVerifier
 	[Test]
 	public void ValidFormat()
 	{
-		const string validProgram = @"
+		const string validProgram = @"using System;
+using Libronix.Utility;
+
+namespace Libronix.Utility
+{
+	public static class StringUtility
+	{
+		public static string FormatInvariant(this string format, params object[] args) => throw new NotImplementedException();
+	}
+}
+
 namespace TestApplication
 {
 	public class TestClass
@@ -20,6 +30,13 @@ namespace TestApplication
 		{
 			var foo = ""foo"";
 			Method($""{foo}"");
+
+			Method(StringUtility.FormatInvariant(""{0}"", foo));
+
+			var fmt = ""{0}"";
+			Method(fmt.FormatInvariant(1));
+
+			Method(StringUtility.FormatInvariant(fmt, foo));
 		}
 
 		private void Method(string parameter)
