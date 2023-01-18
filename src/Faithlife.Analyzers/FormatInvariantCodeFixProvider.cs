@@ -60,7 +60,7 @@ public sealed class FormatInvariantCodeFixProvider : CodeFixProvider
 			if (!requiresInvariant)
 			{
 				var typeInfo = semanticModel.GetTypeInfo(arg.Expression);
-				if (!SymbolEqualityComparer.Default.Equals(typeInfo.Type, stringType))
+				if (typeInfo.Type.TypeKind is not TypeKind.Enum && !SymbolEqualityComparer.Default.Equals(typeInfo.Type, stringType))
 					requiresInvariant = true;
 			}
 
