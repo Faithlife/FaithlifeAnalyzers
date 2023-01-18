@@ -10,6 +10,7 @@ New analyzers are considered "minor" changes (even though adding a new analyzer 
 or errors for existing code when the package is upgraded).
 
 * Add FL0017: Do not switch on a constant value.
+* Add FL0018: FormatInvariant deprecation.
 
 ## 1.3.1
 
