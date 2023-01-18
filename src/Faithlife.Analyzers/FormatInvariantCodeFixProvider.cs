@@ -1,5 +1,6 @@
 using System.Collections.Immutable;
 using System.Composition;
+using System.Globalization;
 using System.Text.RegularExpressions;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CodeActions;
@@ -39,21 +40,20 @@ public sealed class FormatInvariantCodeFixProvider : CodeFixProvider
 		if (formatString is null)
 			return;
 
-		var interpolatedStringExpression = InterpolatedStringExpression(Token(SyntaxKind.InterpolatedStringStartToken));
 		var matches = Regex.Matches(formatString, @"(?!\\){\s*(\d+)(,-?\d+)?(:[^}]+)?\s*}");
 		if (matches.Count == 0)
 			return;
 
 		var requiresInvariant = false;
 		var stringType = semanticModel.Compilation.GetSpecialType(SpecialType.System_String);
-
+		var interpolatedStringExpression = InterpolatedStringExpression(Token(SyntaxKind.InterpolatedStringStartToken));
 		var index = 0;
 		foreach (Match match in matches)
 		{
 			if (index < match.Index)
 				interpolatedStringExpression = interpolatedStringExpression.AddContents(InterpolatedStringText(formatString.Substring(index, match.Index - index)));
 
-			if (!int.TryParse(match.Groups[1].Value, out var argIndex) || argIndex < 0 || argIndex > invocation.ArgumentList.Arguments.Count )
+			if (!int.TryParse(match.Groups[1].Value, NumberStyles.None, CultureInfo.InvariantCulture, out var argIndex) || argIndex < 0 || argIndex > invocation.ArgumentList.Arguments.Count )
 				return;
 
 			var arg = invocation.ArgumentList.Arguments[argIndex];
