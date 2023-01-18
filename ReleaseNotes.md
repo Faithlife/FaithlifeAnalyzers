@@ -9,6 +9,8 @@ Prefix the description of the change with `[major]`, `[minor]`, or `[patch]` in 
 New analyzers are considered "minor" changes (even though adding a new analyzer is likely to generate warnings
 or errors for existing code when the package is upgraded).
 
+## 1.4.0
+
 * Add FL0017: Do not switch on a constant value.
 * Add FL0018: FormatInvariant deprecation.
 
