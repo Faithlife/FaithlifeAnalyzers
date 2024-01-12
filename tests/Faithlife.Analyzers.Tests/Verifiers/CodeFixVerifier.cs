@@ -80,7 +80,7 @@ public abstract partial class CodeFixVerifier : DiagnosticVerifier
 			var context = new CodeFixContext(document, analyzerDiagnostics[0], (a, d) => actions.Add(a), CancellationToken.None);
 			codeFixProvider.RegisterCodeFixesAsync(context).Wait();
 
-			if (!actions.Any())
+			if (actions.Count == 0)
 			{
 				break;
 			}
@@ -110,7 +110,7 @@ public abstract partial class CodeFixVerifier : DiagnosticVerifier
 			}
 
 			// check if there are analyzer diagnostics left after the code fix
-			if (!analyzerDiagnostics.Any())
+			if (analyzerDiagnostics.Length == 0)
 			{
 				break;
 			}
