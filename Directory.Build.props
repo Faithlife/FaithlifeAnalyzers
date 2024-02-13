@@ -1,8 +1,8 @@
 <Project>
 
   <PropertyGroup>
-    <VersionPrefix>1.4.0</VersionPrefix>
-    <LangVersion>10.0</LangVersion>
+    <VersionPrefix>1.5.0</VersionPrefix>
+    <LangVersion>11.0</LangVersion>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
