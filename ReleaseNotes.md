@@ -11,7 +11,7 @@ or errors for existing code when the package is upgraded).
 
 ## 1.5.0
 
-* Add FL0019: Local functions used as event handlers (unless they are static).
+* Add FL0019: Local functions used as event handlers (unless they are static, or else they are subscribed and later unsubscribed in the same method).
 * Add FL0020: Lambda expressions used as event handlers.
 
 ## 1.4.0

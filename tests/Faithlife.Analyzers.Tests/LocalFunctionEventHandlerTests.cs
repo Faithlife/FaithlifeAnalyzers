@@ -10,6 +10,8 @@ public class LocalFunctionEventHandlerTests : CodeFixVerifier
 	[Test]
 	public void LocalFunction()
 	{
+		// This pattern is "unsubscribe the old handler; then subscribe the new handler".
+		// This pattern is wrong because the old and new handlers are different instances.
 		const string program =
 			"""
 			using System;
@@ -18,8 +20,8 @@ public class LocalFunctionEventHandlerTests : CodeFixVerifier
 				public event EventHandler OnFrob;
 				public void Hook()
 				{
-					OnFrob += Local;
 					OnFrob -= Local;
+					OnFrob += Local;
 					void Local(object a, EventArgs b) { }
 					OnFrob?.Invoke(this, EventArgs.Empty);
 				}
@@ -29,9 +31,32 @@ public class LocalFunctionEventHandlerTests : CodeFixVerifier
 		{
 			Id = LocalFunctionEventHandler.LocalFunctionDiagnosticId,
 			Severity = DiagnosticSeverity.Warning,
-			Message = "Local functions should probably not be used as event handlers (unless they are static).",
-			Locations = new[] { new DiagnosticResultLocation("Test0.cs", 8, 3) },
+			Message = "Local function event handler.",
+			Locations = new[] { new DiagnosticResultLocation("Test0.cs", 7, 3) },
 		});
+	}
+
+	[Test]
+	public void LocalFunctionReturningUnsubscribe()
+	{
+		// This pattern is "subscribe the new handler; then return some action to later unsubscribe the handler".
+		// This pattern is correct because the same handler is being subscribed and unsubscribed.
+		const string program =
+			"""
+			using System;
+			class Test
+			{
+				public event EventHandler OnFrob;
+				public Action Hook()
+				{
+					OnFrob += Local;
+					void Local(object a, EventArgs b) { }
+					OnFrob?.Invoke(this, EventArgs.Empty);
+					return () => OnFrob -= Local;
+				}
+			}
+			""";
+		VerifyCSharpDiagnostic(program);
 	}
 
 	[Test]
@@ -45,8 +70,8 @@ public class LocalFunctionEventHandlerTests : CodeFixVerifier
 				public event EventHandler OnFrob;
 				public void Hook()
 				{
-					OnFrob += Local;
 					OnFrob -= Local;
+					OnFrob += Local;
 					static void Local(object a, EventArgs b) { }
 					OnFrob?.Invoke(this, EventArgs.Empty);
 				}
@@ -76,7 +101,7 @@ public class LocalFunctionEventHandlerTests : CodeFixVerifier
 		{
 			Id = LocalFunctionEventHandler.LambdaDiagnosticId,
 			Severity = DiagnosticSeverity.Error,
-			Message = "Lambda expressions may not be used as event handlers.",
+			Message = "Lambda expression event handler.",
 			Locations = new[] { new DiagnosticResultLocation("Test0.cs", 8, 3) },
 		});
 	}
@@ -92,8 +117,8 @@ public class LocalFunctionEventHandlerTests : CodeFixVerifier
 				public event EventHandler OnFrob;
 				public void Hook()
 				{
-					OnFrob += Frobbed;
 					OnFrob -= Frobbed;
+					OnFrob += Frobbed;
 					OnFrob?.Invoke(this, EventArgs.Empty);
 				}
 				private void Frobbed(object a, EventArgs b) { }
