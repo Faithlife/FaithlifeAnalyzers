@@ -9,6 +9,11 @@ Prefix the description of the change with `[major]`, `[minor]`, or `[patch]` in 
 New analyzers are considered "minor" changes (even though adding a new analyzer is likely to generate warnings
 or errors for existing code when the package is upgraded).
 
+## 1.5.0
+
+* Add FL0019: Local functions used as event handlers (unless they are static, or else they are subscribed and later unsubscribed in the same method).
+* Add FL0020: Lambda expressions used as event handlers.
+
 ## 1.4.0
 
 * Add FL0017: Do not switch on a constant value.
