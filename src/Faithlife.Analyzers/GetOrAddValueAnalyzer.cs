@@ -68,7 +68,7 @@ public sealed class GetOrAddValueAnalyzer : DiagnosticAnalyzer
 	private static readonly DiagnosticDescriptor s_rule = new(
 		id: DiagnosticId,
 		title: "GetOrAddValue() Usage",
-		messageFormat: "GetOrAddValue() is not threadsafe and should not be used with ConcurrentDictionary; use GetOrAdd() instead.",
+		messageFormat: "GetOrAddValue() is not threadsafe and should not be used with ConcurrentDictionary; use GetOrAdd() instead",
 		category: "Usage",
 		defaultSeverity: DiagnosticSeverity.Warning,
 		isEnabledByDefault: true,

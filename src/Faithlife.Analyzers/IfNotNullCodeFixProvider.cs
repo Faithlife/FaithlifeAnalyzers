@@ -1,13 +1,11 @@
 using System.Collections.Immutable;
 using System.Composition;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CodeActions;
 using Microsoft.CodeAnalysis.CodeFixes;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.CodeAnalysis.Formatting;
 using Microsoft.CodeAnalysis.Simplification;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
@@ -272,7 +270,7 @@ public sealed class IfNotNullCodeFixProvider : CodeFixProvider
 							createChangedDocument: token => ReplaceValueAsync(
 								context.Document,
 								ifNotNullInvocation,
-								SyntaxUtility.SimplifiableParentheses(finalExpression),
+								finalExpression,
 								token),
 							c_fixName),
 						diagnostic);
@@ -332,7 +330,7 @@ public sealed class IfNotNullCodeFixProvider : CodeFixProvider
 						createChangedDocument: token => ReplaceValueAsync(
 							context.Document,
 							ifNotNullInvocation.Parent,
-							ifStatement,
+							ifStatement.WithAdditionalAnnotations(Formatter.Annotation),
 							token),
 						c_fixName),
 					diagnostic);

@@ -90,7 +90,7 @@ public class LocalFunctionEventHandler : DiagnosticAnalyzer
 	private static readonly DiagnosticDescriptor s_localFunctionRule = new(
 		id: LocalFunctionDiagnosticId,
 		title: "Local Functions as Event Handlers",
-		messageFormat: "Local function event handler.",
+		messageFormat: "Local function event handler",
 		category: "Usage",
 		defaultSeverity: DiagnosticSeverity.Warning,
 		isEnabledByDefault: true,
@@ -100,7 +100,7 @@ public class LocalFunctionEventHandler : DiagnosticAnalyzer
 	private static readonly DiagnosticDescriptor s_lambdaRule = new(
 		id: LambdaDiagnosticId,
 		title: "Lambda Expressions as Event Handlers",
-		messageFormat: "Lambda expression event handler.",
+		messageFormat: "Lambda expression event handler",
 		category: "Usage",
 		defaultSeverity: DiagnosticSeverity.Error,
 		isEnabledByDefault: true,
