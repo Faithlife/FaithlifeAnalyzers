@@ -169,5 +169,77 @@ namespace TestApplication
 		});
 	}
 
+	[Test]
+	public void InterpolatedStringWithDebugAssert()
+	{
+		const string validProgram = @"
+using System.Diagnostics;
+
+namespace TestApplication
+{
+	public class TestClass
+	{
+		public TestClass()
+		{
+			var result = false;
+			Debug.Assert(result, $""Assertion was {result}"");
+		}
+	}
+}";
+		VerifyCSharpDiagnostic(validProgram);
+	}
+
+	[Test]
+	public void InterpolatedStringWithDebugAssertShouldNotTriggerFL0014()
+	{
+		// This should NOT trigger FL0014 when using interpolated string handlers
+		const string validProgram = @"
+using System.Diagnostics;
+
+namespace TestApplication
+{
+	public class TestClass
+	{
+		public void TestMethod()
+		{
+			var result = false;
+			Debug.Assert(result, $""Assertion was {result}"");
+		}
+	}
+}";
+
+		// This test passes (no diagnostics expected) but the issue says FL0014 incorrectly fires
+		VerifyCSharpDiagnostic(validProgram);
+	}
+
+	[Test]
+	public void InterpolatedStringWithDebugAssertNoInterpolations()
+	{
+		// Test case for interpolated string with NO interpolations - this SHOULD trigger FL0014
+		const string invalidProgram = @"
+using System.Diagnostics;
+
+namespace TestApplication
+{
+	public class TestClass
+	{
+		public void TestMethod()
+		{
+			var result = false;
+			Debug.Assert(result, $""Assertion message"");
+		}
+	}
+}";
+
+		// This should trigger FL0014 because there are no interpolations
+		VerifyCSharpDiagnostic(invalidProgram, new DiagnosticResult
+		{
+			Id = InterpolatedStringAnalyzer.DiagnosticIdUnnecessary,
+			Message = "Avoid using an interpolated string where an equivalent literal string exists.",
+			Severity = DiagnosticSeverity.Warning,
+			Locations = new[] { new DiagnosticResultLocation("Test0.cs", 11, 25) },
+		});
+	}
+
 	protected override DiagnosticAnalyzer GetCSharpDiagnosticAnalyzer() => new InterpolatedStringAnalyzer();
 }
