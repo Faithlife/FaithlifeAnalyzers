@@ -44,7 +44,7 @@ public sealed class VerbatimStringAnalyzer : DiagnosticAnalyzer
 	private static readonly DiagnosticDescriptor s_rule = new(
 		id: DiagnosticId,
 		title: "Unnecessary use of verbatim string literal",
-		messageFormat: "Avoid using verbatim string literals without special characters.",
+		messageFormat: "Avoid using verbatim string literals without special characters",
 		category: "Usage",
 		defaultSeverity: DiagnosticSeverity.Warning,
 		isEnabledByDefault: true,

@@ -161,6 +161,7 @@ public abstract partial class DiagnosticVerifier
 			.CurrentSolution
 			.AddProject(projectId, TestProjectName, TestProjectName, language)
 			.WithProjectCompilationOptions(projectId, new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary))
+			.WithProjectParseOptions(projectId, new CSharpParseOptions(LanguageVersion.Latest))
 			.AddMetadataReferences(projectId, s_metadataReferences);
 
 		int count = 0;

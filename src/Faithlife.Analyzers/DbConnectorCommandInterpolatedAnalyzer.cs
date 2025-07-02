@@ -42,7 +42,7 @@ public sealed class DbConnectorCommandInterpolatedAnalyzer : DiagnosticAnalyzer
 	private static readonly DiagnosticDescriptor s_rule = new(
 		id: DiagnosticId,
 		title: "Use DbConnector.CommandFormat",
-		messageFormat: "Command should not be used with an interpolated string; use CommandFormat instead.",
+		messageFormat: "Command should not be used with an interpolated string; use CommandFormat instead",
 		category: "Usage",
 		defaultSeverity: DiagnosticSeverity.Warning,
 		isEnabledByDefault: true,
