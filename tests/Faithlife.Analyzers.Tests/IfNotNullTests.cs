@@ -229,7 +229,7 @@ public sealed class IfNotNullTests : CodeFixVerifier
 		"var result = possiblyNull is ReferenceThing ? new { Property = \"value\" } : new { Property = \"other value\" };")]
 	public void SimpleMethodCall(string possiblyNull, string call, string fixedCall)
 	{
-		string createProgram(string actualCall) =>
+		string CreateProgram(string actualCall) =>
 			c_preamble + @"
 namespace TestProgram
 {
@@ -248,14 +248,14 @@ namespace TestProgram
 			Id = IfNotNullAnalyzer.DiagnosticId,
 			Message = "Prefer modern language features over IfNotNull usage",
 			Severity = DiagnosticSeverity.Info,
-			Locations = new[] { new DiagnosticResultLocation("Test0.cs", c_preambleLength + 8, 17) },
+			Locations = new[] { new DiagnosticResultLocation("Test0.cs", s_preambleLength + 8, 17) },
 		};
 
-		string invalidProgram = createProgram(call);
+		string invalidProgram = CreateProgram(call);
 
 		VerifyCSharpDiagnostic(invalidProgram, expected);
 
-		string validProgram = createProgram(fixedCall).Replace("using Libronix.Utility.IfNotNull;\n", "", StringComparison.Ordinal);
+		string validProgram = CreateProgram(fixedCall).Replace("using Libronix.Utility.IfNotNull;\n", "", StringComparison.Ordinal);
 
 		VerifyCSharpFix(invalidProgram, validProgram);
 	}
@@ -282,7 +282,7 @@ namespace TestProgram
 		17, 17)]
 	public void MultipleMethodCalls(string possiblyNull, string call, string fixedCall, int firstColumn, int secondColumn)
 	{
-		string createProgram(string actualCall) =>
+		string CreateProgram(string actualCall) =>
 			c_preamble + @"
 namespace TestProgram
 {
@@ -302,14 +302,14 @@ namespace TestProgram
 				Id = IfNotNullAnalyzer.DiagnosticId,
 				Message = "Prefer modern language features over IfNotNull usage",
 				Severity = DiagnosticSeverity.Info,
-				Locations = new[] { new DiagnosticResultLocation("Test0.cs", c_preambleLength + 8, column) },
+				Locations = new[] { new DiagnosticResultLocation("Test0.cs", s_preambleLength + 8, column) },
 			};
 
-		string invalidProgram = createProgram(call);
+		string invalidProgram = CreateProgram(call);
 
 		VerifyCSharpDiagnostic(invalidProgram, CreateDiagnosticAtColumn(firstColumn), CreateDiagnosticAtColumn(secondColumn));
 
-		string validProgram = createProgram(fixedCall).Replace("using Libronix.Utility.IfNotNull;\n", "", StringComparison.Ordinal);
+		string validProgram = CreateProgram(fixedCall).Replace("using Libronix.Utility.IfNotNull;\n", "", StringComparison.Ordinal);
 
 		VerifyCSharpFix(invalidProgram, validProgram);
 	}
@@ -332,7 +332,7 @@ namespace TestProgram
 		"if (possiblyNull is ValueThing x)\n\t\t\t\tx.Method();\n\t\t\telse\n\t\t\t\tthrow new InvalidOperationException();")]
 	public void VoidInvocation(string possiblyNull, string call, string fixedCall)
 	{
-		string createProgram(string actualCall) =>
+		string CreateProgram(string actualCall) =>
 			c_preamble + @"
 namespace TestProgram
 {
@@ -351,20 +351,20 @@ namespace TestProgram
 			Id = IfNotNullAnalyzer.DiagnosticId,
 			Message = "Prefer modern language features over IfNotNull usage",
 			Severity = DiagnosticSeverity.Info,
-			Locations = new[] { new DiagnosticResultLocation("Test0.cs", c_preambleLength + 8, 4) },
+			Locations = new[] { new DiagnosticResultLocation("Test0.cs", s_preambleLength + 8, 4) },
 		};
 
-		string invalidProgram = createProgram(call);
+		string invalidProgram = CreateProgram(call);
 
 		VerifyCSharpDiagnostic(invalidProgram, expected);
 
 		// The fixer should decline to make any modifications to unsupported calls.
-		VerifyCSharpFix(invalidProgram, fixedCall is null ? invalidProgram : createProgram(fixedCall).Replace("using Libronix.Utility.IfNotNull;\n", "", StringComparison.Ordinal));
+		VerifyCSharpFix(invalidProgram, fixedCall is null ? invalidProgram : CreateProgram(fixedCall).Replace("using Libronix.Utility.IfNotNull;\n", "", StringComparison.Ordinal));
 	}
 
 	public void NonLocalInvocation()
 	{
-		string createProgram(string actualCall) =>
+		string CreateProgram(string actualCall) =>
 			c_preamble + @"
 namespace TestProgram
 {
@@ -384,15 +384,15 @@ namespace TestProgram
 			Id = IfNotNullAnalyzer.DiagnosticId,
 			Message = "Prefer modern language features over IfNotNull usage",
 			Severity = DiagnosticSeverity.Info,
-			Locations = new[] { new DiagnosticResultLocation("Test0.cs", c_preambleLength + 8, 4) },
+			Locations = new[] { new DiagnosticResultLocation("Test0.cs", s_preambleLength + 8, 4) },
 		};
 
-		string invalidProgram = createProgram("OnAction.IfNotNull(x => x(), () => throw new InvalidOperationException());");
+		string invalidProgram = CreateProgram("OnAction.IfNotNull(x => x(), () => throw new InvalidOperationException());");
 
 		VerifyCSharpDiagnostic(invalidProgram, expected);
 
 		// Ensure that invocations on identifiers that are *not* local variables receive a local variable definition.
-		VerifyCSharpFix(invalidProgram, createProgram(@"if (OnAction is Action x)
+		VerifyCSharpFix(invalidProgram, CreateProgram(@"if (OnAction is Action x)
 				x();
 			else
 				throw new InvalidOperationException();").Replace("using Libronix.Utility.IfNotNull;\n", "", StringComparison.Ordinal));
@@ -412,7 +412,7 @@ namespace TestProgram
 		"var result = possiblyNull.IfNotNull(x => new[] { x });")]
 	public void UnhandledInvocation(string possiblyNull, string call)
 	{
-		string createProgram(string actualCall) =>
+		string CreateProgram(string actualCall) =>
 			c_preamble + @"
 namespace TestProgram
 {
@@ -431,10 +431,10 @@ namespace TestProgram
 			Id = IfNotNullAnalyzer.DiagnosticId,
 			Message = "Prefer modern language features over IfNotNull usage",
 			Severity = DiagnosticSeverity.Info,
-			Locations = new[] { new DiagnosticResultLocation("Test0.cs", c_preambleLength + 8, 17) },
+			Locations = new[] { new DiagnosticResultLocation("Test0.cs", s_preambleLength + 8, 17) },
 		};
 
-		string invalidProgram = createProgram(call);
+		string invalidProgram = CreateProgram(call);
 
 		VerifyCSharpDiagnostic(invalidProgram, expected);
 
@@ -493,5 +493,5 @@ namespace TestProgram
 }
 ";
 
-	private static readonly int c_preambleLength = c_preamble.Split('\n').Length;
+	private static readonly int s_preambleLength = c_preamble.Split('\n').Length;
 }

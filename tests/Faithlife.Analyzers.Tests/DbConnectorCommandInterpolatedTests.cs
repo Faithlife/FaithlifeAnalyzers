@@ -46,7 +46,7 @@ namespace TestApplication
 		var expected = new DiagnosticResult
 		{
 			Id = DbConnectorCommandInterpolatedAnalyzer.DiagnosticId,
-			Message = "Command should not be used with an interpolated string; use CommandFormat instead.",
+			Message = "Command should not be used with an interpolated string; use CommandFormat instead",
 			Severity = DiagnosticSeverity.Warning,
 			Locations = new[] { new DiagnosticResultLocation("Test0.cs", s_preambleLength + 8, 4) },
 		};

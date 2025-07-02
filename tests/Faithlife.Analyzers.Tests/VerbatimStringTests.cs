@@ -45,7 +45,7 @@ namespace TestApplication
 		VerifyCSharpDiagnostic(invalidProgram, new DiagnosticResult
 		{
 			Id = VerbatimStringAnalyzer.DiagnosticId,
-			Message = "Avoid using verbatim string literals without special characters.",
+			Message = "Avoid using verbatim string literals without special characters",
 			Severity = DiagnosticSeverity.Warning,
 			Locations = new[] { new DiagnosticResultLocation("Test0.cs", 8, 4) },
 		});
@@ -68,7 +68,7 @@ namespace TestApplication
 		VerifyCSharpDiagnostic(invalidProgram, new DiagnosticResult
 		{
 			Id = VerbatimStringAnalyzer.DiagnosticId,
-			Message = "Avoid using verbatim string literals without special characters.",
+			Message = "Avoid using verbatim string literals without special characters",
 			Severity = DiagnosticSeverity.Warning,
 			Locations = new[] { new DiagnosticResultLocation("Test0.cs", 8, 4) },
 		});

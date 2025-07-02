@@ -61,7 +61,7 @@ namespace TestApplication
 		VerifyCSharpDiagnostic(invalidProgram, new DiagnosticResult
 		{
 			Id = InterpolatedStringAnalyzer.DiagnosticIdDollar,
-			Message = "Avoid using ${} in interpolated strings.",
+			Message = "Avoid using ${} in interpolated strings",
 			Severity = DiagnosticSeverity.Warning,
 			Locations = new[] { new DiagnosticResultLocation("Test0.cs", 9, 20) },
 		});
@@ -86,14 +86,14 @@ namespace TestApplication
 			new DiagnosticResult
 			{
 				Id = InterpolatedStringAnalyzer.DiagnosticIdDollar,
-				Message = "Avoid using ${} in interpolated strings.",
+				Message = "Avoid using ${} in interpolated strings",
 				Severity = DiagnosticSeverity.Warning,
 				Locations = new[] { new DiagnosticResultLocation("Test0.cs", 9, 20) },
 			},
 			new DiagnosticResult
 			{
 				Id = InterpolatedStringAnalyzer.DiagnosticIdDollar,
-				Message = "Avoid using ${} in interpolated strings.",
+				Message = "Avoid using ${} in interpolated strings",
 				Severity = DiagnosticSeverity.Warning,
 				Locations = new[] { new DiagnosticResultLocation("Test0.cs", 9, 26) },
 			});
@@ -117,7 +117,7 @@ namespace TestApplication
 		VerifyCSharpDiagnostic(invalidProgram, new DiagnosticResult
 		{
 			Id = InterpolatedStringAnalyzer.DiagnosticIdDollar,
-			Message = "Avoid using ${} in interpolated strings.",
+			Message = "Avoid using ${} in interpolated strings",
 			Severity = DiagnosticSeverity.Warning,
 			Locations = new[] { new DiagnosticResultLocation("Test0.cs", 9, 20) },
 		});
@@ -140,7 +140,7 @@ namespace TestApplication
 		VerifyCSharpDiagnostic(invalidProgram, new DiagnosticResult
 		{
 			Id = InterpolatedStringAnalyzer.DiagnosticIdUnnecessary,
-			Message = "Avoid using an interpolated string where an equivalent literal string exists.",
+			Message = "Avoid using an interpolated string where an equivalent literal string exists",
 			Severity = DiagnosticSeverity.Warning,
 			Locations = new[] { new DiagnosticResultLocation("Test0.cs", 8, 17) },
 		});
@@ -163,7 +163,7 @@ namespace TestApplication
 		VerifyCSharpDiagnostic(invalidProgram, new DiagnosticResult
 		{
 			Id = InterpolatedStringAnalyzer.DiagnosticIdUnnecessary,
-			Message = "Avoid using an interpolated string where an equivalent literal string exists.",
+			Message = "Avoid using an interpolated string where an equivalent literal string exists",
 			Severity = DiagnosticSeverity.Warning,
 			Locations = new[] { new DiagnosticResultLocation("Test0.cs", 8, 17) },
 		});

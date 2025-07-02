@@ -34,10 +34,12 @@ public sealed class InterpolatedStringAnalyzer : DiagnosticAnalyzer
 		var invocationOperation = (IInterpolatedStringOperation) context.Operation;
 		var foundDollarSign = false;
 
+#pragma warning disable CS0618 // Type or member is obsolete
 		if (!invocationOperation.Children.Any(child => child is IInterpolationOperation))
 			context.ReportDiagnostic(Diagnostic.Create(s_ruleUnnecessary, invocationOperation.Syntax.GetLocation()));
 
 		foreach (var child in invocationOperation.Children)
+#pragma warning restore CS0618 // Type or member is obsolete
 		{
 			if ((child as IInterpolatedStringTextOperation)?.Text.Syntax.ToFullString().EndsWith("$", StringComparison.Ordinal) ?? false)
 			{
@@ -55,7 +57,7 @@ public sealed class InterpolatedStringAnalyzer : DiagnosticAnalyzer
 	private static readonly DiagnosticDescriptor s_ruleDollar = new(
 		id: DiagnosticIdDollar,
 		title: "Unintentional ${} in interpolated strings",
-		messageFormat: "Avoid using ${} in interpolated strings.",
+		messageFormat: "Avoid using ${} in interpolated strings",
 		category: "Usage",
 		defaultSeverity: DiagnosticSeverity.Warning,
 		isEnabledByDefault: true,
@@ -64,7 +66,7 @@ public sealed class InterpolatedStringAnalyzer : DiagnosticAnalyzer
 	private static readonly DiagnosticDescriptor s_ruleUnnecessary = new(
 		id: DiagnosticIdUnnecessary,
 		title: "Unnecessary interpolated string",
-		messageFormat: "Avoid using an interpolated string where an equivalent literal string exists.",
+		messageFormat: "Avoid using an interpolated string where an equivalent literal string exists",
 		category: "Usage",
 		defaultSeverity: DiagnosticSeverity.Warning,
 		isEnabledByDefault: true,
