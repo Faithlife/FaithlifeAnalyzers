@@ -15,7 +15,7 @@ namespace Faithlife.Analyzers;
 [ExportCodeFixProvider(LanguageNames.CSharp, Name = nameof(FormatInvariantCodeFixProvider)), Shared]
 public sealed class FormatInvariantCodeFixProvider : CodeFixProvider
 {
-	public override ImmutableArray<string> FixableDiagnosticIds => ImmutableArray.Create(FormatInvariantAnalyzer.DiagnosticId);
+	public override ImmutableArray<string> FixableDiagnosticIds => [FormatInvariantAnalyzer.DiagnosticId];
 
 	public override FixAllProvider GetFixAllProvider() => WellKnownFixAllProviders.BatchFixer;
 

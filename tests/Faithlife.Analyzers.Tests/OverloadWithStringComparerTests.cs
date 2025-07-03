@@ -133,10 +133,10 @@ public class OverloadWithStringComparerTests : CodeFixVerifier
 				Id = OverloadWithStringComparerAnalyzer.UseStringComparerDiagnosticId,
 				Message = "Use the overload that takes an IComparer<string>",
 				Severity = DiagnosticSeverity.Warning,
-				Locations = new[]
-				{
+				Locations =
+				[
 					new DiagnosticResultLocation("Test0.cs", s_lineNumber, s_columnNumber + columnOffset),
-				},
+				],
 			});
 	}
 

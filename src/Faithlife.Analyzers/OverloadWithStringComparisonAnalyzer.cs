@@ -77,9 +77,9 @@ public sealed class OverloadWithStringComparisonAnalyzer : DiagnosticAnalyzer
 		return false;
 	}
 
-	private static readonly ISet<string> s_affectedMethods = new HashSet<string>(new[] { "Equals", "Compare", "IndexOf", "LastIndexOf", "StartsWith", "EndsWith" });
+	private static readonly HashSet<string> s_affectedMethods = ["Equals", "Compare", "IndexOf", "LastIndexOf", "StartsWith", "EndsWith"];
 
-	private static readonly DiagnosticDescriptor s_useStringComparisonRule = new DiagnosticDescriptor(
+	private static readonly DiagnosticDescriptor s_useStringComparisonRule = new(
 		id: UseStringComparisonDiagnosticId,
 		title: "Use StringComparison overload",
 		messageFormat: "Use an overload that takes a StringComparison",
@@ -89,7 +89,7 @@ public sealed class OverloadWithStringComparisonAnalyzer : DiagnosticAnalyzer
 		description: "The desired StringComparison must be explicitly specified.",
 		helpLinkUri: $"https://github.com/Faithlife/FaithlifeAnalyzers/wiki/{UseStringComparisonDiagnosticId}");
 
-	private static readonly DiagnosticDescriptor s_avoidStringEqualsRule = new DiagnosticDescriptor(
+	private static readonly DiagnosticDescriptor s_avoidStringEqualsRule = new(
 		id: AvoidStringEqualsDiagnosticId,
 		title: "Avoid string.Equals(string, string)",
 		messageFormat: "Use operator== or a non-ordinal StringComparison",
@@ -98,5 +98,5 @@ public sealed class OverloadWithStringComparisonAnalyzer : DiagnosticAnalyzer
 		isEnabledByDefault: true,
 		helpLinkUri: $"https://github.com/Faithlife/FaithlifeAnalyzers/wiki/{AvoidStringEqualsDiagnosticId}");
 
-	private static readonly ImmutableArray<DiagnosticDescriptor> s_rules = ImmutableArray.Create(s_useStringComparisonRule, s_avoidStringEqualsRule);
+	private static readonly ImmutableArray<DiagnosticDescriptor> s_rules = [s_useStringComparisonRule, s_avoidStringEqualsRule];
 }

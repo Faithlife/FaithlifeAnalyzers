@@ -28,7 +28,7 @@ internal sealed class IfNotNullFixAllProvider : FixAllProvider
 		case FixAllScope.Document:
 			{
 				allDiagnostics = await fixAllContext.GetDocumentDiagnosticsAsync(fixAllContext.Document).ConfigureAwait(false);
-				allSyntaxTrees = new[] { (fixAllContext.Document, await fixAllContext.Document.GetSyntaxTreeAsync(fixAllContext.CancellationToken).ConfigureAwait(false)) };
+				allSyntaxTrees = [(fixAllContext.Document, await fixAllContext.Document.GetSyntaxTreeAsync(fixAllContext.CancellationToken).ConfigureAwait(false))];
 				break;
 			}
 

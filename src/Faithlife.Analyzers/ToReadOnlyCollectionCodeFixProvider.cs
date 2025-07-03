@@ -17,7 +17,7 @@ namespace Faithlife.Analyzers;
 [ExportCodeFixProvider(LanguageNames.CSharp, Name = nameof(CurrentAsyncWorkItemCodeFixProvider)), Shared]
 public sealed class ToReadOnlyCollectionCodeFixProvider : CodeFixProvider
 {
-	public override ImmutableArray<string> FixableDiagnosticIds => ImmutableArray.Create(ToReadOnlyCollectionAnalyzer.DiagnosticId);
+	public override ImmutableArray<string> FixableDiagnosticIds => [ToReadOnlyCollectionAnalyzer.DiagnosticId];
 
 	public override FixAllProvider GetFixAllProvider() => WellKnownFixAllProviders.BatchFixer;
 

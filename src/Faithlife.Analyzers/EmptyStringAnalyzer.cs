@@ -29,7 +29,7 @@ public sealed class EmptyStringAnalyzer : DiagnosticAnalyzer
 
 	public const string DiagnosticId = "FL0009";
 
-	public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => ImmutableArray.Create(s_rule);
+	public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => [s_rule];
 
 	private static void AnalyzeOperation(OperationAnalysisContext context, ISymbol emptyString)
 	{
@@ -40,7 +40,7 @@ public sealed class EmptyStringAnalyzer : DiagnosticAnalyzer
 		context.ReportDiagnostic(Diagnostic.Create(s_rule, context.Operation.Syntax.GetLocation()));
 	}
 
-	private static readonly DiagnosticDescriptor s_rule = new DiagnosticDescriptor(
+	private static readonly DiagnosticDescriptor s_rule = new(
 		id: DiagnosticId,
 		title: "Prefer \"\" over string.Empty",
 		messageFormat: "Prefer \"\" over string.Empty",

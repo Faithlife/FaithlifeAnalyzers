@@ -22,7 +22,7 @@ public sealed class VerbatimStringAnalyzer : DiagnosticAnalyzer
 
 	public const string DiagnosticId = "FL0016";
 
-	public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => ImmutableArray.Create(s_rule);
+	public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => [s_rule];
 
 	private static void AnalyzeSyntax(SyntaxNodeAnalysisContext context)
 	{

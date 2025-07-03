@@ -47,7 +47,7 @@ namespace TestApplication
 			Id = VerbatimStringAnalyzer.DiagnosticId,
 			Message = "Avoid using verbatim string literals without special characters",
 			Severity = DiagnosticSeverity.Warning,
-			Locations = new[] { new DiagnosticResultLocation("Test0.cs", 8, 4) },
+			Locations = [new DiagnosticResultLocation("Test0.cs", 8, 4)],
 		});
 	}
 
@@ -70,7 +70,7 @@ namespace TestApplication
 			Id = VerbatimStringAnalyzer.DiagnosticId,
 			Message = "Avoid using verbatim string literals without special characters",
 			Severity = DiagnosticSeverity.Warning,
-			Locations = new[] { new DiagnosticResultLocation("Test0.cs", 8, 4) },
+			Locations = [new DiagnosticResultLocation("Test0.cs", 8, 4)],
 		});
 	}
 

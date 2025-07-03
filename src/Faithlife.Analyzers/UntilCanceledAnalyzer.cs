@@ -32,7 +32,7 @@ public sealed class UntilCanceledAnalyzer : DiagnosticAnalyzer
 
 	public const string DiagnosticId = "FL0003";
 
-	public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => ImmutableArray.Create(s_rule);
+	public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => [s_rule];
 
 	private static void AnalyzeSyntax(SyntaxNodeAnalysisContext context, INamedTypeSymbol asyncEnumerableUtility, INamedTypeSymbol asyncAction)
 	{
@@ -76,7 +76,7 @@ public sealed class UntilCanceledAnalyzer : DiagnosticAnalyzer
 		}
 	}
 
-	private static readonly DiagnosticDescriptor s_rule = new DiagnosticDescriptor(
+	private static readonly DiagnosticDescriptor s_rule = new(
 		id: DiagnosticId,
 		title: "UntilCanceled() Usage",
 		messageFormat: "UntilCanceled() may only be used in methods that return IEnumerable<AsyncAction>",

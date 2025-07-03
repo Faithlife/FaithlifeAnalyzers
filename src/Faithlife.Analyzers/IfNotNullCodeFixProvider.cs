@@ -14,7 +14,7 @@ namespace Faithlife.Analyzers;
 [ExportCodeFixProvider(LanguageNames.CSharp, Name = nameof(IfNotNullCodeFixProvider)), Shared]
 public sealed class IfNotNullCodeFixProvider : CodeFixProvider
 {
-	public sealed override ImmutableArray<string> FixableDiagnosticIds => ImmutableArray.Create(IfNotNullAnalyzer.DiagnosticId);
+	public sealed override ImmutableArray<string> FixableDiagnosticIds => [IfNotNullAnalyzer.DiagnosticId];
 
 	public sealed override FixAllProvider GetFixAllProvider() => IfNotNullFixAllProvider.Instance;
 
@@ -394,7 +394,7 @@ public sealed class IfNotNullCodeFixProvider : CodeFixProvider
 	private static ImmutableArray<ParameterSyntax> GetLambdaParameters(LambdaExpressionSyntax lambda)
 	{
 		if (lambda is SimpleLambdaExpressionSyntax simpleLambda)
-			return ImmutableArray.Create(simpleLambda.Parameter);
+			return [simpleLambda.Parameter];
 
 		if (lambda is ParenthesizedLambdaExpressionSyntax parenthesizedLambda)
 			return parenthesizedLambda.ParameterList.Parameters.ToImmutableArray();

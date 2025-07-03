@@ -52,7 +52,7 @@ namespace TestApplication
 			Id = UntilCanceledAnalyzer.DiagnosticId,
 			Message = "UntilCanceled() may only be used in methods that return IEnumerable<AsyncAction>",
 			Severity = DiagnosticSeverity.Warning,
-			Locations = new[] { new DiagnosticResultLocation("Test0.cs", c_preambleLength + 7, 46) },
+			Locations = [new DiagnosticResultLocation("Test0.cs", c_preambleLength + 7, 46)],
 		};
 
 		VerifyCSharpDiagnostic(brokenProgram, expected);
@@ -116,7 +116,7 @@ namespace TestApplication
 			Id = UntilCanceledAnalyzer.DiagnosticId,
 			Message = "UntilCanceled() may only be used in methods that return IEnumerable<AsyncAction>",
 			Severity = DiagnosticSeverity.Warning,
-			Locations = new[] { new DiagnosticResultLocation("Test0.cs", c_preambleLength + 8, 19) },
+			Locations = [new DiagnosticResultLocation("Test0.cs", c_preambleLength + 8, 19)],
 		};
 
 		VerifyCSharpDiagnostic(brokenProgram, expected);

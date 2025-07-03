@@ -16,7 +16,11 @@ namespace Faithlife.Analyzers;
 [ExportCodeFixProvider(LanguageNames.CSharp, Name = nameof(CurrentAsyncWorkItemCodeFixProvider)), Shared]
 public sealed class OverloadWithStringComparisonCodeFixProvider : CodeFixProvider
 {
-	public override ImmutableArray<string> FixableDiagnosticIds => ImmutableArray.Create(OverloadWithStringComparisonAnalyzer.UseStringComparisonDiagnosticId, OverloadWithStringComparisonAnalyzer.AvoidStringEqualsDiagnosticId);
+	public override ImmutableArray<string> FixableDiagnosticIds =>
+	[
+		OverloadWithStringComparisonAnalyzer.UseStringComparisonDiagnosticId,
+		OverloadWithStringComparisonAnalyzer.AvoidStringEqualsDiagnosticId,
+	];
 
 	public override FixAllProvider? GetFixAllProvider() => null;
 

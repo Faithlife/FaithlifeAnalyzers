@@ -53,7 +53,7 @@ namespace TestApplication
 			Id = GetOrAddValueAnalyzer.DiagnosticId,
 			Message = "GetOrAddValue() is not threadsafe and should not be used with ConcurrentDictionary; use GetOrAdd() instead",
 			Severity = DiagnosticSeverity.Warning,
-			Locations = new[] { new DiagnosticResultLocation("Test0.cs", s_preambleLength + 8, invalidCall.Length - "GetOrAddValue".Length) },
+			Locations = [new DiagnosticResultLocation("Test0.cs", s_preambleLength + 8, invalidCall.Length - "GetOrAddValue".Length)],
 		};
 
 		VerifyCSharpDiagnostic(brokenProgram, expected);
@@ -86,7 +86,7 @@ namespace TestApplication
 			Id = GetOrAddValueAnalyzer.DiagnosticId,
 			Message = "GetOrAddValue() is not threadsafe and should not be used with ConcurrentDictionary; use GetOrAdd() instead",
 			Severity = DiagnosticSeverity.Warning,
-			Locations = new[] { new DiagnosticResultLocation("Test0.cs", s_preambleLength + 8, invalidCall.Length - "GetOrAddValue".Length) },
+			Locations = [new DiagnosticResultLocation("Test0.cs", s_preambleLength + 8, invalidCall.Length - "GetOrAddValue".Length)],
 		};
 
 		VerifyCSharpDiagnostic(brokenProgram, expected);

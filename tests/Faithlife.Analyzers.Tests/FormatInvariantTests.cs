@@ -85,7 +85,7 @@ namespace TestApplication
 			Id = FormatInvariantAnalyzer.DiagnosticId,
 			Message = "Prefer string interpolation over FormatInvariant",
 			Severity = DiagnosticSeverity.Info,
-			Locations = new[] { new DiagnosticResultLocation("Test0.cs", 19, 11) },
+			Locations = [new DiagnosticResultLocation("Test0.cs", 19, 11)],
 		};
 
 		VerifyCSharpDiagnostic(invalidProgram, expected);

@@ -248,7 +248,7 @@ namespace TestProgram
 			Id = IfNotNullAnalyzer.DiagnosticId,
 			Message = "Prefer modern language features over IfNotNull usage",
 			Severity = DiagnosticSeverity.Info,
-			Locations = new[] { new DiagnosticResultLocation("Test0.cs", s_preambleLength + 8, 17) },
+			Locations = [new DiagnosticResultLocation("Test0.cs", s_preambleLength + 8, 17)],
 		};
 
 		string invalidProgram = CreateProgram(call);
@@ -297,12 +297,12 @@ namespace TestProgram
 }";
 
 		DiagnosticResult CreateDiagnosticAtColumn(int column) =>
-			new DiagnosticResult
+			new()
 			{
 				Id = IfNotNullAnalyzer.DiagnosticId,
 				Message = "Prefer modern language features over IfNotNull usage",
 				Severity = DiagnosticSeverity.Info,
-				Locations = new[] { new DiagnosticResultLocation("Test0.cs", s_preambleLength + 8, column) },
+				Locations = [new DiagnosticResultLocation("Test0.cs", s_preambleLength + 8, column)],
 			};
 
 		string invalidProgram = CreateProgram(call);
@@ -351,7 +351,7 @@ namespace TestProgram
 			Id = IfNotNullAnalyzer.DiagnosticId,
 			Message = "Prefer modern language features over IfNotNull usage",
 			Severity = DiagnosticSeverity.Info,
-			Locations = new[] { new DiagnosticResultLocation("Test0.cs", s_preambleLength + 8, 4) },
+			Locations = [new DiagnosticResultLocation("Test0.cs", s_preambleLength + 8, 4)],
 		};
 
 		string invalidProgram = CreateProgram(call);
@@ -384,7 +384,7 @@ namespace TestProgram
 			Id = IfNotNullAnalyzer.DiagnosticId,
 			Message = "Prefer modern language features over IfNotNull usage",
 			Severity = DiagnosticSeverity.Info,
-			Locations = new[] { new DiagnosticResultLocation("Test0.cs", s_preambleLength + 8, 4) },
+			Locations = [new DiagnosticResultLocation("Test0.cs", s_preambleLength + 8, 4)],
 		};
 
 		string invalidProgram = CreateProgram("OnAction.IfNotNull(x => x(), () => throw new InvalidOperationException());");
@@ -431,7 +431,7 @@ namespace TestProgram
 			Id = IfNotNullAnalyzer.DiagnosticId,
 			Message = "Prefer modern language features over IfNotNull usage",
 			Severity = DiagnosticSeverity.Info,
-			Locations = new[] { new DiagnosticResultLocation("Test0.cs", s_preambleLength + 8, 17) },
+			Locations = [new DiagnosticResultLocation("Test0.cs", s_preambleLength + 8, 17)],
 		};
 
 		string invalidProgram = CreateProgram(call);

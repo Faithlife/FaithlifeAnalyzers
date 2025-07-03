@@ -30,7 +30,7 @@ public sealed class ToReadOnlyCollectionAnalyzer : DiagnosticAnalyzer
 
 	public const string DiagnosticId = "FL0005";
 
-	public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => ImmutableArray.Create(s_rule);
+	public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => [s_rule];
 
 	private static void AnalyzeOperation(OperationAnalysisContext context, INamedTypeSymbol enumerableUtility)
 	{
@@ -52,7 +52,7 @@ public sealed class ToReadOnlyCollectionAnalyzer : DiagnosticAnalyzer
 		}
 	}
 
-	private static readonly DiagnosticDescriptor s_rule = new DiagnosticDescriptor(
+	private static readonly DiagnosticDescriptor s_rule = new(
 		id: DiagnosticId,
 		title: "ToReadOnlyCollection in constructor",
 		messageFormat: "Avoid ToReadOnlyCollection in constructors",

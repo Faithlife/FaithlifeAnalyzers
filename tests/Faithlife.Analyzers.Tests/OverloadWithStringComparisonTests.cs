@@ -110,7 +110,7 @@ namespace ConsoleApplication1
 			Id = OverloadWithStringComparisonAnalyzer.UseStringComparisonDiagnosticId,
 			Message = "Use an overload that takes a StringComparison",
 			Severity = DiagnosticSeverity.Warning,
-			Locations = new[] { new DiagnosticResultLocation("Test0.cs", 8, 8) },
+			Locations = [new DiagnosticResultLocation("Test0.cs", 8, 8)],
 		};
 
 		VerifyCSharpDiagnostic(program, expected);
@@ -150,7 +150,7 @@ namespace ConsoleApplication1
 			Id = OverloadWithStringComparisonAnalyzer.UseStringComparisonDiagnosticId,
 			Message = "Use an overload that takes a StringComparison",
 			Severity = DiagnosticSeverity.Warning,
-			Locations = new[] { new DiagnosticResultLocation("Test0.cs", 8, 8) },
+			Locations = [new DiagnosticResultLocation("Test0.cs", 8, 8)],
 		};
 
 		VerifyCSharpDiagnostic(program, expected);
@@ -190,7 +190,7 @@ namespace ConsoleApplication1
 			Id = OverloadWithStringComparisonAnalyzer.UseStringComparisonDiagnosticId,
 			Message = "Use an overload that takes a StringComparison",
 			Severity = DiagnosticSeverity.Warning,
-			Locations = new[] { new DiagnosticResultLocation("Test0.cs", 8, 8) },
+			Locations = [new DiagnosticResultLocation("Test0.cs", 8, 8)],
 		};
 
 		VerifyCSharpDiagnostic(program, expected);
@@ -230,7 +230,7 @@ namespace ConsoleApplication1
 			Id = OverloadWithStringComparisonAnalyzer.AvoidStringEqualsDiagnosticId,
 			Message = "Use operator== or a non-ordinal StringComparison",
 			Severity = DiagnosticSeverity.Warning,
-			Locations = new[] { new DiagnosticResultLocation("Test0.cs", 8, 24) },
+			Locations = [new DiagnosticResultLocation("Test0.cs", 8, 24)],
 		};
 
 		VerifyCSharpDiagnostic(program, expected);
@@ -270,7 +270,7 @@ namespace ConsoleApplication1
 			Id = OverloadWithStringComparisonAnalyzer.AvoidStringEqualsDiagnosticId,
 			Message = "Use operator== or a non-ordinal StringComparison",
 			Severity = DiagnosticSeverity.Warning,
-			Locations = new[] { new DiagnosticResultLocation("Test0.cs", 8, 21) },
+			Locations = [new DiagnosticResultLocation("Test0.cs", 8, 21)],
 		};
 
 		VerifyCSharpDiagnostic(program, expected);
@@ -324,7 +324,7 @@ namespace ConsoleApplication1
 			Id = OverloadWithStringComparisonAnalyzer.AvoidStringEqualsDiagnosticId,
 			Message = "Use operator== or a non-ordinal StringComparison",
 			Severity = DiagnosticSeverity.Warning,
-			Locations = new[] { new DiagnosticResultLocation("Test0.cs", 8, 21) },
+			Locations = [new DiagnosticResultLocation("Test0.cs", 8, 21)],
 		};
 
 		VerifyCSharpDiagnostic(program, expected);
@@ -378,7 +378,7 @@ namespace ConsoleApplication1
 			Id = OverloadWithStringComparisonAnalyzer.AvoidStringEqualsDiagnosticId,
 			Message = "Use operator== or a non-ordinal StringComparison",
 			Severity = DiagnosticSeverity.Warning,
-			Locations = new[] { new DiagnosticResultLocation("Test0.cs", 8, 24) },
+			Locations = [new DiagnosticResultLocation("Test0.cs", 8, 24)],
 		};
 
 		VerifyCSharpDiagnostic(program, expected);

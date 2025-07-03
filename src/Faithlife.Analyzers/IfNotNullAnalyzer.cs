@@ -31,7 +31,7 @@ public sealed class IfNotNullAnalyzer : DiagnosticAnalyzer
 
 	public const string DiagnosticId = "FL0010";
 
-	public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => ImmutableArray.Create(s_rule);
+	public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => [s_rule];
 
 	private static void AnalyzeSyntax(SyntaxNodeAnalysisContext context, ImmutableArray<ISymbol> ifNotNullMethods)
 	{
@@ -46,7 +46,7 @@ public sealed class IfNotNullAnalyzer : DiagnosticAnalyzer
 		context.ReportDiagnostic(Diagnostic.Create(s_rule, syntax.GetLocation()));
 	}
 
-	private static readonly DiagnosticDescriptor s_rule = new DiagnosticDescriptor(
+	private static readonly DiagnosticDescriptor s_rule = new(
 		id: DiagnosticId,
 		title: "IfNotNull deprecation",
 		messageFormat: "Prefer modern language features over IfNotNull usage",

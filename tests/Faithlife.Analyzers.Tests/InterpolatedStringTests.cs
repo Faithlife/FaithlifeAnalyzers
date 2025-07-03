@@ -63,7 +63,7 @@ namespace TestApplication
 			Id = InterpolatedStringAnalyzer.DiagnosticIdDollar,
 			Message = "Avoid using ${} in interpolated strings",
 			Severity = DiagnosticSeverity.Warning,
-			Locations = new[] { new DiagnosticResultLocation("Test0.cs", 9, 20) },
+			Locations = [new DiagnosticResultLocation("Test0.cs", 9, 20)],
 		});
 	}
 
@@ -88,14 +88,14 @@ namespace TestApplication
 				Id = InterpolatedStringAnalyzer.DiagnosticIdDollar,
 				Message = "Avoid using ${} in interpolated strings",
 				Severity = DiagnosticSeverity.Warning,
-				Locations = new[] { new DiagnosticResultLocation("Test0.cs", 9, 20) },
+				Locations = [new DiagnosticResultLocation("Test0.cs", 9, 20)],
 			},
 			new DiagnosticResult
 			{
 				Id = InterpolatedStringAnalyzer.DiagnosticIdDollar,
 				Message = "Avoid using ${} in interpolated strings",
 				Severity = DiagnosticSeverity.Warning,
-				Locations = new[] { new DiagnosticResultLocation("Test0.cs", 9, 26) },
+				Locations = [new DiagnosticResultLocation("Test0.cs", 9, 26)],
 			});
 	}
 
@@ -119,7 +119,7 @@ namespace TestApplication
 			Id = InterpolatedStringAnalyzer.DiagnosticIdDollar,
 			Message = "Avoid using ${} in interpolated strings",
 			Severity = DiagnosticSeverity.Warning,
-			Locations = new[] { new DiagnosticResultLocation("Test0.cs", 9, 20) },
+			Locations = [new DiagnosticResultLocation("Test0.cs", 9, 20)],
 		});
 	}
 
@@ -142,7 +142,7 @@ namespace TestApplication
 			Id = InterpolatedStringAnalyzer.DiagnosticIdUnnecessary,
 			Message = "Avoid using an interpolated string where an equivalent literal string exists",
 			Severity = DiagnosticSeverity.Warning,
-			Locations = new[] { new DiagnosticResultLocation("Test0.cs", 8, 17) },
+			Locations = [new DiagnosticResultLocation("Test0.cs", 8, 17)],
 		});
 	}
 
@@ -165,7 +165,7 @@ namespace TestApplication
 			Id = InterpolatedStringAnalyzer.DiagnosticIdUnnecessary,
 			Message = "Avoid using an interpolated string where an equivalent literal string exists",
 			Severity = DiagnosticSeverity.Warning,
-			Locations = new[] { new DiagnosticResultLocation("Test0.cs", 8, 17) },
+			Locations = [new DiagnosticResultLocation("Test0.cs", 8, 17)],
 		});
 	}
 
@@ -214,7 +214,7 @@ namespace TestApplication
 			Id = InterpolatedStringAnalyzer.DiagnosticIdUnnecessary,
 			Message = "Avoid using an interpolated string where an equivalent literal string exists",
 			Severity = DiagnosticSeverity.Warning,
-			Locations = new[] { new DiagnosticResultLocation("Test0.cs", 10, 25) },
+			Locations = [new DiagnosticResultLocation("Test0.cs", 10, 25)],
 		});
 	}
 

@@ -18,7 +18,7 @@ namespace Faithlife.Analyzers;
 [ExportCodeFixProvider(LanguageNames.CSharp, Name = nameof(UntilCanceledCodeFixProvider)), Shared]
 public sealed class UntilCanceledCodeFixProvider : CodeFixProvider
 {
-	public override ImmutableArray<string> FixableDiagnosticIds => ImmutableArray.Create(UntilCanceledAnalyzer.DiagnosticId);
+	public override ImmutableArray<string> FixableDiagnosticIds => [UntilCanceledAnalyzer.DiagnosticId];
 
 	public override FixAllProvider? GetFixAllProvider() => null;
 

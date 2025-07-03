@@ -57,7 +57,7 @@ namespace TestApplication
 			Id = ConstantSwitchAnalyzer.DiagnosticId,
 			Message = "Do not use a constant value as the target of a switch expression",
 			Severity = DiagnosticSeverity.Warning,
-			Locations = new[] { new DiagnosticResultLocation("Test0.cs", 10, 15) },
+			Locations = [new DiagnosticResultLocation("Test0.cs", 10, 15)],
 		};
 
 		VerifyCSharpDiagnostic(invalidProgram, expected);

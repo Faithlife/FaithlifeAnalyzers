@@ -21,7 +21,7 @@ public sealed class ConstantSwitchAnalyzer : DiagnosticAnalyzer
 
 	public const string DiagnosticId = "FL0017";
 
-	public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => ImmutableArray.Create(s_rule);
+	public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => [s_rule];
 
 	private static void AnalyzeOperation(OperationAnalysisContext context)
 	{
@@ -30,7 +30,7 @@ public sealed class ConstantSwitchAnalyzer : DiagnosticAnalyzer
 			context.ReportDiagnostic(Diagnostic.Create(s_rule, context.Operation.Syntax.GetLocation()));
 	}
 
-	private static readonly DiagnosticDescriptor s_rule = new DiagnosticDescriptor(
+	private static readonly DiagnosticDescriptor s_rule = new(
 		id: DiagnosticId,
 		title: "Do not switch on a constant value",
 		messageFormat: "Do not use a constant value as the target of a switch expression",

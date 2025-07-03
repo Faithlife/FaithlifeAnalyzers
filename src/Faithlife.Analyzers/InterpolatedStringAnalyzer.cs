@@ -27,7 +27,7 @@ public sealed class InterpolatedStringAnalyzer : DiagnosticAnalyzer
 	public const string DiagnosticIdDollar = "FL0007";
 	public const string DiagnosticIdUnnecessary = "FL0014";
 
-	public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => ImmutableArray.Create(s_ruleDollar, s_ruleUnnecessary);
+	public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => [s_ruleDollar, s_ruleUnnecessary];
 
 	private static void AnalyzeOperation(OperationAnalysisContext context)
 	{

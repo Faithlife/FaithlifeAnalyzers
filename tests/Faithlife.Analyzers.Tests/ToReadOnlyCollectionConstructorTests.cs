@@ -84,7 +84,7 @@ namespace TestApplication
 			Id = ToReadOnlyCollectionAnalyzer.DiagnosticId,
 			Message = "Avoid ToReadOnlyCollection in constructors",
 			Severity = DiagnosticSeverity.Warning,
-			Locations = new[] { new DiagnosticResultLocation("Test0.cs", 20, 19) },
+			Locations = [new DiagnosticResultLocation("Test0.cs", 20, 19)],
 		};
 
 		VerifyCSharpDiagnostic(program, expected);
@@ -128,7 +128,7 @@ namespace TestApplication
 			Id = ToReadOnlyCollectionAnalyzer.DiagnosticId,
 			Message = "Avoid ToReadOnlyCollection in constructors",
 			Severity = DiagnosticSeverity.Warning,
-			Locations = new[] { new DiagnosticResultLocation("Test0.cs", 20, 20) },
+			Locations = [new DiagnosticResultLocation("Test0.cs", 20, 20)],
 		};
 
 		VerifyCSharpDiagnostic(program, expected);
@@ -172,7 +172,7 @@ namespace TestApplication
 			Id = ToReadOnlyCollectionAnalyzer.DiagnosticId,
 			Message = "Avoid ToReadOnlyCollection in constructors",
 			Severity = DiagnosticSeverity.Warning,
-			Locations = new[] { new DiagnosticResultLocation("Test0.cs", 20, 20) },
+			Locations = [new DiagnosticResultLocation("Test0.cs", 20, 20)],
 		};
 
 		VerifyCSharpDiagnostic(program, expected);

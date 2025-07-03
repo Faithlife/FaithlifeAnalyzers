@@ -32,7 +32,7 @@ public class LocalFunctionEventHandlerTests : CodeFixVerifier
 			Id = LocalFunctionEventHandler.LocalFunctionDiagnosticId,
 			Severity = DiagnosticSeverity.Warning,
 			Message = "Local function event handler",
-			Locations = new[] { new DiagnosticResultLocation("Test0.cs", 7, 3) },
+			Locations = [new DiagnosticResultLocation("Test0.cs", 7, 3)],
 		});
 	}
 
@@ -102,7 +102,7 @@ public class LocalFunctionEventHandlerTests : CodeFixVerifier
 			Id = LocalFunctionEventHandler.LambdaDiagnosticId,
 			Severity = DiagnosticSeverity.Error,
 			Message = "Lambda expression event handler",
-			Locations = new[] { new DiagnosticResultLocation("Test0.cs", 8, 3) },
+			Locations = [new DiagnosticResultLocation("Test0.cs", 8, 3)],
 		});
 	}
 

@@ -39,7 +39,7 @@ public sealed class AvailableWorkStateAnalyzer : DiagnosticAnalyzer
 
 	public const string DiagnosticId = "FL0008";
 
-	public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => ImmutableArray.Create(s_rule);
+	public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => [s_rule];
 
 	private static void AnalyzeOperation(OperationAnalysisContext context, INamedTypeSymbol iworkState, ISymbol workStateNone, ISymbol workStateToDo)
 	{
@@ -92,7 +92,7 @@ public sealed class AvailableWorkStateAnalyzer : DiagnosticAnalyzer
 		context.ReportDiagnostic(Diagnostic.Create(s_rule, propertyReferenceOperation.Syntax.GetLocation()));
 	}
 
-	private static readonly DiagnosticDescriptor s_rule = new DiagnosticDescriptor(
+	private static readonly DiagnosticDescriptor s_rule = new(
 		id: DiagnosticId,
 		title: "WorkState.None and WorkState.ToDo Usage",
 		messageFormat: "WorkState.None and WorkState.ToDo must not be used when an IWorkState is available",

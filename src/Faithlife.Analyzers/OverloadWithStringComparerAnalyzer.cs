@@ -42,7 +42,7 @@ public sealed class OverloadWithStringComparerAnalyzer : DiagnosticAnalyzer
 
 	public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => s_rules;
 
-	private static readonly DiagnosticDescriptor s_useStringComparerRule = new DiagnosticDescriptor(
+	private static readonly DiagnosticDescriptor s_useStringComparerRule = new(
 		id: UseStringComparerDiagnosticId,
 		title: "Use IComparer<string> overload",
 		messageFormat: "Use the overload that takes an IComparer<string>",
@@ -52,5 +52,5 @@ public sealed class OverloadWithStringComparerAnalyzer : DiagnosticAnalyzer
 		description: "The desired comparer must be explicitly specified. Consider StringComparer.Ordinal.",
 		helpLinkUri: $"https://github.com/Faithlife/FaithlifeAnalyzers/wiki/{UseStringComparerDiagnosticId}");
 
-	private static readonly ImmutableArray<DiagnosticDescriptor> s_rules = ImmutableArray.Create(s_useStringComparerRule);
+	private static readonly ImmutableArray<DiagnosticDescriptor> s_rules = [s_useStringComparerRule];
 }

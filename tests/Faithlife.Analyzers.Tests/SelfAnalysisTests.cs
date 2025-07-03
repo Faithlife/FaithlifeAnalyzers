@@ -38,19 +38,19 @@ public class SelfAnalysisTests
 
 		var project = solution.GetProject(projectId)!;
 		var compilation = await project.GetCompilationAsync().ConfigureAwait(false);
-		var compilationWithAnalyzers = compilation!.WithAnalyzers(ImmutableArray.CreateRange(typeof(CurrentAsyncWorkItemAnalyzer)
+		var compilationWithAnalyzers = compilation!.WithAnalyzers([.. typeof(CurrentAsyncWorkItemAnalyzer)
 			.Assembly
 			.GetTypes()
 			.Where(x => x.BaseType == typeof(DiagnosticAnalyzer))
 			.Select(Activator.CreateInstance)
-			.Cast<DiagnosticAnalyzer>()));
+			.Cast<DiagnosticAnalyzer>()]);
 
 		var diagnostics = await compilationWithAnalyzers.GetAnalyzerDiagnosticsAsync().ConfigureAwait(false);
 		Assert.That(diagnostics, Is.Empty);
 	}
 
-	private static readonly IReadOnlyList<string> s_assemblyReferences = new[]
-	{
+	private static readonly IReadOnlyList<string> s_assemblyReferences =
+	[
 		"System.Collections",
 		"System.Collections.Immutable",
 		"System.Composition.AttributedModel",
@@ -60,7 +60,7 @@ public class SelfAnalysisTests
 		"Microsoft.CodeAnalysis",
 		"Microsoft.CodeAnalysis.CSharp",
 		"Microsoft.CodeAnalysis.Workspaces",
-	};
+	];
 
 	private static readonly IReadOnlyList<MetadataReference> s_metadataReferences = s_assemblyReferences
 		.Select(x => (MetadataReference) MetadataReference.CreateFromFile(Assembly.Load(x).Location)).ToList();

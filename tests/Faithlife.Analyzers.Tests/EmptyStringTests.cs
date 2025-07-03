@@ -55,7 +55,7 @@ namespace TestApplication
 			Id = EmptyStringAnalyzer.DiagnosticId,
 			Message = "Prefer \"\" over string.Empty",
 			Severity = DiagnosticSeverity.Warning,
-			Locations = new[] { new DiagnosticResultLocation("Test0.cs", 9, 11) },
+			Locations = [new DiagnosticResultLocation("Test0.cs", 9, 11)],
 		};
 
 		VerifyCSharpDiagnostic(invalidProgram, expected);

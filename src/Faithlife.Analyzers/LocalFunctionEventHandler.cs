@@ -82,7 +82,7 @@ public class LocalFunctionEventHandler : DiagnosticAnalyzer
 		}
 	}
 
-	public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => ImmutableArray.Create(s_localFunctionRule, s_lambdaRule);
+	public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => [s_localFunctionRule, s_lambdaRule];
 
 	public const string LocalFunctionDiagnosticId = "FL0019";
 	public const string LambdaDiagnosticId = "FL0020";

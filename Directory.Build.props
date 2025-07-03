@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <VersionPrefix>1.5.0</VersionPrefix>
-    <LangVersion>11.0</LangVersion>
+    <LangVersion>12.0</LangVersion>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
