@@ -9,6 +9,11 @@ Prefix the description of the change with `[major]`, `[minor]`, or `[patch]` in 
 New analyzers are considered "minor" changes (even though adding a new analyzer is likely to generate warnings
 or errors for existing code when the package is upgraded).
 
+## 1.5.1
+
+* Fix FL0014 false positive for interpolated string handlers: [#88](https://github.com/Faithlife/FaithlifeAnalyzers/issues/88).
+* Update the version of Microsoft.CodeAnalysis used by Faithlife.Analyzers from 3.5.0 to 4.14.0.
+
 ## 1.5.0
 
 * Add FL0019: Local functions used as event handlers (unless they are static, or else they are subscribed and later unsubscribed in the same method).
