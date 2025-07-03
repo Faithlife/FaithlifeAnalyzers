@@ -172,130 +172,72 @@ namespace TestApplication
 	[Test]
 	public void InterpolatedStringWithDebugAssert()
 	{
-		const string validProgram = @"
-using System.Diagnostics;
+		const string validProgram = """
+			using System.Diagnostics;
 
-namespace TestApplication
-{
-	public class TestClass
-	{
-		public TestClass()
-		{
-			var result = false;
-			Debug.Assert(result, $""Assertion was {result}"");
-		}
-	}
-}";
+			namespace TestApplication
+			{
+				public class TestClass
+				{
+					public TestClass()
+					{
+						var result = false;
+						Debug.Assert(result, $"Assertion was {result}");
+					}
+				}
+			}
+			""";
 		VerifyCSharpDiagnostic(validProgram);
 	}
 
 	[Test]
-	public void InterpolatedStringWithDebugAssertShouldNotTriggerFL0014()
+	public void UnnecessaryInterpolatedStringWithDebugAssert()
 	{
-		// This should NOT trigger FL0014 when using interpolated string handlers
-		const string validProgram = @"
-using System.Diagnostics;
+		const string invalidProgram = """
+			using System.Diagnostics;
 
-namespace TestApplication
-{
-	public class TestClass
-	{
-		public void TestMethod()
-		{
-			var result = false;
-			Debug.Assert(result, $""Assertion was {result}"");
-		}
-	}
-}";
+			namespace TestApplication
+			{
+				public class TestClass
+				{
+					public void TestMethod()
+					{
+						var result = false;
+						Debug.Assert(result, $"Assertion message");
+					}
+				}
+			}
+			""";
 
-		// This test passes (no diagnostics expected) but the issue says FL0014 incorrectly fires
-		VerifyCSharpDiagnostic(validProgram);
-	}
-
-	[Test]
-	public void InterpolatedStringWithDebugAssertNoInterpolations()
-	{
-		// Test case for interpolated string with NO interpolations - this SHOULD trigger FL0014
-		const string invalidProgram = @"
-using System.Diagnostics;
-
-namespace TestApplication
-{
-	public class TestClass
-	{
-		public void TestMethod()
-		{
-			var result = false;
-			Debug.Assert(result, $""Assertion message"");
-		}
-	}
-}";
-
-		// This should trigger FL0014 because there are no interpolations
 		VerifyCSharpDiagnostic(invalidProgram, new DiagnosticResult
 		{
 			Id = InterpolatedStringAnalyzer.DiagnosticIdUnnecessary,
 			Message = "Avoid using an interpolated string where an equivalent literal string exists",
 			Severity = DiagnosticSeverity.Warning,
-			Locations = new[] { new DiagnosticResultLocation("Test0.cs", 11, 25) },
+			Locations = new[] { new DiagnosticResultLocation("Test0.cs", 10, 25) },
 		});
 	}
 
 	[Test]
-	public void InterpolatedStringWithoutInterpolationsAndInterpolatedStringHandler()
+	public void InterpolatedStringWithStringBuilderAppend()
 	{
-		// Test case: interpolated string with NO interpolations passed to a method with handler parameter
-		// This SHOULD still trigger FL0014 because there are no interpolations
-		const string invalidProgram = @"
-using System.Diagnostics;
+		const string validProgram = """
+			using System.Diagnostics;
 
-namespace TestApplication
-{
-	public class TestClass
-	{
-		public void TestMethod()
-		{
-			var condition = true;
-			// This interpolated string has no interpolations, so FL0014 should still trigger
-			// even though it's passed to Debug.Assert which has an interpolated string handler
-			Debug.Assert(condition, $""Simple message"");
-		}
-	}
-}";
+			namespace TestApplication
+			{
+				public class TestClass
+				{
+					public void TestMethod()
+					{
+						var result = false;
+						var sb = new System.Text.StringBuilder();
+						sb.Append($"Result was {result}");
+					}
+				}
+			}
+			""";
 
-		// This SHOULD trigger FL0014 because there are no interpolations
-		VerifyCSharpDiagnostic(invalidProgram, new DiagnosticResult
-		{
-			Id = InterpolatedStringAnalyzer.DiagnosticIdUnnecessary,
-			Message = "Avoid using an interpolated string where an equivalent literal string exists",
-			Severity = DiagnosticSeverity.Warning,
-			Locations = new[] { new DiagnosticResultLocation("Test0.cs", 13, 28) },
-		});
-	}
-
-	[Test]
-	public void InterpolatedStringWithInterpolationsAndDebugAssert()
-	{
-		// This is the actual issue from the GitHub issue - FL0014 should NOT trigger
-		// when there ARE interpolations, even with interpolated string handlers
-		const string validProgram = @"
-using System.Diagnostics;
-
-namespace TestApplication
-{
-	public class TestClass
-	{
-		public void TestMethod()
-		{
-			var result = false;
-			// This interpolated string HAS interpolations, so FL0014 should NOT trigger
-			// This was the reported bug - FL0014 was incorrectly triggering for this case
-			Debug.Assert(result, $""Assertion was {result}"");
-		}
-	}
-}";
-
-		// This should NOT trigger FL0014 because there ARE interpolations
 		VerifyCSharpDiagnostic(validProgram);
 	}
 
