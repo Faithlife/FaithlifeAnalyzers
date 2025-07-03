@@ -1,0 +1,17 @@
+<Project>
+  <PropertyGroup>
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageVersion Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="4.14.0" />
+    <PackageVersion Include="Faithlife.Build" Version="5.14.7" />
+    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
+    <PackageVersion Include="NUnit" Version="3.14.0" />
+    <PackageVersion Include="NUnit3TestAdapter" Version="5.0.0" />
+  </ItemGroup>
+  <ItemGroup>
+    <GlobalPackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="4.14.0" />
+    <GlobalPackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" />
+    <GlobalPackageReference Include="StyleCop.Analyzers" Version="1.2.0-beta.556" />
+  </ItemGroup>
+</Project>
