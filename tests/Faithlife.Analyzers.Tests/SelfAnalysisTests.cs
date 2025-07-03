@@ -46,7 +46,7 @@ public class SelfAnalysisTests
 			.Cast<DiagnosticAnalyzer>()));
 
 		var diagnostics = await compilationWithAnalyzers.GetAnalyzerDiagnosticsAsync().ConfigureAwait(false);
-		Assert.IsEmpty(diagnostics);
+		Assert.That(diagnostics, Is.Empty);
 	}
 
 	private static readonly IReadOnlyList<string> s_assemblyReferences = new[]

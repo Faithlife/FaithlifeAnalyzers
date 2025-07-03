@@ -61,7 +61,7 @@ public abstract partial class DiagnosticVerifier
 
 			// warnings for default usings have Severity == DiagnosticSeverity.Hidden
 			foreach (var diagnostic in compilation.GetDiagnostics().Where(x => x.Severity != DiagnosticSeverity.Hidden))
-				Assert.GreaterOrEqual(diagnostic.WarningLevel, 4, diagnostic.GetMessage());
+				Assert.That(diagnostic.WarningLevel, Is.GreaterThanOrEqualTo(4), diagnostic.GetMessage());
 
 			var compilationWithAnalyzers = compilation.WithAnalyzers(ImmutableArray.Create(analyzer));
 			var diags = compilationWithAnalyzers.GetAnalyzerDiagnosticsAsync().GetAwaiter().GetResult();
