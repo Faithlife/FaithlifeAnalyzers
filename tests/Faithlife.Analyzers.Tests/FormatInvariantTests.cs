@@ -6,7 +6,7 @@ using NUnit.Framework;
 namespace Faithlife.Analyzers.Tests;
 
 [TestFixture]
-public sealed class FormatInvariantTests : CodeFixVerifier
+internal sealed class FormatInvariantTests : CodeFixVerifier
 {
 	[Test]
 	public void ValidFormat()

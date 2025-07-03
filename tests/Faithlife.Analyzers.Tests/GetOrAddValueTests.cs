@@ -5,7 +5,7 @@ using NUnit.Framework;
 namespace Faithlife.Analyzers.Tests;
 
 [TestFixture]
-public class GetOrAddValueTests : CodeFixVerifier
+internal sealed class GetOrAddValueTests : CodeFixVerifier
 {
 	[Test]
 	public void ValidUsage()

@@ -12,7 +12,7 @@ namespace Faithlife.Analyzers.Tests;
 /// Diagnostic Producer class with extra methods dealing with applying codefixes
 /// All methods are static
 /// </summary>
-public abstract partial class CodeFixVerifier : DiagnosticVerifier
+internal abstract partial class CodeFixVerifier : DiagnosticVerifier
 {
 	/// <summary>
 	/// Apply the inputted CodeAction to the inputted document.

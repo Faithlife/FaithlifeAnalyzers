@@ -6,7 +6,7 @@ using NUnit.Framework;
 namespace Faithlife.Analyzers.Tests;
 
 [TestFixture]
-public class CurrentAsyncWorkItemTests : CodeFixVerifier
+internal sealed class CurrentAsyncWorkItemTests : CodeFixVerifier
 {
 	[Test]
 	public void ValidUsage()

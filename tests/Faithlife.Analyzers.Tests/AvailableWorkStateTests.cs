@@ -6,7 +6,7 @@ using NUnit.Framework;
 namespace Faithlife.Analyzers.Tests;
 
 [TestFixture]
-public class AvailableWorkStateTests : CodeFixVerifier
+internal sealed class AvailableWorkStateTests : CodeFixVerifier
 {
 	[Test]
 	public void NoDiagnosticWhenNotUsed()

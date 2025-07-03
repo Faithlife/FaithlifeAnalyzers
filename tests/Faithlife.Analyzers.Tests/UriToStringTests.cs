@@ -5,7 +5,7 @@ using NUnit.Framework;
 namespace Faithlife.Analyzers.Tests;
 
 [TestFixture]
-public class UriToStringTests : CodeFixVerifier
+internal sealed class UriToStringTests : CodeFixVerifier
 {
 	[Test]
 	public void ValidUsage()

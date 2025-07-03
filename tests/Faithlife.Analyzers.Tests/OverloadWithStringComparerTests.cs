@@ -6,9 +6,9 @@ using NUnit.Framework;
 namespace Faithlife.Analyzers.Tests;
 
 [TestFixture]
-public class OverloadWithStringComparerTests : CodeFixVerifier
+internal sealed class OverloadWithStringComparerTests : CodeFixVerifier
 {
-	public enum Ordering
+	internal enum Ordering
 	{
 		OrderBy,
 		OrderByDescending,

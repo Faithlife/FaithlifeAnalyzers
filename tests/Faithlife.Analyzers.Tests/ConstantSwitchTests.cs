@@ -5,7 +5,7 @@ using NUnit.Framework;
 namespace Faithlife.Analyzers.Tests;
 
 [TestFixture]
-public sealed class ConstantSwitchTests : CodeFixVerifier
+internal sealed class ConstantSwitchTests : CodeFixVerifier
 {
 	[Test]
 	public void ValidSwitchExpression()

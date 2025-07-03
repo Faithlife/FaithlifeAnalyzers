@@ -6,7 +6,7 @@ using NUnit.Framework;
 namespace Faithlife.Analyzers.Tests;
 
 [TestFixture]
-public class ToReadOnlyCollectionConstructorTests : CodeFixVerifier
+internal sealed class ToReadOnlyCollectionConstructorTests : CodeFixVerifier
 {
 	[Test]
 	public void EnumerationIsValid()

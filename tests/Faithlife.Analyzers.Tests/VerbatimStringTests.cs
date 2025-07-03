@@ -5,7 +5,7 @@ using NUnit.Framework;
 namespace Faithlife.Analyzers.Tests;
 
 [TestFixture]
-public sealed class VerbatimStringTests : DiagnosticVerifier
+internal sealed class VerbatimStringTests : DiagnosticVerifier
 {
 	[Test]
 	public void ValidStrings()

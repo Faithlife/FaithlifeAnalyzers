@@ -5,7 +5,7 @@ using NUnit.Framework;
 namespace Faithlife.Analyzers.Tests;
 
 [TestFixture]
-public class DbConnectorCommandInterpolatedTests : CodeFixVerifier
+internal sealed class DbConnectorCommandInterpolatedTests : CodeFixVerifier
 {
 	[Test]
 	public void ValidUsage()

@@ -16,7 +16,7 @@ namespace Faithlife.Analyzers.Tests;
 /// Superclass of all Unit tests made for diagnostics with codefixes.
 /// Contains methods used to verify correctness of codefixes
 /// </summary>
-public abstract partial class CodeFixVerifier : DiagnosticVerifier
+internal abstract partial class CodeFixVerifier : DiagnosticVerifier
 {
 	/// <summary>
 	/// Returns the codefix being tested (C#) - to be implemented in non-abstract class

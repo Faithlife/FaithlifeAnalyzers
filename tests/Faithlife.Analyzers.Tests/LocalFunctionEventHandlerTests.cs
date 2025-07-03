@@ -5,7 +5,7 @@ using NUnit.Framework;
 namespace Faithlife.Analyzers.Tests;
 
 [TestFixture]
-public class LocalFunctionEventHandlerTests : CodeFixVerifier
+internal sealed class LocalFunctionEventHandlerTests : CodeFixVerifier
 {
 	[Test]
 	public void LocalFunction()

@@ -14,7 +14,7 @@ using NUnit.Framework;
 namespace Faithlife.Analyzers.Tests;
 
 [TestFixture]
-public class SelfAnalysisTests
+internal sealed class SelfAnalysisTests
 {
 	[Test]
 	public async Task CheckFaithlifeAnalyzers()

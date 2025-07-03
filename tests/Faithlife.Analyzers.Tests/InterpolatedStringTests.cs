@@ -5,7 +5,7 @@ using NUnit.Framework;
 namespace Faithlife.Analyzers.Tests;
 
 [TestFixture]
-public sealed class InterpolatedStringTests : DiagnosticVerifier
+internal sealed class InterpolatedStringTests : DiagnosticVerifier
 {
 	[Test]
 	public void ValidInterpolatedStrings()

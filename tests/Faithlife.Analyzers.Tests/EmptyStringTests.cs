@@ -6,7 +6,7 @@ using NUnit.Framework;
 namespace Faithlife.Analyzers.Tests;
 
 [TestFixture]
-public sealed class EmptyStringTests : CodeFixVerifier
+internal sealed class EmptyStringTests : CodeFixVerifier
 {
 	[Test]
 	public void ValidEmptyString()

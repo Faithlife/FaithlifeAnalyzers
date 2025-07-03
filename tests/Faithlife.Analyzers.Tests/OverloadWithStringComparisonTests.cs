@@ -6,7 +6,7 @@ using NUnit.Framework;
 namespace Faithlife.Analyzers.Tests;
 
 [TestFixture]
-public sealed class OverloadWithStringComparisonTests : CodeFixVerifier
+internal sealed class OverloadWithStringComparisonTests : CodeFixVerifier
 {
 	[Test]
 	public void ValidUsage()

@@ -7,7 +7,7 @@ using NUnit.Framework;
 namespace Faithlife.Analyzers.Tests;
 
 [TestFixture]
-public sealed class IfNotNullTests : CodeFixVerifier
+internal sealed class IfNotNullTests : CodeFixVerifier
 {
 	// An expression evaluating to a value type without a supplied default
 	// needs to use the null coalescing to maintain the correct type.
