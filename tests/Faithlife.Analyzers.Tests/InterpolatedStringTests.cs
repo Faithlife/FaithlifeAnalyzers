@@ -169,5 +169,77 @@ namespace TestApplication
 		});
 	}
 
+	[Test]
+	public void InterpolatedStringWithDebugAssert()
+	{
+		const string validProgram = """
+			using System.Diagnostics;
+
+			namespace TestApplication
+			{
+				public class TestClass
+				{
+					public TestClass()
+					{
+						var result = false;
+						Debug.Assert(result, $"Assertion was {result}");
+					}
+				}
+			}
+			""";
+		VerifyCSharpDiagnostic(validProgram);
+	}
+
+	[Test]
+	public void UnnecessaryInterpolatedStringWithDebugAssert()
+	{
+		const string invalidProgram = """
+			using System.Diagnostics;
+
+			namespace TestApplication
+			{
+				public class TestClass
+				{
+					public void TestMethod()
+					{
+						var result = false;
+						Debug.Assert(result, $"Assertion message");
+					}
+				}
+			}
+			""";
+
+		VerifyCSharpDiagnostic(invalidProgram, new DiagnosticResult
+		{
+			Id = InterpolatedStringAnalyzer.DiagnosticIdUnnecessary,
+			Message = "Avoid using an interpolated string where an equivalent literal string exists",
+			Severity = DiagnosticSeverity.Warning,
+			Locations = new[] { new DiagnosticResultLocation("Test0.cs", 10, 25) },
+		});
+	}
+
+	[Test]
+	public void InterpolatedStringWithStringBuilderAppend()
+	{
+		const string validProgram = """
+			using System.Diagnostics;
+
+			namespace TestApplication
+			{
+				public class TestClass
+				{
+					public void TestMethod()
+					{
+						var result = false;
+						var sb = new System.Text.StringBuilder();
+						sb.Append($"Result was {result}");
+					}
+				}
+			}
+			""";
+
+		VerifyCSharpDiagnostic(validProgram);
+	}
+
 	protected override DiagnosticAnalyzer GetCSharpDiagnosticAnalyzer() => new InterpolatedStringAnalyzer();
 }

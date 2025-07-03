@@ -31,15 +31,13 @@ public sealed class InterpolatedStringAnalyzer : DiagnosticAnalyzer
 
 	private static void AnalyzeOperation(OperationAnalysisContext context)
 	{
-		var invocationOperation = (IInterpolatedStringOperation)context.Operation;
+		var invocationOperation = (IInterpolatedStringOperation) context.Operation;
 		var foundDollarSign = false;
 
-#pragma warning disable CS0618 // Type or member is obsolete
-		if (!invocationOperation.Children.Any(child => child is IInterpolationOperation))
+		if (!invocationOperation.ChildOperations.Any(child => child is IInterpolationOperation or IInterpolatedStringAppendOperation { Kind: OperationKind.InterpolatedStringAppendFormatted }))
 			context.ReportDiagnostic(Diagnostic.Create(s_ruleUnnecessary, invocationOperation.Syntax.GetLocation()));
 
-		foreach (var child in invocationOperation.Children)
-#pragma warning restore CS0618 // Type or member is obsolete
+		foreach (var child in invocationOperation.ChildOperations)
 		{
 			if ((child as IInterpolatedStringTextOperation)?.Text.Syntax.ToFullString().EndsWith("$", StringComparison.Ordinal) ?? false)
 			{
