@@ -16,15 +16,13 @@ public sealed class OverloadWithStringComparerAnalyzer : DiagnosticAnalyzer
 
 		context.RegisterCompilationStartAction(compilationStartAnalysisContext =>
 		{
-			var enumerableType = compilationStartAnalysisContext.Compilation.GetTypeByMetadataName("System.Linq.Enumerable");
-			if (enumerableType != null)
+			if (compilationStartAnalysisContext.Compilation.GetTypeByMetadataName("System.Linq.Enumerable") is { } enumerableType)
 			{
 				compilationStartAnalysisContext.RegisterOperationAction(operationContext =>
 				{
 					var operation = (IInvocationOperation) operationContext.Operation;
-					var targetMethod = operation.TargetMethod;
 
-					if (targetMethod != null &&
+					if (operation.TargetMethod is { } targetMethod &&
 						SymbolEqualityComparer.Default.Equals(targetMethod.ContainingType, enumerableType) &&
 						(targetMethod.Name == "OrderBy" || targetMethod.Name == "OrderByDescending" || targetMethod.Name == "ThenBy" || targetMethod.Name == "ThenByDescending") &&
 						targetMethod.TypeArguments.Length == 2 &&

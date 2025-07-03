@@ -73,7 +73,7 @@ public sealed class IfNotNullCodeFixProvider : CodeFixProvider
 				// Only handle expression-bodied lambdas. A lambda with a block body would need to
 				// be converted to a local method, and that's probably too much effort to bother with
 				// relative to the number of them I would expect to see.
-				if (!(lambda.Body is ExpressionSyntax defaultLambdaExpression))
+				if (lambda.Body is not ExpressionSyntax defaultLambdaExpression)
 					return;
 
 				// The point of allowing lambas to be specified was so that the value could be lazily evaluated.
@@ -156,11 +156,9 @@ public sealed class IfNotNullCodeFixProvider : CodeFixProvider
 		if (parameterList.Length != 1)
 			return;
 
-		var lambdaExpressionBody = lambdaExpression.Body as ExpressionSyntax;
-
 		// To properly handle block-bodied lambda expressions, we'll need to hoist
 		// the body of the lambda to a local function and call it. For now, skip this.
-		if (lambdaExpressionBody is null)
+		if (lambdaExpression.Body is not ExpressionSyntax lambdaExpressionBody)
 			return;
 
 		// There are several factors that might prohibit us from using the conditional access operator.

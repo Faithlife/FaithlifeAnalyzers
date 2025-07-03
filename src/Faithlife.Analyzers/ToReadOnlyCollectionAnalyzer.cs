@@ -16,8 +16,7 @@ public sealed class ToReadOnlyCollectionAnalyzer : DiagnosticAnalyzer
 
 		context.RegisterCompilationStartAction(compilationStartAnalysisContext =>
 		{
-			var enumerableUtility = compilationStartAnalysisContext.Compilation.GetTypeByMetadataName("Libronix.Utility.EnumerableUtility");
-			if (enumerableUtility != null)
+			if (compilationStartAnalysisContext.Compilation.GetTypeByMetadataName("Libronix.Utility.EnumerableUtility") is { } enumerableUtility)
 			{
 				compilationStartAnalysisContext.RegisterOperationBlockStartAction(context =>
 				{

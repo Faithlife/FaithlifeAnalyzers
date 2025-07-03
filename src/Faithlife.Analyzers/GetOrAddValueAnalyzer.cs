@@ -18,12 +18,10 @@ public sealed class GetOrAddValueAnalyzer : DiagnosticAnalyzer
 
 		context.RegisterCompilationStartAction(compilationStartAnalysisContext =>
 		{
-			var dictionaryUtility = compilationStartAnalysisContext.Compilation.GetTypeByMetadataName("Libronix.Utility.DictionaryUtility");
-			if (dictionaryUtility is null)
+			if (compilationStartAnalysisContext.Compilation.GetTypeByMetadataName("Libronix.Utility.DictionaryUtility") is not { } dictionaryUtility)
 				return;
 
-			var concurrentDictionary = compilationStartAnalysisContext.Compilation.GetTypeByMetadataName("System.Collections.Concurrent.ConcurrentDictionary`2");
-			if (concurrentDictionary is null)
+			if (compilationStartAnalysisContext.Compilation.GetTypeByMetadataName("System.Collections.Concurrent.ConcurrentDictionary`2") is not { } concurrentDictionary)
 				return;
 
 			compilationStartAnalysisContext.RegisterSyntaxNodeAction(c => AnalyzeSyntax(c, dictionaryUtility, concurrentDictionary), SyntaxKind.InvocationExpression);

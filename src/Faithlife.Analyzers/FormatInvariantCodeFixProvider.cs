@@ -36,8 +36,7 @@ public sealed class FormatInvariantCodeFixProvider : CodeFixProvider
 		if (invocation.Expression is not MemberAccessExpressionSyntax { Expression: LiteralExpressionSyntax invocationTarget } || !invocationTarget.IsKind(SyntaxKind.StringLiteralExpression))
 			return;
 
-		var formatString = invocationTarget.Token.Value as string;
-		if (formatString is null)
+		if (invocationTarget.Token.Value is not string formatString)
 			return;
 
 		var matches = Regex.Matches(formatString, @"(?!\\){\s*(\d+)(,-?\d+)?(:[^}]+)?\s*}");

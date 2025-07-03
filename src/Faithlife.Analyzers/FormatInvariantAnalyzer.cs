@@ -16,8 +16,7 @@ public sealed class FormatInvariantAnalyzer : DiagnosticAnalyzer
 
 		context.RegisterCompilationStartAction(compilationStartAnalysisContext =>
 		{
-			var stringUtilityType = compilationStartAnalysisContext.Compilation.GetTypeByMetadataName("Libronix.Utility.StringUtility");
-			if (stringUtilityType == null)
+			if (compilationStartAnalysisContext.Compilation.GetTypeByMetadataName("Libronix.Utility.StringUtility") is not { } stringUtilityType)
 				return;
 
 			var formatInvariantMethods = stringUtilityType.GetMembers("FormatInvariant");
@@ -36,14 +35,12 @@ public sealed class FormatInvariantAnalyzer : DiagnosticAnalyzer
 	{
 		var syntax = (InvocationExpressionSyntax) context.Node;
 
-		var methodSymbol = context.SemanticModel.GetSymbolInfo(syntax.Expression).Symbol as IMethodSymbol;
-		if (methodSymbol == null ||
+		if (context.SemanticModel.GetSymbolInfo(syntax.Expression).Symbol is not IMethodSymbol methodSymbol ||
 			(methodSymbol.ReducedFrom == null && methodSymbol.ConstructedFrom == null) ||
 			!formatInvariantMethods.Any(x => SymbolEqualityComparer.Default.Equals(x, methodSymbol.ReducedFrom) || SymbolEqualityComparer.Default.Equals(x, methodSymbol.ConstructedFrom)))
 			return;
 
-		var memberAccessExpression = syntax.Expression as MemberAccessExpressionSyntax;
-		if (memberAccessExpression is null)
+		if (syntax.Expression is not MemberAccessExpressionSyntax memberAccessExpression)
 			return;
 
 		if (!memberAccessExpression.Expression.IsKind(SyntaxKind.StringLiteralExpression))

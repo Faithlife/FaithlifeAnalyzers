@@ -33,8 +33,7 @@ public sealed class ToReadOnlyCollectionCodeFixProvider : CodeFixProvider
 		if (invocation is null)
 			return;
 
-		var methodSymbol = semanticModel.GetSymbolInfo(invocation).Symbol as IMethodSymbol;
-		if (methodSymbol is null)
+		if (semanticModel.GetSymbolInfo(invocation).Symbol is not IMethodSymbol methodSymbol)
 			return;
 
 		context.RegisterCodeFix(

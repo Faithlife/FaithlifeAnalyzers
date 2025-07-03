@@ -25,8 +25,7 @@ public class AvailableWorkStateCodeFixProvider : CodeFixProvider
 		var root = await context.Document.GetSyntaxRootAsync(context.CancellationToken).ConfigureAwait(false);
 
 		var semanticModel = await context.Document.GetSemanticModelAsync(context.CancellationToken).ConfigureAwait(false);
-		var iworkState = semanticModel.Compilation.GetTypeByMetadataName("Libronix.Utility.Threading.IWorkState");
-		if (iworkState is null)
+		if (semanticModel.Compilation.GetTypeByMetadataName("Libronix.Utility.Threading.IWorkState") is not { } iworkState)
 			return;
 
 		var diagnostic = context.Diagnostics.First();
@@ -46,8 +45,7 @@ public class AvailableWorkStateCodeFixProvider : CodeFixProvider
 		if (asyncAction != null)
 		{
 			var ienumerable = semanticModel.Compilation.GetTypeByMetadataName("System.Collections.Generic.IEnumerable`1");
-			var returnTypeSymbol = semanticModel.GetSymbolInfo(containingMethod.ReturnType).Symbol as INamedTypeSymbol;
-			if (returnTypeSymbol != null && returnTypeSymbol.ConstructedFrom != null && SymbolEqualityComparer.Default.Equals(returnTypeSymbol.ConstructedFrom, ienumerable) &&
+			if (semanticModel.GetSymbolInfo(containingMethod.ReturnType).Symbol is INamedTypeSymbol returnTypeSymbol && returnTypeSymbol.ConstructedFrom != null && SymbolEqualityComparer.Default.Equals(returnTypeSymbol.ConstructedFrom, ienumerable) &&
 				SymbolEqualityComparer.Default.Equals(returnTypeSymbol.TypeArguments[0], asyncAction))
 			{
 				context.RegisterCodeFix(

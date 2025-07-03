@@ -18,12 +18,10 @@ public sealed class UntilCanceledAnalyzer : DiagnosticAnalyzer
 
 		context.RegisterCompilationStartAction(compilationStartAnalysisContext =>
 		{
-			var asyncEnumerableUtility = compilationStartAnalysisContext.Compilation.GetTypeByMetadataName("Libronix.Utility.Threading.AsyncEnumerableUtility");
-			if (asyncEnumerableUtility is null)
+			if (compilationStartAnalysisContext.Compilation.GetTypeByMetadataName("Libronix.Utility.Threading.AsyncEnumerableUtility") is not { } asyncEnumerableUtility)
 				return;
 
-			var asyncAction = compilationStartAnalysisContext.Compilation.GetTypeByMetadataName("Libronix.Utility.Threading.AsyncAction");
-			if (asyncAction is null)
+			if (compilationStartAnalysisContext.Compilation.GetTypeByMetadataName("Libronix.Utility.Threading.AsyncAction") is not { } asyncAction)
 				return;
 
 			compilationStartAnalysisContext.RegisterSyntaxNodeAction(c => AnalyzeSyntax(c, asyncEnumerableUtility, asyncAction), SyntaxKind.InvocationExpression);

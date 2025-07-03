@@ -17,12 +17,10 @@ public sealed class AvailableWorkStateAnalyzer : DiagnosticAnalyzer
 
 		context.RegisterCompilationStartAction(compilationStartAnalysisContext =>
 		{
-			var iworkState = compilationStartAnalysisContext.Compilation.GetTypeByMetadataName("Libronix.Utility.Threading.IWorkState");
-			if (iworkState is null)
+			if (compilationStartAnalysisContext.Compilation.GetTypeByMetadataName("Libronix.Utility.Threading.IWorkState") is not { } iworkState)
 				return;
 
-			var workStateClass = compilationStartAnalysisContext.Compilation.GetTypeByMetadataName("Libronix.Utility.Threading.WorkState");
-			if (workStateClass is null)
+			if (compilationStartAnalysisContext.Compilation.GetTypeByMetadataName("Libronix.Utility.Threading.WorkState") is not { } workStateClass)
 				return;
 
 			var workStateNone = workStateClass.GetMembers("None");
@@ -69,15 +67,13 @@ public sealed class AvailableWorkStateAnalyzer : DiagnosticAnalyzer
 		var asyncMethodContext = context.Compilation.GetTypeByMetadataName("Libronix.Utility.Threading.AsyncMethodContext");
 		var hasWorkStateParameters = containingMethod.ParameterList.Parameters.Any(parameter =>
 		{
-			var parameterSymbolInfo = semanticModel.GetSymbolInfo(parameter.Type);
-			if (parameterSymbolInfo.Symbol is null)
+			if (semanticModel.GetSymbolInfo(parameter.Type) is not { Symbol: not null } parameterSymbolInfo)
 				return false;
 
 			if (SymbolEqualityComparer.Default.Equals(parameterSymbolInfo.Symbol, iworkState))
 				return true;
 
-			var namedTypeSymbol = parameterSymbolInfo.Symbol as INamedTypeSymbol;
-			if (namedTypeSymbol is null)
+			if (parameterSymbolInfo.Symbol is not INamedTypeSymbol namedTypeSymbol)
 				return false;
 
 			if (SymbolEqualityComparer.Default.Equals(namedTypeSymbol, iworkState) || SymbolEqualityComparer.Default.Equals(namedTypeSymbol, cancellationToken) || SymbolEqualityComparer.Default.Equals(namedTypeSymbol, asyncMethodContext))

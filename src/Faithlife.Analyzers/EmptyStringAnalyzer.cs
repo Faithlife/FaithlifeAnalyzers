@@ -15,8 +15,7 @@ public sealed class EmptyStringAnalyzer : DiagnosticAnalyzer
 
 		context.RegisterCompilationStartAction(compilationStartAnalysisContext =>
 		{
-			var stringClass = compilationStartAnalysisContext.Compilation.GetTypeByMetadataName("System.String");
-			if (stringClass == null)
+			if (compilationStartAnalysisContext.Compilation.GetTypeByMetadataName("System.String") is not { } stringClass)
 				return;
 
 			var emptyString = stringClass.GetMembers("Empty");

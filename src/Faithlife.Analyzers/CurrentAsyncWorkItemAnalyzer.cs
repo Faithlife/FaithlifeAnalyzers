@@ -17,16 +17,14 @@ public sealed class CurrentAsyncWorkItemAnalyzer : DiagnosticAnalyzer
 
 		context.RegisterCompilationStartAction(compilationStartAnalysisContext =>
 		{
-			var asyncWorkItem = compilationStartAnalysisContext.Compilation.GetTypeByMetadataName("Libronix.Utility.Threading.AsyncWorkItem");
-			if (asyncWorkItem is null)
+			if (compilationStartAnalysisContext.Compilation.GetTypeByMetadataName("Libronix.Utility.Threading.AsyncWorkItem") is not { } asyncWorkItem)
 				return;
 
 			var currentMembers = asyncWorkItem.GetMembers("Current");
 			if (currentMembers.Length != 1)
 				return;
 
-			var asyncAction = compilationStartAnalysisContext.Compilation.GetTypeByMetadataName("Libronix.Utility.Threading.AsyncAction");
-			if (asyncAction is null)
+			if (compilationStartAnalysisContext.Compilation.GetTypeByMetadataName("Libronix.Utility.Threading.AsyncAction") is not { } asyncAction)
 				return;
 
 			compilationStartAnalysisContext.RegisterSyntaxNodeAction(c => AnalyzeSyntax(c, asyncWorkItem, asyncAction, currentMembers[0]), SyntaxKind.SimpleMemberAccessExpression);
@@ -46,8 +44,7 @@ public sealed class CurrentAsyncWorkItemAnalyzer : DiagnosticAnalyzer
 			return;
 
 		var ienumerable = context.SemanticModel.Compilation.GetTypeByMetadataName("System.Collections.Generic.IEnumerable`1");
-		var returnTypeSymbol = context.SemanticModel.GetSymbolInfo(containingMethod.ReturnType).Symbol as INamedTypeSymbol;
-		if (returnTypeSymbol != null && returnTypeSymbol.ConstructedFrom != null && SymbolEqualityComparer.Default.Equals(returnTypeSymbol.ConstructedFrom, ienumerable) &&
+		if (context.SemanticModel.GetSymbolInfo(containingMethod.ReturnType).Symbol is INamedTypeSymbol { ConstructedFrom: not null } returnTypeSymbol && SymbolEqualityComparer.Default.Equals(returnTypeSymbol.ConstructedFrom, ienumerable) &&
 			SymbolEqualityComparer.Default.Equals(returnTypeSymbol.TypeArguments[0], asyncAction))
 		{
 			return;

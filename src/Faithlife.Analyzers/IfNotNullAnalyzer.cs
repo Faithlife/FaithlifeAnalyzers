@@ -17,8 +17,7 @@ public sealed class IfNotNullAnalyzer : DiagnosticAnalyzer
 
 		context.RegisterCompilationStartAction(compilationStartAnalysisContext =>
 		{
-			var ifNotNullExtensionMethodType = compilationStartAnalysisContext.Compilation.GetTypeByMetadataName("Libronix.Utility.IfNotNull.IfNotNullExtensionMethod");
-			if (ifNotNullExtensionMethodType == null)
+			if (compilationStartAnalysisContext.Compilation.GetTypeByMetadataName("Libronix.Utility.IfNotNull.IfNotNullExtensionMethod") is not { } ifNotNullExtensionMethodType)
 				return;
 
 			var ifNotNullMethods = ifNotNullExtensionMethodType.GetMembers("IfNotNull");
@@ -37,8 +36,7 @@ public sealed class IfNotNullAnalyzer : DiagnosticAnalyzer
 	{
 		var syntax = (InvocationExpressionSyntax) context.Node;
 
-		var methodSymbol = context.SemanticModel.GetSymbolInfo(syntax.Expression).Symbol as IMethodSymbol;
-		if (methodSymbol == null ||
+		if (context.SemanticModel.GetSymbolInfo(syntax.Expression).Symbol is not IMethodSymbol methodSymbol ||
 			(methodSymbol.ReducedFrom == null && methodSymbol.ConstructedFrom == null) ||
 			!ifNotNullMethods.Any(x => SymbolEqualityComparer.Default.Equals(x, methodSymbol.ReducedFrom) || SymbolEqualityComparer.Default.Equals(x, methodSymbol.ConstructedFrom)))
 			return;

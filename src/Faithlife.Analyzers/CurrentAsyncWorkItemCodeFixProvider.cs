@@ -52,8 +52,7 @@ public class CurrentAsyncWorkItemCodeFixProvider : CodeFixProvider
 			if (SymbolEqualityComparer.Default.Equals(symbolInfo.Symbol, iworkState))
 				return true;
 
-			var namedTypeSymbol = symbolInfo.Symbol as INamedTypeSymbol;
-			if (namedTypeSymbol is null)
+			if (symbolInfo.Symbol is not INamedTypeSymbol namedTypeSymbol)
 				return false;
 
 			return namedTypeSymbol.AllInterfaces.Any(x => SymbolEqualityComparer.Default.Equals(x, iworkState));

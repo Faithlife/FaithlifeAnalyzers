@@ -18,10 +18,9 @@ public sealed class OverloadWithStringComparisonAnalyzer : DiagnosticAnalyzer
 		// NOTE: some parts of this implementation derived from https://github.com/dotnet/roslyn-analyzers/blob/7a2540618fc32c5b38bdb43bc3a70ba6401ed135/src/Microsoft.NetCore.Analyzers/Core/Runtime/UseOrdinalStringComparison.cs
 		context.RegisterCompilationStartAction(compilationStartAnalysisContext =>
 		{
-			var stringComparisonType = compilationStartAnalysisContext.Compilation.GetTypeByMetadataName("System.StringComparison");
 			var cultureInfoType = compilationStartAnalysisContext.Compilation.GetTypeByMetadataName("System.Globalization.CultureInfo");
 
-			if (stringComparisonType != null)
+			if (compilationStartAnalysisContext.Compilation.GetTypeByMetadataName("System.StringComparison") is { } stringComparisonType)
 			{
 				compilationStartAnalysisContext.RegisterOperationAction(operationContext =>
 				{

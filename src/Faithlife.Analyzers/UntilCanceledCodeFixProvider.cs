@@ -27,15 +27,14 @@ public sealed class UntilCanceledCodeFixProvider : CodeFixProvider
 		var root = await context.Document.GetSyntaxRootAsync(context.CancellationToken).ConfigureAwait(false);
 
 		var semanticModel = await context.Document.GetSemanticModelAsync(context.CancellationToken).ConfigureAwait(false);
-		var iworkState = semanticModel.Compilation.GetTypeByMetadataName("Libronix.Utility.Threading.IWorkState");
-		if (iworkState is null)
+		if (semanticModel.Compilation.GetTypeByMetadataName("Libronix.Utility.Threading.IWorkState") is not { } iworkState)
 			return;
 
 		var diagnostic = context.Diagnostics.First();
 		var diagnosticSpan = diagnostic.Location.SourceSpan;
 
 		var diagnosticNode = root.FindNode(diagnosticSpan);
-		if (!(diagnosticNode is ArgumentListSyntax))
+		if (diagnosticNode is not ArgumentListSyntax)
 			return;
 
 		var containingMethod = diagnosticNode.Ancestors().OfType<MethodDeclarationSyntax>().FirstOrDefault();
@@ -51,8 +50,7 @@ public sealed class UntilCanceledCodeFixProvider : CodeFixProvider
 			if (SymbolEqualityComparer.Default.Equals(symbolInfo.Symbol, iworkState))
 				return true;
 
-			var namedTypeSymbol = symbolInfo.Symbol as INamedTypeSymbol;
-			if (namedTypeSymbol is null)
+			if (symbolInfo.Symbol is not INamedTypeSymbol namedTypeSymbol)
 				return false;
 
 			return namedTypeSymbol.AllInterfaces.Any(x => SymbolEqualityComparer.Default.Equals(x, iworkState));

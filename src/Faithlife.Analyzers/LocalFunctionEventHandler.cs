@@ -19,8 +19,7 @@ public class LocalFunctionEventHandler : DiagnosticAnalyzer
 
 	private void Analyze(SyntaxNodeAnalysisContext context)
 	{
-		var containingMethod = TryFindEnclosingMethod(context.Node);
-		if (containingMethod == null)
+		if (TryFindEnclosingMethod(context.Node) is not { } containingMethod)
 			return;
 
 		var assignment = (AssignmentExpressionSyntax) context.Node;
