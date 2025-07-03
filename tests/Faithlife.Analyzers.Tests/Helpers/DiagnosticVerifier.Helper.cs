@@ -180,7 +180,6 @@ public abstract partial class DiagnosticVerifier
 		"System",
 		"System.Collections",
 		"System.Collections.Concurrent",
-		"System.Diagnostics.Debug",
 		"System.Linq",
 		"System.Private.CoreLib",
 		"System.Private.Uri",
