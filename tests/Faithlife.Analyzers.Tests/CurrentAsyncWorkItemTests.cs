@@ -11,254 +11,269 @@ internal sealed class CurrentAsyncWorkItemTests : CodeFixVerifier
 	[Test]
 	public void ValidUsage()
 	{
-		const string validProgram = preamble + @"
-namespace TestApplication
-{
-	internal static class TestClass
-	{
-		public static IEnumerable<AsyncAction> UtilityMethod(IWorkState ignored)
-		{
-			HelperMethod(AsyncWorkItem.Current);
+		const string validProgram = $$"""
+			{{c_preamble}}
+			namespace TestApplication
+			{
+				internal static class TestClass
+				{
+					public static IEnumerable<AsyncAction> UtilityMethod(IWorkState ignored)
+					{
+						HelperMethod(AsyncWorkItem.Current);
 
-			yield break;
-		}
+						yield break;
+					}
 
-		private static void HelperMethod(IWorkState workState)
-		{
-		}
-	}
-}";
+					private static void HelperMethod(IWorkState workState)
+					{
+					}
+				}
+			}
+			""";
 		VerifyCSharpDiagnostic(validProgram);
 	}
 
 	[Test]
 	public void AsyncWorkItemCurrentInAsyncWorkItemStartLambdaIsValid()
 	{
-		const string validProgram = preamble + @"
-namespace TestApplication
-{
-	internal static class TestClass
-	{
-		public static void Method()
-		{
-			AsyncWorkItem.Start(null, obj => HelperMethod(AsyncWorkItem.Current));
-		}
+		const string validProgram = $$"""
+			{{c_preamble}}
+			namespace TestApplication
+			{
+				internal static class TestClass
+				{
+					public static void Method()
+					{
+						AsyncWorkItem.Start(null, obj => HelperMethod(AsyncWorkItem.Current));
+					}
 
-		private static void HelperMethod(IWorkState workState)
-		{
-		}
-	}
-}";
+					private static void HelperMethod(IWorkState workState)
+					{
+					}
+				}
+			}
+			""";
 		VerifyCSharpDiagnostic(validProgram);
 	}
 
 	[Test]
 	public void AsyncWorkItemCurrentInAsyncWorkItemStartLambdaIsValid2()
 	{
-		const string validProgram = preamble + @"
-namespace TestApplication
-{
-	internal static class TestClass
-	{
-		public static void Method()
-		{
-			AsyncWorkItem.Start(null, obj => HelperMethod(AsyncWorkItem.Current), null, AsyncWorkOptions.None);
-		}
+		const string validProgram = $$"""
+			{{c_preamble}}
+			namespace TestApplication
+			{
+				internal static class TestClass
+				{
+					public static void Method()
+					{
+						AsyncWorkItem.Start(null, obj => HelperMethod(AsyncWorkItem.Current), null, AsyncWorkOptions.None);
+					}
 
-		private static void HelperMethod(IWorkState workState)
-		{
-		}
-	}
-}";
+					private static void HelperMethod(IWorkState workState)
+					{
+					}
+				}
+			}
+			""";
 		VerifyCSharpDiagnostic(validProgram);
 	}
 
 	[Test]
 	public void InvalidUsage()
 	{
-		const string brokenProgram = preamble + @"
-namespace TestApplication
-{
-	internal static class TestClass
-	{
-		public static void UtilityMethod(IWorkState ignored)
-		{
-			HelperMethod(AsyncWorkItem.Current);
-		}
+		const string brokenProgram = $$"""
+			{{c_preamble}}
+			namespace TestApplication
+			{
+				internal static class TestClass
+				{
+					public static void UtilityMethod(IWorkState ignored)
+					{
+						HelperMethod(AsyncWorkItem.Current);
+					}
 
-		private static void HelperMethod(IWorkState workState)
-		{
-		}
-	}
-}
-";
+					private static void HelperMethod(IWorkState workState)
+					{
+					}
+				}
+			}
+			""";
 
 		var expected = new DiagnosticResult
 		{
 			Id = CurrentAsyncWorkItemAnalyzer.DiagnosticId,
 			Message = "AsyncWorkItem.Current must only be used in methods that return IEnumerable<AsyncAction>",
 			Severity = DiagnosticSeverity.Warning,
-			Locations = [new DiagnosticResultLocation("Test0.cs", c_preambleLength + 7, 17)],
+			Locations = [new DiagnosticResultLocation("Test0.cs", s_preambleLength + 7, 17)],
 		};
 
 		VerifyCSharpDiagnostic(brokenProgram, expected);
 
-		const string firstFix = preamble + @"
-namespace TestApplication
-{
-	internal static class TestClass
-	{
-		public static void UtilityMethod(IWorkState ignored)
-		{
-			HelperMethod(ignored);
-		}
+		const string firstFix = $$"""
+			{{c_preamble}}
+			namespace TestApplication
+			{
+				internal static class TestClass
+				{
+					public static void UtilityMethod(IWorkState ignored)
+					{
+						HelperMethod(ignored);
+					}
 
-		private static void HelperMethod(IWorkState workState)
-		{
-		}
-	}
-}
-";
+					private static void HelperMethod(IWorkState workState)
+					{
+					}
+				}
+			}
+			""";
 
 		VerifyCSharpFix(brokenProgram, firstFix, 0);
 
-		const string secondFix = preamble + @"
-namespace TestApplication
-{
-	internal static class TestClass
-	{
-		public static void UtilityMethod(IWorkState ignored, IWorkState workState)
-		{
-			HelperMethod(workState);
-		}
+		const string secondFix = $$"""
+			{{c_preamble}}
+			namespace TestApplication
+			{
+				internal static class TestClass
+				{
+					public static void UtilityMethod(IWorkState ignored, IWorkState workState)
+					{
+						HelperMethod(workState);
+					}
 
-		private static void HelperMethod(IWorkState workState)
-		{
-		}
-	}
-}
-";
+					private static void HelperMethod(IWorkState workState)
+					{
+					}
+				}
+			}
+			""";
 		VerifyCSharpFix(brokenProgram, secondFix, 1);
 	}
 
 	[Test]
 	public void FixAsyncWorkItemCurrentCanceled()
 	{
-		const string brokenProgram = preamble + @"
-namespace TestApplication
-{
-	internal static class TestClass
-	{
-		public static void Method(IWorkState ignored)
-		{
-			if (AsyncWorkItem.Current.Canceled)
-				return;
-		}
-	}
-}
-";
+		const string brokenProgram = $$"""
+			{{c_preamble}}
+			namespace TestApplication
+			{
+				internal static class TestClass
+				{
+					public static void Method(IWorkState ignored)
+					{
+						if (AsyncWorkItem.Current.Canceled)
+							return;
+					}
+				}
+			}
+			""";
 
 		var expected = new DiagnosticResult
 		{
 			Id = CurrentAsyncWorkItemAnalyzer.DiagnosticId,
 			Message = "AsyncWorkItem.Current must only be used in methods that return IEnumerable<AsyncAction>",
 			Severity = DiagnosticSeverity.Warning,
-			Locations = [new DiagnosticResultLocation("Test0.cs", c_preambleLength + 7, 8)],
+			Locations = [new DiagnosticResultLocation("Test0.cs", s_preambleLength + 7, 8)],
 		};
 
 		VerifyCSharpDiagnostic(brokenProgram, expected);
 
-		const string firstFix = preamble + @"
-namespace TestApplication
-{
-	internal static class TestClass
-	{
-		public static void Method(IWorkState ignored)
-		{
-			if (ignored.Canceled)
-				return;
-		}
-	}
-}
-";
+		const string firstFix = $$"""
+			{{c_preamble}}
+			namespace TestApplication
+			{
+				internal static class TestClass
+				{
+					public static void Method(IWorkState ignored)
+					{
+						if (ignored.Canceled)
+							return;
+					}
+				}
+			}
+			""";
 
 		VerifyCSharpFix(brokenProgram, firstFix, 0);
 
-		const string secondFix = preamble + @"
-namespace TestApplication
-{
-	internal static class TestClass
-	{
-		public static void Method(IWorkState ignored, IWorkState workState)
-		{
-			if (workState.Canceled)
-				return;
-		}
-	}
-}
-";
+		const string secondFix = $$"""
+			{{c_preamble}}
+			namespace TestApplication
+			{
+				internal static class TestClass
+				{
+					public static void Method(IWorkState ignored, IWorkState workState)
+					{
+						if (workState.Canceled)
+							return;
+					}
+				}
+			}
+			""";
 		VerifyCSharpFix(brokenProgram, secondFix, 1);
 	}
 
 	[Test]
 	public void GenerateUniqueName()
 	{
-		const string brokenProgram = preamble + @"
-namespace TestApplication
-{
-	internal static class TestClass
-	{
-		public static void Method(IWorkState workState, int workState1, string workState2)
-		{
-			var workState3 = new object();
-			if (AsyncWorkItem.Current.Canceled)
-				return;
-		}
-	}
-}
-";
+		const string brokenProgram = $$"""
+			{{c_preamble}}
+			namespace TestApplication
+			{
+				internal static class TestClass
+				{
+					public static void Method(IWorkState workState, int workState1, string workState2)
+					{
+						var workState3 = new object();
+						if (AsyncWorkItem.Current.Canceled)
+							return;
+					}
+				}
+			}
+			""";
 
 		var expected = new DiagnosticResult
 		{
 			Id = CurrentAsyncWorkItemAnalyzer.DiagnosticId,
 			Message = "AsyncWorkItem.Current must only be used in methods that return IEnumerable<AsyncAction>",
 			Severity = DiagnosticSeverity.Warning,
-			Locations = [new DiagnosticResultLocation("Test0.cs", c_preambleLength + 8, 8)],
+			Locations = [new DiagnosticResultLocation("Test0.cs", s_preambleLength + 8, 8)],
 		};
 
 		VerifyCSharpDiagnostic(brokenProgram, expected);
 
-		const string firstFix = preamble + @"
-namespace TestApplication
-{
-	internal static class TestClass
-	{
-		public static void Method(IWorkState workState, int workState1, string workState2)
-		{
-			var workState3 = new object();
-			if (workState.Canceled)
-				return;
-		}
-	}
-}
-";
+		const string firstFix = $$"""
+			{{c_preamble}}
+			namespace TestApplication
+			{
+				internal static class TestClass
+				{
+					public static void Method(IWorkState workState, int workState1, string workState2)
+					{
+						var workState3 = new object();
+						if (workState.Canceled)
+							return;
+					}
+				}
+			}
+			""";
 
 		VerifyCSharpFix(brokenProgram, firstFix, 0);
 
-		const string secondFix = preamble + @"
-namespace TestApplication
-{
-	internal static class TestClass
-	{
-		public static void Method(IWorkState workState, int workState1, string workState2, IWorkState workState4)
-		{
-			var workState3 = new object();
-			if (workState4.Canceled)
-				return;
-		}
-	}
-}
-";
+		const string secondFix = $$"""
+			{{c_preamble}}
+			namespace TestApplication
+			{
+				internal static class TestClass
+				{
+					public static void Method(IWorkState workState, int workState1, string workState2, IWorkState workState4)
+					{
+						var workState3 = new object();
+						if (workState4.Canceled)
+							return;
+					}
+				}
+			}
+			""";
 		VerifyCSharpFix(brokenProgram, secondFix, 1);
 	}
 
@@ -272,31 +287,33 @@ namespace TestApplication
 		return new CurrentAsyncWorkItemAnalyzer();
 	}
 
-	private const string preamble = @"using System;
-using System.Collections.Generic;
-using Libronix.Utility.Threading;
+	private const string c_preamble = """
+		using System;
+		using System.Collections.Generic;
+		using Libronix.Utility.Threading;
 
-namespace Libronix.Utility.Threading
-{
-	public sealed class AsyncAction {}
-	public sealed class AsyncWorkGroup {}
-	public enum AsyncWorkOptions { None }
-	public interface IWorkState
-	{
-		bool Canceled { get; }
-	}
-	public sealed class AsyncWorkItem : IWorkState
-	{
-		public static AsyncWorkItem Current
+		namespace Libronix.Utility.Threading
 		{
-			get { throw new NotImplementedException(); }
+			public sealed class AsyncAction {}
+			public sealed class AsyncWorkGroup {}
+			public enum AsyncWorkOptions { None }
+			public interface IWorkState
+			{
+				bool Canceled { get; }
+			}
+			public sealed class AsyncWorkItem : IWorkState
+			{
+				public static AsyncWorkItem Current
+				{
+					get { throw new NotImplementedException(); }
+				}
+				public bool Canceled => false;
+				public static AsyncWorkItem Start(AsyncWorkGroup group, Action<object> action) => throw new NotImplementedException();
+				public static AsyncWorkItem Start(AsyncWorkGroup group, Action<object> action, object state, AsyncWorkOptions options) => throw new NotImplementedException();
+			}
 		}
-		public bool Canceled => false;
-		public static AsyncWorkItem Start(AsyncWorkGroup group, Action<object> action) => throw new NotImplementedException();
-		public static AsyncWorkItem Start(AsyncWorkGroup group, Action<object> action, object state, AsyncWorkOptions options) => throw new NotImplementedException();
-	}
-}
-";
 
-	private static readonly int c_preambleLength = preamble.Split('\n').Length;
+		""";
+
+	private static readonly int s_preambleLength = c_preamble.Split('\n').Length;
 }

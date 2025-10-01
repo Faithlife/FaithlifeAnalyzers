@@ -11,73 +11,81 @@ internal sealed class ToReadOnlyCollectionConstructorTests : CodeFixVerifier
 	[Test]
 	public void EnumerationIsValid()
 	{
-		const string validProgram = c_preamble + @"
-namespace TestApplication
-{
-	public class TestClass
-	{
-		public TestClass(IEnumerable<int> args)
-		{
-			foreach (var arg in args.ToReadOnlyCollection())
+		const string validProgram = $$"""
+			{{c_preamble}}
+			namespace TestApplication
 			{
+				public class TestClass
+				{
+					public TestClass(IEnumerable<int> args)
+					{
+						foreach (var arg in args.ToReadOnlyCollection())
+						{
+						}
+					}
+				}
 			}
-		}
-	}
-}";
+			""";
 		VerifyCSharpDiagnostic(validProgram);
 	}
 
 	[Test]
 	public void VariableDeclarationIsValid()
 	{
-		const string validProgram = c_preamble + @"
-namespace TestApplication
-{
-	public class TestClass
-	{
-		public TestClass(IEnumerable<int> args)
-		{
-			var local = args.ToReadOnlyCollection();
-		}
-	}
-}";
+		const string validProgram = $$"""
+			{{c_preamble}}
+			namespace TestApplication
+			{
+				public class TestClass
+				{
+					public TestClass(IEnumerable<int> args)
+					{
+						var local = args.ToReadOnlyCollection();
+					}
+				}
+			}
+			""";
 		VerifyCSharpDiagnostic(validProgram);
 	}
 
 	[Test]
 	public void AssignLocalIsValid()
 	{
-		const string validProgram = c_preamble + @"
-namespace TestApplication
-{
-	public class TestClass
-	{
-		public TestClass(IEnumerable<int> args)
-		{
-			ReadOnlyCollection<int> local;
-			local = args.ToReadOnlyCollection();
-		}
-	}
-}";
+		const string validProgram = $$"""
+			{{c_preamble}}
+			namespace TestApplication
+			{
+				public class TestClass
+				{
+					public TestClass(IEnumerable<int> args)
+					{
+						ReadOnlyCollection<int> local;
+						local = args.ToReadOnlyCollection();
+					}
+				}
+			}
+			""";
 		VerifyCSharpDiagnostic(validProgram);
 	}
 
 	[Test]
 	public void AssignField()
 	{
-		const string program = c_preamble + @"
-namespace TestApplication
-{
-	public class TestClass
-	{
-		public TestClass(IEnumerable<int> args)
-		{
-			m_field = args.ToReadOnlyCollection();
-		}
+		const string program = $$"""
+			{{c_preamble}}
+			namespace TestApplication
+			{
+				public class TestClass
+				{
+					public TestClass(IEnumerable<int> args)
+					{
+						m_field = args.ToReadOnlyCollection();
+					}
 
-		ReadOnlyCollection<int> m_field;
-	}
-}";
+					ReadOnlyCollection<int> m_field;
+				}
+			}
+			""";
 
 		var expected = new DiagnosticResult
 		{
@@ -89,19 +97,21 @@ namespace TestApplication
 
 		VerifyCSharpDiagnostic(program, expected);
 
-		const string fix = c_preamble + @"
-namespace TestApplication
-{
-	public class TestClass
-	{
-		public TestClass(IEnumerable<int> args)
-		{
-			m_field = args.ToList().AsReadOnly();
-		}
+		const string fix = $$"""
+			{{c_preamble}}
+			namespace TestApplication
+			{
+				public class TestClass
+				{
+					public TestClass(IEnumerable<int> args)
+					{
+						m_field = args.ToList().AsReadOnly();
+					}
 
-		ReadOnlyCollection<int> m_field;
-	}
-}";
+					ReadOnlyCollection<int> m_field;
+				}
+			}
+			""";
 
 		VerifyCSharpFix(program, fix, 0);
 	}
@@ -109,19 +119,21 @@ namespace TestApplication
 	[Test]
 	public void AssignFieldConditionalNull()
 	{
-		const string program = c_preamble + @"
-namespace TestApplication
-{
-	public class TestClass
-	{
-		public TestClass(IEnumerable<int> args)
-		{
-			m_field = args?.ToReadOnlyCollection();
-		}
+		const string program = $$"""
+			{{c_preamble}}
+			namespace TestApplication
+			{
+				public class TestClass
+				{
+					public TestClass(IEnumerable<int> args)
+					{
+						m_field = args?.ToReadOnlyCollection();
+					}
 
-		ReadOnlyCollection<int> m_field;
-	}
-}";
+					ReadOnlyCollection<int> m_field;
+				}
+			}
+			""";
 
 		var expected = new DiagnosticResult
 		{
@@ -133,19 +145,21 @@ namespace TestApplication
 
 		VerifyCSharpDiagnostic(program, expected);
 
-		const string fix = c_preamble + @"
-namespace TestApplication
-{
-	public class TestClass
-	{
-		public TestClass(IEnumerable<int> args)
-		{
-			m_field = args?.ToList().AsReadOnly();
-		}
+		const string fix = $$"""
+			{{c_preamble}}
+			namespace TestApplication
+			{
+				public class TestClass
+				{
+					public TestClass(IEnumerable<int> args)
+					{
+						m_field = args?.ToList().AsReadOnly();
+					}
 
-		ReadOnlyCollection<int> m_field;
-	}
-}";
+					ReadOnlyCollection<int> m_field;
+				}
+			}
+			""";
 
 		VerifyCSharpFix(program, fix, 0);
 	}
@@ -153,19 +167,21 @@ namespace TestApplication
 	[Test]
 	public void AssignProperty()
 	{
-		const string program = c_preamble + @"
-namespace TestApplication
-{
-	public class TestClass
-	{
-		public TestClass(IEnumerable<int> args)
-		{
-			Property = args.ToReadOnlyCollection();
-		}
+		const string program = $$"""
+			{{c_preamble}}
+			namespace TestApplication
+			{
+				public class TestClass
+				{
+					public TestClass(IEnumerable<int> args)
+					{
+						Property = args.ToReadOnlyCollection();
+					}
 
-		public ReadOnlyCollection<int> Property { get; }
-	}
-}";
+					public ReadOnlyCollection<int> Property { get; }
+				}
+			}
+			""";
 
 		var expected = new DiagnosticResult
 		{
@@ -177,19 +193,21 @@ namespace TestApplication
 
 		VerifyCSharpDiagnostic(program, expected);
 
-		const string fix = c_preamble + @"
-namespace TestApplication
-{
-	public class TestClass
-	{
-		public TestClass(IEnumerable<int> args)
-		{
-			Property = args.ToList().AsReadOnly();
-		}
+		const string fix = $$"""
+			{{c_preamble}}
+			namespace TestApplication
+			{
+				public class TestClass
+				{
+					public TestClass(IEnumerable<int> args)
+					{
+						Property = args.ToList().AsReadOnly();
+					}
 
-		public ReadOnlyCollection<int> Property { get; }
-	}
-}";
+					public ReadOnlyCollection<int> Property { get; }
+				}
+			}
+			""";
 
 		VerifyCSharpFix(program, fix, 0);
 	}
@@ -198,17 +216,19 @@ namespace TestApplication
 
 	protected override CodeFixProvider GetCSharpCodeFixProvider() => new ToReadOnlyCollectionCodeFixProvider();
 
-	private const string c_preamble = @"using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using Libronix.Utility;
+	private const string c_preamble = """
+		using System;
+		using System.Collections.Generic;
+		using System.Collections.ObjectModel;
+		using Libronix.Utility;
 
-namespace Libronix.Utility
-{
-	public static class EnumerableUtility
-	{
-		public static ReadOnlyCollection<T> ToReadOnlyCollection<T>(this IEnumerable<T> seq) => throw new NotImplementedException();
-	}
-}
-";
+		namespace Libronix.Utility
+		{
+			public static class EnumerableUtility
+			{
+				public static ReadOnlyCollection<T> ToReadOnlyCollection<T>(this IEnumerable<T> seq) => throw new NotImplementedException();
+			}
+		}
+
+		""";
 }

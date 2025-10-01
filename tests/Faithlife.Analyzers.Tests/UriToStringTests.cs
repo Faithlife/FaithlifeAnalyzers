@@ -10,17 +10,18 @@ internal sealed class UriToStringTests : CodeFixVerifier
 	[Test]
 	public void ValidUsage()
 	{
-		const string validProgram = @"
-namespace TestApplication
-{
-	internal static class TestClass
-	{
-		public static void UtilityMethod()
-		{
-			var x = new System.Uri(""http://www.faithlife.com"").AbsolutePath;
-		}
-	}
-}";
+		const string validProgram = """
+			namespace TestApplication
+			{
+				internal static class TestClass
+				{
+					public static void UtilityMethod()
+					{
+						var x = new System.Uri("http://www.faithlife.com").AbsolutePath;
+					}
+				}
+			}
+			""";
 
 		VerifyCSharpDiagnostic(validProgram);
 	}
@@ -28,24 +29,25 @@ namespace TestApplication
 	[Test]
 	public void InvalidUsage()
 	{
-		var brokenProgram = @"
-namespace TestApplication
-{
-	internal static class TestClass
-	{
-		public static void UtilityMethod()
-		{
-			var x = new System.Uri(""http://www.faithlife.com"").ToString();
-		}
-	}
-}";
+		var brokenProgram = """
+			namespace TestApplication
+			{
+				internal static class TestClass
+				{
+					public static void UtilityMethod()
+					{
+						var x = new System.Uri("http://www.faithlife.com").ToString();
+					}
+				}
+			}
+			""";
 
 		var expected = new DiagnosticResult
 		{
 			Id = UriToStringAnalyzer.DiagnosticId,
 			Message = "Do not use Uri.ToString()",
 			Severity = DiagnosticSeverity.Warning,
-			Locations = [new DiagnosticResultLocation("Test0.cs", 8, 12)],
+			Locations = [new DiagnosticResultLocation("Test0.cs", 7, 12)],
 		};
 
 		VerifyCSharpDiagnostic(brokenProgram, expected);
@@ -54,24 +56,25 @@ namespace TestApplication
 	[Test]
 	public void InvalidNullableUsage()
 	{
-		var brokenProgram = @"
-namespace TestApplication
-{
-	internal static class TestClass
-	{
-		public static void UtilityMethod(System.Uri uri)
-		{
-			var x = uri?.ToString();
-		}
-	}
-}";
+		var brokenProgram = """
+			namespace TestApplication
+			{
+				internal static class TestClass
+				{
+					public static void UtilityMethod(System.Uri uri)
+					{
+						var x = uri?.ToString();
+					}
+				}
+			}
+			""";
 
 		var expected = new DiagnosticResult
 		{
 			Id = UriToStringAnalyzer.DiagnosticId,
 			Message = "Do not use Uri.ToString()",
 			Severity = DiagnosticSeverity.Warning,
-			Locations = [new DiagnosticResultLocation("Test0.cs", 8, 16)],
+			Locations = [new DiagnosticResultLocation("Test0.cs", 7, 16)],
 		};
 
 		VerifyCSharpDiagnostic(brokenProgram, expected);

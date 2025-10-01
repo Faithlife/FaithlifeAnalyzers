@@ -30,18 +30,20 @@ namespace TestApplication
 	[TestCase("connector.Command($\"invalid\", (\"value\", true));")]
 	public void InvalidUsage(string invalidCall)
 	{
-		var brokenProgram = c_preamble + @"
-namespace TestApplication
-{
-	internal static class TestClass
-	{
-		public static void UtilityMethod()
-		{
-			var connector = new DbConnector();
-			" + invalidCall + @"
-		}
-	}
-}";
+		var brokenProgram = $$"""
+			{{c_preamble}}
+			namespace TestApplication
+			{
+				internal static class TestClass
+				{
+					public static void UtilityMethod()
+					{
+						var connector = new DbConnector();
+						{{invalidCall}}
+					}
+				}
+			}
+			""";
 
 		var expected = new DiagnosticResult
 		{
@@ -56,18 +58,20 @@ namespace TestApplication
 
 	protected override DiagnosticAnalyzer GetCSharpDiagnosticAnalyzer() => new DbConnectorCommandInterpolatedAnalyzer();
 
-	private const string c_preamble = @"using System;
-using Faithlife.Data;
+	private const string c_preamble = """
+		using System;
+		using Faithlife.Data;
 
-namespace Faithlife.Data
-{
-	public class DbConnector
-	{
-		public object Command(string text) => throw new NotImplementedException();
-		public object Command(string text, params (string Name, object Value)[] parameters) => throw new NotImplementedException();
-	}
-}
-";
+		namespace Faithlife.Data
+		{
+			public class DbConnector
+			{
+				public object Command(string text) => throw new NotImplementedException();
+				public object Command(string text, params (string Name, object Value)[] parameters) => throw new NotImplementedException();
+			}
+		}
+
+		""";
 
 	private static readonly int s_preambleLength = c_preamble.Split('\n').Length;
 }

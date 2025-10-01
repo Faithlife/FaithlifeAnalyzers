@@ -11,39 +11,41 @@ internal sealed class FormatInvariantTests : CodeFixVerifier
 	[Test]
 	public void ValidFormat()
 	{
-		const string validProgram = @"using System;
-using Libronix.Utility;
+		const string validProgram = """
+			using System;
+			using Libronix.Utility;
 
-namespace Libronix.Utility
-{
-	public static class StringUtility
-	{
-		public static string FormatInvariant(this string format, params object[] args) => throw new NotImplementedException();
-	}
-}
+			namespace Libronix.Utility
+			{
+				public static class StringUtility
+				{
+					public static string FormatInvariant(this string format, params object[] args) => throw new NotImplementedException();
+				}
+			}
 
-namespace TestApplication
-{
-	public class TestClass
-	{
-		public TestClass()
-		{
-			var foo = ""foo"";
-			Method($""{foo}"");
+			namespace TestApplication
+			{
+				public class TestClass
+				{
+					public TestClass()
+					{
+						var foo = "foo";
+						Method($"{foo}");
 
-			Method(StringUtility.FormatInvariant(""{0}"", foo));
+						Method(StringUtility.FormatInvariant("{0}", foo));
 
-			var fmt = ""{0}"";
-			Method(fmt.FormatInvariant(1));
+						var fmt = "{0}";
+						Method(fmt.FormatInvariant(1));
 
-			Method(StringUtility.FormatInvariant(fmt, foo));
-		}
+						Method(StringUtility.FormatInvariant(fmt, foo));
+					}
 
-		private void Method(string parameter)
-		{
-		}
-	}
-}";
+					private void Method(string parameter)
+					{
+					}
+				}
+			}
+			""";
 		VerifyCSharpDiagnostic(validProgram);
 	}
 
@@ -54,32 +56,34 @@ namespace TestApplication
 	[TestCase(@"""with enum {0} {1} post"".FormatInvariant(DateTimeKind.Local, foo)", @"$""with enum {DateTimeKind.Local} {foo} post""")]
 	public void InvalidFormat(string invalidCode, string fixedCode)
 	{
-		var invalidProgram = $@"using System;
-using Libronix.Utility;
+		var invalidProgram = $$"""
+			using System;
+			using Libronix.Utility;
 
-namespace Libronix.Utility
-{{
-	public static class StringUtility
-	{{
-		public static string FormatInvariant(this string format, params object[] args) => throw new NotImplementedException();
-	}}
-}}
+			namespace Libronix.Utility
+			{
+				public static class StringUtility
+				{
+					public static string FormatInvariant(this string format, params object[] args) => throw new NotImplementedException();
+				}
+			}
 
-namespace TestApplication
-{{
-	public class TestClass
-	{{
-		public TestClass(bool b)
-		{{
-			var foo = ""foo"";
-			Method({invalidCode});
-		}}
+			namespace TestApplication
+			{
+				public class TestClass
+				{
+					public TestClass(bool b)
+					{
+						var foo = "foo";
+						Method({{invalidCode}});
+					}
 
-		private void Method(string parameter)
-		{{
-		}}
-	}}
-}}";
+					private void Method(string parameter)
+					{
+					}
+				}
+			}
+			""";
 		var expected = new DiagnosticResult
 		{
 			Id = FormatInvariantAnalyzer.DiagnosticId,
@@ -90,31 +94,33 @@ namespace TestApplication
 
 		VerifyCSharpDiagnostic(invalidProgram, expected);
 
-		var fixedProgram = $@"using System;
+		var fixedProgram = $$"""
+			using System;
 
-namespace Libronix.Utility
-{{
-	public static class StringUtility
-	{{
-		public static string FormatInvariant(this string format, params object[] args) => throw new NotImplementedException();
-	}}
-}}
+			namespace Libronix.Utility
+			{
+				public static class StringUtility
+				{
+					public static string FormatInvariant(this string format, params object[] args) => throw new NotImplementedException();
+				}
+			}
 
-namespace TestApplication
-{{
-	public class TestClass
-	{{
-		public TestClass(bool b)
-		{{
-			var foo = ""foo"";
-			Method({fixedCode});
-		}}
+			namespace TestApplication
+			{
+				public class TestClass
+				{
+					public TestClass(bool b)
+					{
+						var foo = "foo";
+						Method({{fixedCode}});
+					}
 
-		private void Method(string parameter)
-		{{
-		}}
-	}}
-}}";
+					private void Method(string parameter)
+					{
+					}
+				}
+			}
+			""";
 
 		VerifyCSharpFix(invalidProgram, fixedProgram, 0);
 	}

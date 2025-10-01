@@ -41,8 +41,8 @@ public sealed class EmptyStringAnalyzer : DiagnosticAnalyzer
 
 	private static readonly DiagnosticDescriptor s_rule = new(
 		id: DiagnosticId,
-		title: "Prefer \"\" over string.Empty",
-		messageFormat: "Prefer \"\" over string.Empty",
+		title: """Prefer "" over string.Empty""",
+		messageFormat: """Prefer "" over string.Empty""",
 		category: "Usage",
 		defaultSeverity: DiagnosticSeverity.Warning,
 		isEnabledByDefault: true,
