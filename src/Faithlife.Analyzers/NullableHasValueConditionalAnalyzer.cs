@@ -39,7 +39,7 @@ public sealed class NullableHasValueConditionalAnalyzer : DiagnosticAnalyzer
 
 		// the type of the nullable expression has to be Nullable<T>
 		if (context.SemanticModel.GetTypeInfo(conditionAccess.Expression).Type is not INamedTypeSymbol nullableType ||
-			!nullableType.ConstructedFrom.SpecialType.Equals(SpecialType.System_Nullable_T))
+			nullableType.ConstructedFrom.SpecialType != SpecialType.System_Nullable_T)
 		{
 			return;
 		}
