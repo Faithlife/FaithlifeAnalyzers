@@ -64,22 +64,24 @@ namespace TestApplication
 	[TestCase("DictionaryFromProperty?.GetOrAddValue(0);")]
 	public void InvalidNullableUsage(string invalidCall)
 	{
-		var brokenProgram = c_preamble + @"
-namespace TestApplication
-{
-	internal static class TestClass
-	{
-		public static void UtilityMethod()
-		{
-			var localDictionary = new ConcurrentDictionary<int, List<int>>();
-			" + invalidCall + @"
-		}
+		var brokenProgram = $$"""
+			{{c_preamble}}
+			namespace TestApplication
+			{
+				internal static class TestClass
+				{
+					public static void UtilityMethod()
+					{
+						var localDictionary = new ConcurrentDictionary<int, List<int>>();
+						{{invalidCall}}
+					}
 
-		public static ConcurrentDictionary<int, List<int>> DictionaryFromFunction() => new ConcurrentDictionary<int, List<int>>();
+					public static ConcurrentDictionary<int, List<int>> DictionaryFromFunction() => new ConcurrentDictionary<int, List<int>>();
 
-		public static ConcurrentDictionary<int, List<int>> DictionaryFromProperty => new ConcurrentDictionary<int, List<int>>();
-	}
-}";
+					public static ConcurrentDictionary<int, List<int>> DictionaryFromProperty => new ConcurrentDictionary<int, List<int>>();
+				}
+			}
+			""";
 
 		var expected = new DiagnosticResult
 		{
@@ -94,21 +96,23 @@ namespace TestApplication
 
 	protected override DiagnosticAnalyzer GetCSharpDiagnosticAnalyzer() => new GetOrAddValueAnalyzer();
 
-	private const string c_preamble = @"using System;
-using System.Collections.Generic;
-using System.Collections.Concurrent;
-using Libronix.Utility;
+	private const string c_preamble = """
+		using System;
+		using System.Collections.Generic;
+		using System.Collections.Concurrent;
+		using Libronix.Utility;
 
-namespace Libronix.Utility
-{
-	public static class DictionaryUtility
-	{
-		public static TValue GetOrAddValue<TKey, TValue>(this IDictionary<TKey, TValue> dictionary, TKey key) where TValue : new() => throw new NotImplementedException();
-		public static TValue GetOrAddValue<TKey, TValue>(this IDictionary<TKey, TValue> dictionary, TKey key, Func<TValue> creator) => throw new NotImplementedException();
-		public static TValue GetOrAddValue<TKey, TValue>(this IDictionary<TKey, TValue> dict, TKey key, Func<TKey, TValue> creator) => throw new NotImplementedException();
-	}
-}
-";
+		namespace Libronix.Utility
+		{
+			public static class DictionaryUtility
+			{
+				public static TValue GetOrAddValue<TKey, TValue>(this IDictionary<TKey, TValue> dictionary, TKey key) where TValue : new() => throw new NotImplementedException();
+				public static TValue GetOrAddValue<TKey, TValue>(this IDictionary<TKey, TValue> dictionary, TKey key, Func<TValue> creator) => throw new NotImplementedException();
+				public static TValue GetOrAddValue<TKey, TValue>(this IDictionary<TKey, TValue> dict, TKey key, Func<TKey, TValue> creator) => throw new NotImplementedException();
+			}
+		}
+
+		""";
 
 	private static readonly int s_preambleLength = c_preamble.Split('\n').Length;
 }

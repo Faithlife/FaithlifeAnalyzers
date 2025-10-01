@@ -12,8 +12,7 @@ internal sealed class LocalFunctionEventHandlerTests : CodeFixVerifier
 	{
 		// This pattern is "unsubscribe the old handler; then subscribe the new handler".
 		// This pattern is wrong because the old and new handlers are different instances.
-		const string program =
-			"""
+		const string program = """
 			using System;
 			class Test
 			{
@@ -41,8 +40,7 @@ internal sealed class LocalFunctionEventHandlerTests : CodeFixVerifier
 	{
 		// This pattern is "subscribe the new handler; then return some action to later unsubscribe the handler".
 		// This pattern is correct because the same handler is being subscribed and unsubscribed.
-		const string program =
-			"""
+		const string program = """
 			using System;
 			class Test
 			{
@@ -62,8 +60,7 @@ internal sealed class LocalFunctionEventHandlerTests : CodeFixVerifier
 	[Test]
 	public void StaticLocalFunction()
 	{
-		const string program =
-			"""
+		const string program = """
 			using System;
 			class Test
 			{
@@ -83,8 +80,7 @@ internal sealed class LocalFunctionEventHandlerTests : CodeFixVerifier
 	[Test]
 	public void Lambda()
 	{
-		const string program =
-			"""
+		const string program = """
 			using System;
 			class Test
 			{
@@ -109,8 +105,7 @@ internal sealed class LocalFunctionEventHandlerTests : CodeFixVerifier
 	[Test]
 	public void NonStaticInstanceMethod()
 	{
-		const string program =
-			"""
+		const string program = """
 			using System;
 			class Test
 			{

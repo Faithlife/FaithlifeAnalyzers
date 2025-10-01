@@ -228,19 +228,20 @@ internal sealed class IfNotNullTests : CodeFixVerifier
 		"var result = possiblyNull is ReferenceThing ? new { Property = \"value\" } : new { Property = \"other value\" };")]
 	public void SimpleMethodCall(string possiblyNull, string call, string fixedCall)
 	{
-		string CreateProgram(string actualCall) =>
-			c_preamble + @"
-namespace TestProgram
-{
-	internal static class TestClass
-	{
-		public static void CallIfNotNull()
-		{
-			var possiblyNull = " + possiblyNull + @";
-			" + actualCall + @"
-		}
-	}
-}";
+		string CreateProgram(string actualCall) => $$"""
+			{{c_preamble}}
+			namespace TestProgram
+			{
+				internal static class TestClass
+				{
+					public static void CallIfNotNull()
+					{
+						var possiblyNull = {{possiblyNull}};
+						{{actualCall}}
+					}
+				}
+			}
+			""";
 
 		var expected = new DiagnosticResult
 		{
@@ -281,19 +282,20 @@ namespace TestProgram
 		17, 17)]
 	public void MultipleMethodCalls(string possiblyNull, string call, string fixedCall, int firstColumn, int secondColumn)
 	{
-		string CreateProgram(string actualCall) =>
-			c_preamble + @"
-namespace TestProgram
-{
-	internal static class TestClass
-	{
-		public static void CallIfNotNull()
-		{
-			var possiblyNull = " + possiblyNull + @";
-			" + actualCall + @"
-		}
-	}
-}";
+		string CreateProgram(string actualCall) => $$"""
+			{{c_preamble}}
+			namespace TestProgram
+			{
+				internal static class TestClass
+				{
+					public static void CallIfNotNull()
+					{
+						var possiblyNull = {{possiblyNull}};
+						{{actualCall}}
+					}
+				}
+			}
+			""";
 
 		DiagnosticResult CreateDiagnosticAtColumn(int column) =>
 			new()
@@ -331,19 +333,20 @@ namespace TestProgram
 		"if (possiblyNull is ValueThing x)\n\t\t\t\tx.Method();\n\t\t\telse\n\t\t\t\tthrow new InvalidOperationException();")]
 	public void VoidInvocation(string possiblyNull, string call, string fixedCall)
 	{
-		string CreateProgram(string actualCall) =>
-			c_preamble + @"
-namespace TestProgram
-{
-	internal static class TestClass
-	{
-		public static void CallIfNotNull()
-		{
-			var possiblyNull = " + possiblyNull + @";
-			" + actualCall + @"
-		}
-	}
-}";
+		string CreateProgram(string actualCall) => $$"""
+			{{c_preamble}}
+			namespace TestProgram
+			{
+				internal static class TestClass
+				{
+					public static void CallIfNotNull()
+					{
+						var possiblyNull = {{possiblyNull}};
+						{{actualCall}}
+					}
+				}
+			}
+			""";
 
 		var expected = new DiagnosticResult
 		{
@@ -363,20 +366,21 @@ namespace TestProgram
 
 	public void NonLocalInvocation()
 	{
-		string CreateProgram(string actualCall) =>
-			c_preamble + @"
-namespace TestProgram
-{
-	internal class TestClass
-	{
-		public event Action OnAction;
+		string CreateProgram(string actualCall) => $$"""
+			{{c_preamble}}
+			namespace TestProgram
+			{
+				internal class TestClass
+				{
+					public event Action OnAction;
 
-		public void CallIfNotNull()
-		{
-			" + actualCall + @"
-		}
-	}
-}";
+					public void CallIfNotNull()
+					{
+						{{actualCall}}
+					}
+				}
+			}
+			""";
 
 		var expected = new DiagnosticResult
 		{
@@ -411,19 +415,20 @@ namespace TestProgram
 		"var result = possiblyNull.IfNotNull(x => new[] { x });")]
 	public void UnhandledInvocation(string possiblyNull, string call)
 	{
-		string CreateProgram(string actualCall) =>
-			c_preamble + @"
-namespace TestProgram
-{
-	internal static class TestClass
-	{
-		public static void CallIfNotNull()
-		{
-			var possiblyNull = " + possiblyNull + @";
-			" + actualCall + @"
-		}
-	}
-}";
+		string CreateProgram(string actualCall) => $$"""
+			{{c_preamble}}
+			namespace TestProgram
+			{
+				internal static class TestClass
+				{
+					public static void CallIfNotNull()
+					{
+						var possiblyNull = {{possiblyNull}};
+						{{actualCall}}
+					}
+				}
+			}
+			""";
 
 		var expected = new DiagnosticResult
 		{
@@ -444,53 +449,55 @@ namespace TestProgram
 
 	protected override CodeFixProvider GetCSharpCodeFixProvider() => new IfNotNullCodeFixProvider();
 
-	private const string c_preamble = @"using System;
-using Libronix.Utility.IfNotNull;
-using TestProgram;
+	private const string c_preamble = """
+		using System;
+		using Libronix.Utility.IfNotNull;
+		using TestProgram;
 
-namespace Libronix.Utility.IfNotNull
-{
-	public static class IfNotNullExtensionMethod
-	{
-		public static TOutput IfNotNull<TInput, TOutput>(this TInput t, Func<TInput, TOutput> fn) where TInput : class => throw new NotImplementedException();
-		public static TOutput IfNotNull<TInput, TOutput>(this TInput? t, Func<TInput, TOutput> fn) where TInput : struct => throw new NotImplementedException();
-		public static TOutput IfNotNull<TInput, TOutput>(this TInput t, Func<TInput, TOutput> fn, TOutput def) where TInput : class => throw new NotImplementedException();
-		public static TOutput IfNotNull<TInput, TOutput>(this TInput? t, Func<TInput, TOutput> fn, TOutput def) where TInput : struct => throw new NotImplementedException();
-		public static TOutput IfNotNull<TInput, TOutput>(this TInput t, Func<TInput, TOutput> fn, Func<TOutput> def) where TInput : class => throw new NotImplementedException();
-		public static TOutput IfNotNull<TInput, TOutput>(this TInput? t, Func<TInput, TOutput> fn, Func<TOutput> def) where TInput : struct => throw new NotImplementedException();
-		public static void IfNotNull<TInput>(this TInput t, Action<TInput> fn) where TInput : class => throw new NotImplementedException();
-		public static void IfNotNull<TInput>(this TInput? t, Action<TInput> fn) where TInput : struct => throw new NotImplementedException();
-		public static void IfNotNull<TInput>(this TInput t, Action<TInput> fn, Action def) where TInput : class => throw new NotImplementedException();
-		public static void IfNotNull<TInput>(this TInput? t, Action<TInput> fn, Action def) where TInput : struct => throw new NotImplementedException();
-	}
-}
+		namespace Libronix.Utility.IfNotNull
+		{
+			public static class IfNotNullExtensionMethod
+			{
+				public static TOutput IfNotNull<TInput, TOutput>(this TInput t, Func<TInput, TOutput> fn) where TInput : class => throw new NotImplementedException();
+				public static TOutput IfNotNull<TInput, TOutput>(this TInput? t, Func<TInput, TOutput> fn) where TInput : struct => throw new NotImplementedException();
+				public static TOutput IfNotNull<TInput, TOutput>(this TInput t, Func<TInput, TOutput> fn, TOutput def) where TInput : class => throw new NotImplementedException();
+				public static TOutput IfNotNull<TInput, TOutput>(this TInput? t, Func<TInput, TOutput> fn, TOutput def) where TInput : struct => throw new NotImplementedException();
+				public static TOutput IfNotNull<TInput, TOutput>(this TInput t, Func<TInput, TOutput> fn, Func<TOutput> def) where TInput : class => throw new NotImplementedException();
+				public static TOutput IfNotNull<TInput, TOutput>(this TInput? t, Func<TInput, TOutput> fn, Func<TOutput> def) where TInput : struct => throw new NotImplementedException();
+				public static void IfNotNull<TInput>(this TInput t, Action<TInput> fn) where TInput : class => throw new NotImplementedException();
+				public static void IfNotNull<TInput>(this TInput? t, Action<TInput> fn) where TInput : struct => throw new NotImplementedException();
+				public static void IfNotNull<TInput>(this TInput t, Action<TInput> fn, Action def) where TInput : class => throw new NotImplementedException();
+				public static void IfNotNull<TInput>(this TInput? t, Action<TInput> fn, Action def) where TInput : struct => throw new NotImplementedException();
+			}
+		}
 
-namespace TestProgram
-{
-	internal sealed class ReferenceThing
-	{
-		public int ValueTypeProperty => throw new NotImplementedException();
-		public int? NullableProperty => throw new NotImplementedException();
-		public ReferenceThing RecursiveProperty => throw new NotImplementedException();
-		public void Method() => throw new NotImplementedException();
-		public ReferenceThing CalculateValue() => throw new NotImplementedException();
-		public ReferenceThing CalculateValue(ReferenceThing input) => throw new NotImplementedException();
-		public int CalculateValueTypeValue() => throw new NotImplementedException();
-		public ReferenceThing this[int i] => throw new NotImplementedException();
-		public static ReferenceThing CalculateStatic(ReferenceThing x) => throw new NotImplementedException();
-		public static ReferenceThing Factory() => throw new NotImplementedException();
-	}
+		namespace TestProgram
+		{
+			internal sealed class ReferenceThing
+			{
+				public int ValueTypeProperty => throw new NotImplementedException();
+				public int? NullableProperty => throw new NotImplementedException();
+				public ReferenceThing RecursiveProperty => throw new NotImplementedException();
+				public void Method() => throw new NotImplementedException();
+				public ReferenceThing CalculateValue() => throw new NotImplementedException();
+				public ReferenceThing CalculateValue(ReferenceThing input) => throw new NotImplementedException();
+				public int CalculateValueTypeValue() => throw new NotImplementedException();
+				public ReferenceThing this[int i] => throw new NotImplementedException();
+				public static ReferenceThing CalculateStatic(ReferenceThing x) => throw new NotImplementedException();
+				public static ReferenceThing Factory() => throw new NotImplementedException();
+			}
 
-	internal struct ValueThing
-	{
-		public int ValueTypeProperty => throw new NotImplementedException();
-		public ReferenceThing ReferenceTypeProperty => throw new NotImplementedException();
-		public ValueThing RecursiveProperty => throw new NotImplementedException();
-		public void Method() => throw new NotImplementedException();
-		public ValueThing CalculateValue() => throw new NotImplementedException();
-	}
-}
-";
+			internal struct ValueThing
+			{
+				public int ValueTypeProperty => throw new NotImplementedException();
+				public ReferenceThing ReferenceTypeProperty => throw new NotImplementedException();
+				public ValueThing RecursiveProperty => throw new NotImplementedException();
+				public void Method() => throw new NotImplementedException();
+				public ValueThing CalculateValue() => throw new NotImplementedException();
+			}
+		}
+
+		""";
 
 	private static readonly int s_preambleLength = c_preamble.Split('\n').Length;
 }

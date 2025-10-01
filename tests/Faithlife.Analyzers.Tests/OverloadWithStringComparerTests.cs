@@ -18,21 +18,21 @@ internal sealed class OverloadWithStringComparerTests : CodeFixVerifier
 	[Test]
 	public void OrderByStringWithoutComparer_Invalid([Values] Ordering ordering)
 	{
-		string code = GetExtensionMethodCode(ordering, @"new[] { ""A"", ""b"", ""C"" }", "x => x");
+		string code = GetExtensionMethodCode(ordering, """new[] { "A", "b", "C" }""", "x => x");
 		VerifyInvalidExpression(code, code.IndexOf(GetMethodName(ordering), StringComparison.Ordinal));
 	}
 
 	[Test]
 	public void OrderByStringWithoutComparerWithNullConditional_Invalid([Values] Ordering ordering)
 	{
-		string code = GetExtensionMethodCode(ordering, @"new[] { ""A"", ""b"", ""C"" }", "x => x", isNullConditional: true);
+		string code = GetExtensionMethodCode(ordering, """new[] { "A", "b", "C" }""", "x => x", isNullConditional: true);
 		VerifyInvalidExpression(code, code.IndexOf(GetMethodName(ordering), StringComparison.Ordinal));
 	}
 
 	[Test]
 	public void OrderByStringWithComparer_Valid([Values] Ordering ordering)
 	{
-		string code = GetExtensionMethodCode(ordering, @"new[] { ""A"", ""b"", ""C"" }", "x => x", "StringComparer.Ordinal");
+		string code = GetExtensionMethodCode(ordering, """new[] { "A", "b", "C" }""", "x => x", "StringComparer.Ordinal");
 		VerifyValidExpression(code);
 	}
 
@@ -60,7 +60,7 @@ internal sealed class OverloadWithStringComparerTests : CodeFixVerifier
 	[Test]
 	public void ExplicitOrderByStringWithoutComparer_Invalid()
 	{
-		const string code = @"Enumerable.OrderBy(new[] { ""A"", ""b"", ""C"" }, x => x)";
+		const string code = """Enumerable.OrderBy(new[] { "A", "b", "C" }, x => x)""";
 		VerifyInvalidExpression(code, code.IndexOf("OrderBy", StringComparison.Ordinal));
 	}
 
@@ -73,7 +73,7 @@ internal sealed class OverloadWithStringComparerTests : CodeFixVerifier
 	[Test]
 	public void LinqSyntaxOrderByString_Invalid([Values] Ordering ordering)
 	{
-		string code = GetLinqSyntaxCode(ordering, @"new[] { ""A"", ""b"", ""C"" }", "x");
+		string code = GetLinqSyntaxCode(ordering, """new[] { "A", "b", "C" }""", "x");
 		VerifyInvalidExpression(code, code.IndexOf("orderby", StringComparison.Ordinal));
 	}
 
@@ -87,7 +87,7 @@ internal sealed class OverloadWithStringComparerTests : CodeFixVerifier
 	[Test]
 	public void LinqSyntaxOrderByStringWithComparer_Valid()
 	{
-		VerifyValidExpression(@"(from letter in new[] { ""A"", ""b"", ""C"" } select letter).OrderByDescending(x => x, StringComparer.OrdinalIgnoreCase)");
+		VerifyValidExpression("""(from letter in new[] { "A", "b", "C" } select letter).OrderByDescending(x => x, StringComparer.OrdinalIgnoreCase)""");
 	}
 
 	protected override DiagnosticAnalyzer GetCSharpDiagnosticAnalyzer() => new OverloadWithStringComparerAnalyzer();
@@ -139,22 +139,25 @@ internal sealed class OverloadWithStringComparerTests : CodeFixVerifier
 			});
 	}
 
-	private const string c_linesBefore = @"
-using System;
-using System.Linq;
+	private const string c_linesBefore = """
+		using System;
+		using System.Linq;
 
-namespace TestApplication
-{
-	internal static class TestClass
-	{
-		public static void UtilityMethod()
+		namespace TestApplication
 		{
-";
+			internal static class TestClass
+			{
+				public static void UtilityMethod()
+				{
 
-	private const string c_linesAfter = @"
+		""";
+
+	private const string c_linesAfter = """
+
+				}
+			}
 		}
-	}
-}";
+		""";
 
 	private const string c_beforeExpression = "GC.KeepAlive(";
 
