@@ -20,14 +20,18 @@ public sealed class NullableHasValueConditionalCodeFixProvider : CodeFixProvider
 	public sealed override async Task RegisterCodeFixesAsync(CodeFixContext context)
 	{
 		var root = await context.Document.GetSyntaxRootAsync(context.CancellationToken).ConfigureAwait(false);
-		if (root is null)
-			return;
 
 		var diagnostic = context.Diagnostics.First();
 		var diagnosticSpan = diagnostic.Location.SourceSpan;
 
 		var diagnosticNode = root.FindNode(diagnosticSpan);
-		if (diagnosticNode is not ConditionalExpressionSyntax conditionalExpression)
+		var conditionalExpression = root.FindNode(diagnosticSpan) switch
+		{
+			ConditionalExpressionSyntax topLevelConditional => topLevelConditional,
+			ArgumentSyntax { Expression: ConditionalExpressionSyntax argumentConditional } => argumentConditional,
+			_ => null,
+		};
+		if (conditionalExpression is null)
 			return;
 
 		if (TryExtractNullableIdentifier(conditionalExpression) is not { } nullableIdentifier)
