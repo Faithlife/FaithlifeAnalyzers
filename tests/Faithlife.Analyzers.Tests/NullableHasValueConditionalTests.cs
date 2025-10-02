@@ -365,6 +365,114 @@ internal sealed class NullableHasValueConditionalTests : CodeFixVerifier
 		VerifyCSharpDiagnostic(validProgram);
 	}
 
+	[Test]
+	public void CodeFixWorksForEnum()
+	{
+		const string invalidProgram = """
+			using System;
+
+			namespace TestApplication
+			{
+				public enum Mode
+				{
+					First,
+					Second,
+					Third
+				}
+				public class TestClass
+				{
+					public void TestMethod(Mode? mode)
+					{
+						var result = mode.HasValue ? mode.Value.ToString() : null;
+					}
+				}
+			}
+			""";
+		var expected = new DiagnosticResult
+		{
+			Id = NullableHasValueConditionalAnalyzer.DiagnosticId,
+			Message = "Use null propagation",
+			Severity = DiagnosticSeverity.Warning,
+			Locations = [new DiagnosticResultLocation("Test0.cs", 15, 17)],
+		};
+
+		VerifyCSharpDiagnostic(invalidProgram, expected);
+
+		const string fixedProgram = """
+			using System;
+
+			namespace TestApplication
+			{
+				public enum Mode
+				{
+					First,
+					Second,
+					Third
+				}
+				public class TestClass
+				{
+					public void TestMethod(Mode? mode)
+					{
+						var result = mode?.ToString();
+					}
+				}
+			}
+			""";
+
+		VerifyCSharpFix(invalidProgram, fixedProgram, 0);
+	}
+
+	[Test]
+	public void CodeFixWorksInMethodCall()
+	{
+		const string invalidProgram = """
+			using System;
+
+			namespace TestApplication
+			{
+				public class TestClass
+				{
+					public void TestMethod(int? value)
+					{
+						Method2(value.HasValue ? value.Value.ToString() : null);
+					}
+					public void Method2(string value)
+					{
+					}
+				}
+			}
+			""";
+		var expected = new DiagnosticResult
+		{
+			Id = NullableHasValueConditionalAnalyzer.DiagnosticId,
+			Message = "Use null propagation",
+			Severity = DiagnosticSeverity.Warning,
+			Locations = [new DiagnosticResultLocation("Test0.cs", 9, 12)],
+		};
+
+		VerifyCSharpDiagnostic(invalidProgram, expected);
+
+		const string fixedProgram = """
+			using System;
+
+			namespace TestApplication
+			{
+				public class TestClass
+				{
+					public void TestMethod(int? value)
+					{
+						Method2(value?.ToString());
+					}
+					public void Method2(string value)
+					{
+					}
+				}
+			}
+			""";
+
+		VerifyCSharpFix(invalidProgram, fixedProgram, 0);
+	}
+
 	protected override DiagnosticAnalyzer GetCSharpDiagnosticAnalyzer() => new NullableHasValueConditionalAnalyzer();
 
 	protected override CodeFixProvider GetCSharpCodeFixProvider() => new NullableHasValueConditionalCodeFixProvider();

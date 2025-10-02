@@ -152,6 +152,146 @@ internal sealed class AsyncMethodContextWorkStateTests : CodeFixVerifier
 		VerifyCSharpFix(brokenProgram, fixedProgram);
 	}
 
+	[Test]
+	public void CodeFixWorksWithMethodCall()
+	{
+		var brokenProgram = $$"""
+			{{c_preamble}}
+			namespace TestApplication
+			{
+				internal class TestClass
+				{
+					public static void Method(AsyncMethodContext context)
+					{
+						Method2(WorkState.FromCancellationToken(context.CancellationToken));
+					}
+					public static bool Method2(IWorkState workState)
+					{
+						return workState.Canceled;
+					}
+				}
+			}
+			""";
+
+		var expected = new DiagnosticResult
+		{
+			Id = AsyncMethodContextWorkStateAnalyzer.DiagnosticId,
+			Message = "Use AsyncMethodContext.WorkState",
+			Severity = DiagnosticSeverity.Warning,
+			Locations = [new DiagnosticResultLocation("Test0.cs", s_preambleLength + 7, 12)],
+		};
+
+		VerifyCSharpDiagnostic(brokenProgram, expected);
+
+		var fixedProgram = $$"""
+			{{c_preamble}}
+			namespace TestApplication
+			{
+				internal class TestClass
+				{
+					public static void Method(AsyncMethodContext context)
+					{
+						Method2(context.WorkState);
+					}
+					public static bool Method2(IWorkState workState)
+					{
+						return workState.Canceled;
+					}
+				}
+			}
+			""";
+
+		VerifyCSharpFix(brokenProgram, fixedProgram);
+	}
+
+	[Test]
+	public void CodeFixWorksWithCast()
+	{
+		var brokenProgram = $$"""
+			{{c_preamble}}
+			namespace TestApplication
+			{
+				internal class TestClass
+				{
+					public static void Method(AsyncMethodContext context)
+					{
+						var concrete = (ConcreteWorkState) WorkState.FromCancellationToken(context.CancellationToken);
+					}
+				}
+			}
+			""";
+
+		var expected = new DiagnosticResult
+		{
+			Id = AsyncMethodContextWorkStateAnalyzer.DiagnosticId,
+			Message = "Use AsyncMethodContext.WorkState",
+			Severity = DiagnosticSeverity.Warning,
+			Locations = [new DiagnosticResultLocation("Test0.cs", s_preambleLength + 7, 39)],
+		};
+
+		VerifyCSharpDiagnostic(brokenProgram, expected);
+
+		var fixedProgram = $$"""
+			{{c_preamble}}
+			namespace TestApplication
+			{
+				internal class TestClass
+				{
+					public static void Method(AsyncMethodContext context)
+					{
+						var concrete = (ConcreteWorkState) context.WorkState;
+					}
+				}
+			}
+			""";
+
+		VerifyCSharpFix(brokenProgram, fixedProgram);
+	}
+
+	[Test]
+	public void CodeFixWorksWithPropertyAccess()
+	{
+		var brokenProgram = $$"""
+			{{c_preamble}}
+			namespace TestApplication
+			{
+				internal class TestClass
+				{
+					public static bool Method(AsyncMethodContext context)
+					{
+						return WorkState.FromCancellationToken(context.CancellationToken).Canceled;
+					}
+				}
+			}
+			""";
+
+		var expected = new DiagnosticResult
+		{
+			Id = AsyncMethodContextWorkStateAnalyzer.DiagnosticId,
+			Message = "Use AsyncMethodContext.WorkState",
+			Severity = DiagnosticSeverity.Warning,
+			Locations = [new DiagnosticResultLocation("Test0.cs", s_preambleLength + 7, 11)],
+		};
+
+		VerifyCSharpDiagnostic(brokenProgram, expected);
+
+		var fixedProgram = $$"""
+			{{c_preamble}}
+			namespace TestApplication
+			{
+				internal class TestClass
+				{
+					public static bool Method(AsyncMethodContext context)
+					{
+						return context.WorkState.Canceled;
+					}
+				}
+			}
+			""";
+
+		VerifyCSharpFix(brokenProgram, fixedProgram);
+	}
+
 	protected override DiagnosticAnalyzer GetCSharpDiagnosticAnalyzer() => new AsyncMethodContextWorkStateAnalyzer();
 
 	protected override CodeFixProvider GetCSharpCodeFixProvider() => new AsyncMethodContextWorkStateCodeFixProvider();

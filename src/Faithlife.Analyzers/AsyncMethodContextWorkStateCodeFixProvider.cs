@@ -24,7 +24,13 @@ public sealed class AsyncMethodContextWorkStateCodeFixProvider : CodeFixProvider
 		var diagnostic = context.Diagnostics.First();
 		var diagnosticSpan = diagnostic.Location.SourceSpan;
 
-		if (root.FindNode(diagnosticSpan) is not InvocationExpressionSyntax invocation)
+		var invocation = root.FindNode(diagnosticSpan) switch
+		{
+			InvocationExpressionSyntax topLevelInvocation => topLevelInvocation,
+			ArgumentSyntax { Expression: InvocationExpressionSyntax argumentInvocation } => argumentInvocation,
+			_ => null,
+		};
+		if (invocation is null)
 			return;
 
 		// extract the context expression from WorkState.FromCancellationToken(context.CancellationToken)
