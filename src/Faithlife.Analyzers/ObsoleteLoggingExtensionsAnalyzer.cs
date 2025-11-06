@@ -55,7 +55,7 @@ public sealed class ObsoleteLoggingExtensionsAnalyzer : DiagnosticAnalyzer
 		context.ReportDiagnostic(diagnostic);
 	}
 
-	private static string GetReplacementMethodName(string obsoleteMethodName) =>
+	internal static string GetReplacementMethodName(string obsoleteMethodName) =>
 		obsoleteMethodName switch
 		{
 			"Debug" => "LogDebug",

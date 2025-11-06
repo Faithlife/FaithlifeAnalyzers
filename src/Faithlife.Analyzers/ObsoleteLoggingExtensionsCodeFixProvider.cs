@@ -41,7 +41,7 @@ public sealed class ObsoleteLoggingExtensionsCodeFixProvider : CodeFixProvider
 			return;
 
 		var oldMethodName = methodSymbol.Name;
-		var newMethodName = GetReplacementMethodName(oldMethodName);
+		var newMethodName = ObsoleteLoggingExtensionsAnalyzer.GetReplacementMethodName(oldMethodName);
 
 		context.RegisterCodeFix(
 			CodeAction.Create(
@@ -50,17 +50,6 @@ public sealed class ObsoleteLoggingExtensionsCodeFixProvider : CodeFixProvider
 				"replace-with-ilogger-method"),
 			diagnostic);
 	}
-
-	private static string GetReplacementMethodName(string obsoleteMethodName) =>
-		obsoleteMethodName switch
-		{
-			"Debug" => "LogDebug",
-			"Info" => "LogInformation",
-			"Warn" => "LogWarning",
-			"Error" => "LogError",
-			"Fatal" => "LogCritical",
-			_ => obsoleteMethodName,
-		};
 
 	private static async Task<Document> ReplaceMethodAsync(Document document, InvocationExpressionSyntax invocation, MemberAccessExpressionSyntax memberAccess, string newMethodName, CancellationToken cancellationToken)
 	{
