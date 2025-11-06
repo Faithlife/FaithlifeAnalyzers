@@ -14,11 +14,11 @@ internal sealed class ObsoleteLoggingExtensionsTests : CodeFixVerifier
 		const string validProgram = """
 			using Microsoft.Extensions.Logging;
 
-			namespace Logos.Common.Logging
+			namespace Logos.Common.Logging.Extensions
 			{
-				public static class Extensions
+				public static partial class LoggerExtensions
 				{
-					public static void Debug(this ILogger logger, string message) => throw new System.NotImplementedException();
+					public static void Debug(this ILogger logger, string message, params object[] args) => logger.LogDebug(message, args);
 				}
 			}
 
@@ -28,11 +28,11 @@ internal sealed class ObsoleteLoggingExtensionsTests : CodeFixVerifier
 
 				public static class LoggerExtensions
 				{
-					public static void LogDebug(this ILogger logger, string message) => throw new System.NotImplementedException();
-					public static void LogInformation(this ILogger logger, string message) => throw new System.NotImplementedException();
-					public static void LogWarning(this ILogger logger, string message) => throw new System.NotImplementedException();
-					public static void LogError(this ILogger logger, string message) => throw new System.NotImplementedException();
-					public static void LogCritical(this ILogger logger, string message) => throw new System.NotImplementedException();
+					public static void LogDebug(this ILogger logger, string message, params object[] args) => throw new System.NotImplementedException();
+					public static void LogInformation(this ILogger logger, string message, params object[] args) => throw new System.NotImplementedException();
+					public static void LogWarning(this ILogger logger, string message, params object[] args) => throw new System.NotImplementedException();
+					public static void LogError(this ILogger logger, string message, params object[] args) => throw new System.NotImplementedException();
+					public static void LogCritical(this ILogger logger, string message, params object[] args) => throw new System.NotImplementedException();
 				}
 			}
 
@@ -64,24 +64,33 @@ internal sealed class ObsoleteLoggingExtensionsTests : CodeFixVerifier
 	public void ObsoleteLoggingMethod(string obsoleteMethod, string replacementMethod)
 	{
 		var invalidProgram = $$"""
-			using Logos.Common.Logging;
+			using Logos.Common.Logging.Extensions;
 			using Microsoft.Extensions.Logging;
 
-			namespace Logos.Common.Logging
+			namespace Logos.Common.Logging.Extensions
 			{
-				public static class Extensions
+				public static partial class LoggerExtensions
 				{
-					public static void Debug(this ILogger logger, string message) => throw new System.NotImplementedException();
-					public static void Info(this ILogger logger, string message) => throw new System.NotImplementedException();
-					public static void Warn(this ILogger logger, string message) => throw new System.NotImplementedException();
-					public static void Error(this ILogger logger, string message) => throw new System.NotImplementedException();
-					public static void Fatal(this ILogger logger, string message) => throw new System.NotImplementedException();
+					public static void Debug(this ILogger logger, string message, params object[] args) => logger.LogDebug(message, args);
+					public static void Info(this ILogger logger, string message, params object[] args) => logger.LogInformation(message, args);
+					public static void Warn(this ILogger logger, string message, params object[] args) => logger.LogWarning(message, args);
+					public static void Error(this ILogger logger, string message, params object[] args) => logger.LogError(message, args);
+					public static void Fatal(this ILogger logger, string message, params object[] args) => logger.LogCritical(message, args);
 				}
 			}
 
 			namespace Microsoft.Extensions.Logging
 			{
 				public interface ILogger { }
+
+				public static class LoggerExtensions
+				{
+					public static void LogDebug(this ILogger logger, string message, params object[] args) => throw new System.NotImplementedException();
+					public static void LogInformation(this ILogger logger, string message, params object[] args) => throw new System.NotImplementedException();
+					public static void LogWarning(this ILogger logger, string message, params object[] args) => throw new System.NotImplementedException();
+					public static void LogError(this ILogger logger, string message, params object[] args) => throw new System.NotImplementedException();
+					public static void LogCritical(this ILogger logger, string message, params object[] args) => throw new System.NotImplementedException();
+				}
 			}
 
 			namespace TestApplication
@@ -103,7 +112,7 @@ internal sealed class ObsoleteLoggingExtensionsTests : CodeFixVerifier
 			Id = ObsoleteLoggingExtensionsAnalyzer.DiagnosticId,
 			Message = $"Replace obsolete '{obsoleteMethod}' method with '{replacementMethod}'",
 			Severity = DiagnosticSeverity.Error,
-			Locations = [new DiagnosticResultLocation("Test0.cs", 29, 4)],
+			Locations = [new DiagnosticResultLocation("Test0.cs", 38, 4)],
 		};
 
 		VerifyCSharpDiagnostic(invalidProgram, expected);
@@ -111,21 +120,30 @@ internal sealed class ObsoleteLoggingExtensionsTests : CodeFixVerifier
 		var fixedProgram = $$"""
 			using Microsoft.Extensions.Logging;
 
-			namespace Logos.Common.Logging
+			namespace Logos.Common.Logging.Extensions
 			{
-				public static class Extensions
+				public static partial class LoggerExtensions
 				{
-					public static void Debug(this ILogger logger, string message) => throw new System.NotImplementedException();
-					public static void Info(this ILogger logger, string message) => throw new System.NotImplementedException();
-					public static void Warn(this ILogger logger, string message) => throw new System.NotImplementedException();
-					public static void Error(this ILogger logger, string message) => throw new System.NotImplementedException();
-					public static void Fatal(this ILogger logger, string message) => throw new System.NotImplementedException();
+					public static void Debug(this ILogger logger, string message, params object[] args) => logger.LogDebug(message, args);
+					public static void Info(this ILogger logger, string message, params object[] args) => logger.LogInformation(message, args);
+					public static void Warn(this ILogger logger, string message, params object[] args) => logger.LogWarning(message, args);
+					public static void Error(this ILogger logger, string message, params object[] args) => logger.LogError(message, args);
+					public static void Fatal(this ILogger logger, string message, params object[] args) => logger.LogCritical(message, args);
 				}
 			}
 
 			namespace Microsoft.Extensions.Logging
 			{
 				public interface ILogger { }
+
+				public static class LoggerExtensions
+				{
+					public static void LogDebug(this ILogger logger, string message, params object[] args) => throw new System.NotImplementedException();
+					public static void LogInformation(this ILogger logger, string message, params object[] args) => throw new System.NotImplementedException();
+					public static void LogWarning(this ILogger logger, string message, params object[] args) => throw new System.NotImplementedException();
+					public static void LogError(this ILogger logger, string message, params object[] args) => throw new System.NotImplementedException();
+					public static void LogCritical(this ILogger logger, string message, params object[] args) => throw new System.NotImplementedException();
+				}
 			}
 
 			namespace TestApplication
@@ -149,20 +167,25 @@ internal sealed class ObsoleteLoggingExtensionsTests : CodeFixVerifier
 	public void ObsoleteLoggingMethodWithFormattedMessage()
 	{
 		const string invalidProgram = """
-			using Logos.Common.Logging;
+			using Logos.Common.Logging.Extensions;
 			using Microsoft.Extensions.Logging;
 
-			namespace Logos.Common.Logging
+			namespace Logos.Common.Logging.Extensions
 			{
-				public static class Extensions
+				public static partial class LoggerExtensions
 				{
-					public static void Debug(this ILogger logger, string format, params object[] args) => throw new System.NotImplementedException();
+					public static void Debug(this ILogger logger, string message, params object[] args) => logger.LogDebug(message, args);
 				}
 			}
 
 			namespace Microsoft.Extensions.Logging
 			{
 				public interface ILogger { }
+
+				public static class LoggerExtensions
+				{
+					public static void LogDebug(this ILogger logger, string message, params object[] args) => throw new System.NotImplementedException();
+				}
 			}
 
 			namespace TestApplication
@@ -184,7 +207,7 @@ internal sealed class ObsoleteLoggingExtensionsTests : CodeFixVerifier
 			Id = ObsoleteLoggingExtensionsAnalyzer.DiagnosticId,
 			Message = "Replace obsolete 'Debug' method with 'LogDebug'",
 			Severity = DiagnosticSeverity.Error,
-			Locations = [new DiagnosticResultLocation("Test0.cs", 25, 4)],
+			Locations = [new DiagnosticResultLocation("Test0.cs", 30, 4)],
 		};
 
 		VerifyCSharpDiagnostic(invalidProgram, expected);
@@ -192,17 +215,22 @@ internal sealed class ObsoleteLoggingExtensionsTests : CodeFixVerifier
 		const string fixedProgram = """
 			using Microsoft.Extensions.Logging;
 
-			namespace Logos.Common.Logging
+			namespace Logos.Common.Logging.Extensions
 			{
-				public static class Extensions
+				public static partial class LoggerExtensions
 				{
-					public static void Debug(this ILogger logger, string format, params object[] args) => throw new System.NotImplementedException();
+					public static void Debug(this ILogger logger, string message, params object[] args) => logger.LogDebug(message, args);
 				}
 			}
 
 			namespace Microsoft.Extensions.Logging
 			{
 				public interface ILogger { }
+
+				public static class LoggerExtensions
+				{
+					public static void LogDebug(this ILogger logger, string message, params object[] args) => throw new System.NotImplementedException();
+				}
 			}
 
 			namespace TestApplication
@@ -226,22 +254,29 @@ internal sealed class ObsoleteLoggingExtensionsTests : CodeFixVerifier
 	public void MultipleObsoleteMethods()
 	{
 		const string invalidProgram = """
-			using Logos.Common.Logging;
+			using Logos.Common.Logging.Extensions;
 			using Microsoft.Extensions.Logging;
 
-			namespace Logos.Common.Logging
+			namespace Logos.Common.Logging.Extensions
 			{
-				public static class Extensions
+				public static partial class LoggerExtensions
 				{
-					public static void Debug(this ILogger logger, string message) => throw new System.NotImplementedException();
-					public static void Info(this ILogger logger, string message) => throw new System.NotImplementedException();
-					public static void Error(this ILogger logger, string message) => throw new System.NotImplementedException();
+					public static void Debug(this ILogger logger, string message, params object[] args) => logger.LogDebug(message, args);
+					public static void Info(this ILogger logger, string message, params object[] args) => logger.LogInformation(message, args);
+					public static void Error(this ILogger logger, string message, params object[] args) => logger.LogError(message, args);
 				}
 			}
 
 			namespace Microsoft.Extensions.Logging
 			{
 				public interface ILogger { }
+
+				public static class LoggerExtensions
+				{
+					public static void LogDebug(this ILogger logger, string message, params object[] args) => throw new System.NotImplementedException();
+					public static void LogInformation(this ILogger logger, string message, params object[] args) => throw new System.NotImplementedException();
+					public static void LogError(this ILogger logger, string message, params object[] args) => throw new System.NotImplementedException();
+				}
 			}
 
 			namespace TestApplication
@@ -267,21 +302,21 @@ internal sealed class ObsoleteLoggingExtensionsTests : CodeFixVerifier
 				Id = ObsoleteLoggingExtensionsAnalyzer.DiagnosticId,
 				Message = "Replace obsolete 'Debug' method with 'LogDebug'",
 				Severity = DiagnosticSeverity.Error,
-				Locations = [new DiagnosticResultLocation("Test0.cs", 27, 4)],
+				Locations = [new DiagnosticResultLocation("Test0.cs", 34, 4)],
 			},
 			new DiagnosticResult
 			{
 				Id = ObsoleteLoggingExtensionsAnalyzer.DiagnosticId,
 				Message = "Replace obsolete 'Info' method with 'LogInformation'",
 				Severity = DiagnosticSeverity.Error,
-				Locations = [new DiagnosticResultLocation("Test0.cs", 28, 4)],
+				Locations = [new DiagnosticResultLocation("Test0.cs", 35, 4)],
 			},
 			new DiagnosticResult
 			{
 				Id = ObsoleteLoggingExtensionsAnalyzer.DiagnosticId,
 				Message = "Replace obsolete 'Error' method with 'LogError'",
 				Severity = DiagnosticSeverity.Error,
-				Locations = [new DiagnosticResultLocation("Test0.cs", 29, 4)],
+				Locations = [new DiagnosticResultLocation("Test0.cs", 36, 4)],
 			},
 		};
 

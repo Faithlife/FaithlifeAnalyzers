@@ -73,5 +73,5 @@ public sealed class ObsoleteLoggingExtensionsCodeFixProvider : CodeFixProvider
 			cancellationToken: cancellationToken).ConfigureAwait(false);
 	}
 
-	private static readonly NameSyntax s_logosCommonLoggingNamespace = ParseName("Logos.Common.Logging");
+	private static readonly NameSyntax s_logosCommonLoggingNamespace = ParseName("Logos.Common.Logging.Extensions");
 }

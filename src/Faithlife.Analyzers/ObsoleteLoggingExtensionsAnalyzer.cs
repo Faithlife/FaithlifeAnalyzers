@@ -16,7 +16,7 @@ public sealed class ObsoleteLoggingExtensionsAnalyzer : DiagnosticAnalyzer
 
 		context.RegisterCompilationStartAction(compilationStartAnalysisContext =>
 		{
-			if (compilationStartAnalysisContext.Compilation.GetTypeByMetadataName("Logos.Common.Logging.Extensions") is not { } extensionsType)
+			if (compilationStartAnalysisContext.Compilation.GetTypeByMetadataName("Logos.Common.Logging.Extensions.LoggerExtensions") is not { } extensionsType)
 				return;
 
 			var obsoleteMethods = extensionsType.GetMembers()
