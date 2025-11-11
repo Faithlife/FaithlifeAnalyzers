@@ -131,6 +131,56 @@ internal sealed class LoggerInterpolatedStringTests : CodeFixVerifier
 		VerifyCSharpFix(invalidProgram, fixedProgram, 0);
 	}
 
+	[Test]
+	public void InvalidInterpolationWithWrite()
+	{
+		const string invalidProgram = $$"""
+			{{c_preamble}}
+
+			namespace TestApplication
+			{
+				internal static class TestClass
+				{
+					private static Logger m_logger = null!;
+
+					public static void UtilityMethod(string errorMessage)
+					{
+						m_logger.Write(LogLevel.Error, $"Operation failed: {errorMessage}");
+					}
+				}
+			}
+			""";
+
+		var expected = new DiagnosticResult
+		{
+			Id = LoggerInterpolatedStringAnalyzer.DiagnosticId,
+			Message = "Replace interpolated string with composite format string arguments",
+			Severity = DiagnosticSeverity.Info,
+			Locations = [new("Test0.cs", 39, 35)],
+		};
+
+		VerifyCSharpDiagnostic(invalidProgram, expected);
+
+		const string fixedProgram = $$"""
+			{{c_preamble}}
+
+			namespace TestApplication
+			{
+				internal static class TestClass
+				{
+					private static Logger m_logger = null!;
+
+					public static void UtilityMethod(string errorMessage)
+					{
+						m_logger.Write(LogLevel.Error, "Operation failed: {0}", errorMessage);
+					}
+				}
+			}
+			""";
+
+		VerifyCSharpFix(invalidProgram, fixedProgram, 0);
+	}
+
 	protected override DiagnosticAnalyzer GetCSharpDiagnosticAnalyzer() => new LoggerInterpolatedStringAnalyzer();
 
 	protected override CodeFixProvider GetCSharpCodeFixProvider() => new LoggerInterpolatedStringCodeFixProvider();

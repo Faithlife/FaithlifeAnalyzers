@@ -56,21 +56,37 @@ public sealed class LoggerInterpolatedStringCodeFixProvider : CodeFixProvider
 
 		var (formatLiteral, argumentExpressions) = BuildFormatLiteral(interpolated);
 
-		// Replace first argument expression with a string literal.
+		// Find which argument contains the interpolated string
 		var originalArgs = invocation.ArgumentList.Arguments;
-		var newFirstArg = originalArgs[0].WithExpression(
+		var messageArgIndex = -1;
+		for (int i = 0; i < originalArgs.Count; i++)
+		{
+			if (originalArgs[i].Expression == interpolated)
+			{
+				messageArgIndex = i;
+				break;
+			}
+		}
+
+		if (messageArgIndex == -1)
+			return document;
+
+		// Replace the message argument with a string literal.
+		var newMessageArg = originalArgs[messageArgIndex].WithExpression(
 			SyntaxFactory.LiteralExpression(SyntaxKind.StringLiteralExpression, SyntaxFactory.Literal(formatLiteral)));
 
 		// Add new arguments for each interpolation hole.
 		SeparatedSyntaxList<ArgumentSyntax> newArgList;
 		if (argumentExpressions.Count == 0)
 		{
-			newArgList = SyntaxFactory.SeparatedList([newFirstArg]);
+			var list = originalArgs.ToList();
+			list[messageArgIndex] = newMessageArg;
+			newArgList = SyntaxFactory.SeparatedList(list);
 		}
 		else
 		{
 			var list = originalArgs.ToList();
-			list[0] = newFirstArg;
+			list[messageArgIndex] = newMessageArg;
 			list.AddRange(argumentExpressions.Select(SyntaxFactory.Argument));
 			newArgList = SyntaxFactory.SeparatedList(list);
 		}

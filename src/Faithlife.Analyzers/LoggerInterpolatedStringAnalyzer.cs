@@ -34,27 +34,33 @@ public sealed class LoggerInterpolatedStringAnalyzer : DiagnosticAnalyzer
 
 		var args = argumentList.Arguments;
 
-		// Only inspect first argument (message template).
-		if (args[0].Expression is not InterpolatedStringExpressionSyntax interpolated)
-			return;
-
-		// Ignore if there are no interpolation holes (FL0014 already handles empty interpolation cases).
-		if (interpolated.Contents.All(c => c is InterpolatedStringTextSyntax))
-			return;
-
-		// Resolve symbol.
+		// Resolve symbol first to determine which argument to check.
 		if (context.SemanticModel.GetSymbolInfo(invocation.Expression).Symbol is not IMethodSymbol methodSymbol)
 			return;
 
 		if (!IsLoggerMethod(methodSymbol))
 			return;
 
-		// If caller already supplies additional arguments that could be a params array, allow fix anyway,
-		// but skip if second argument is explicitly an array creation to avoid ambiguity.
-		if (args.Count > 1 && args[1].Expression is (ArrayCreationExpressionSyntax or ImplicitArrayCreationExpressionSyntax))
+		// For Write method, check second argument (message), otherwise check first argument.
+		var messageArgIndex = methodSymbol.Name == "Write" ? 1 : 0;
+		if (args.Count <= messageArgIndex)
 			return;
 
-		context.ReportDiagnostic(Diagnostic.Create(s_rule, args[0].GetLocation()));
+		// Only inspect the message argument.
+		if (args[messageArgIndex].Expression is not InterpolatedStringExpressionSyntax interpolated)
+			return;
+
+		// Ignore if there are no interpolation holes (FL0014 already handles empty interpolation cases).
+		if (interpolated.Contents.All(c => c is InterpolatedStringTextSyntax))
+			return;
+
+		// If caller already supplies additional arguments that could be a params array, allow fix anyway,
+		// but skip if next argument is explicitly an array creation to avoid ambiguity.
+		var nextArgIndex = messageArgIndex + 1;
+		if (args.Count > nextArgIndex && args[nextArgIndex].Expression is (ArrayCreationExpressionSyntax or ImplicitArrayCreationExpressionSyntax))
+			return;
+
+		context.ReportDiagnostic(Diagnostic.Create(s_rule, args[messageArgIndex].GetLocation()));
 	}
 
 	private static bool IsLoggerMethod(IMethodSymbol method)
