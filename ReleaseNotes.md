@@ -9,7 +9,7 @@ Prefix the description of the change with `[major]`, `[minor]`, or `[patch]` in 
 New analyzers are considered "minor" changes (even though adding a new analyzer is likely to generate warnings
 or errors for existing code when the package is upgraded).
 
-* `[minor]` Fix FL0024 code fix provider to properly find interpolated string expressions within argument nodes.
+* `[minor]` Add [FL0024](https://github.com/Faithlife/FaithlifeAnalyzers/wiki/FL0024): Use composite format string instead of interpolated string with Libronix Logger methods.
 
 ## 1.6.0 Beta 2
 
