@@ -56,7 +56,7 @@ internal sealed class LoggerInterpolatedStringTests : CodeFixVerifier
 			Id = LoggerInterpolatedStringAnalyzer.DiagnosticId,
 			Message = "Replace interpolated string with composite format string arguments",
 			Severity = DiagnosticSeverity.Info,
-			Locations = [new("Test0.cs", 26, 18)],
+			Locations = [new("Test0.cs", 39, 18)],
 		};
 
 		VerifyCSharpDiagnostic(invalidProgram, expected);
@@ -106,7 +106,7 @@ internal sealed class LoggerInterpolatedStringTests : CodeFixVerifier
 			Id = LoggerInterpolatedStringAnalyzer.DiagnosticId,
 			Message = "Replace interpolated string with composite format string arguments",
 			Severity = DiagnosticSeverity.Info,
-			Locations = [new("Test0.cs", 26, 19)],
+			Locations = [new("Test0.cs", 39, 19)],
 		};
 
 		VerifyCSharpDiagnostic(invalidProgram, expected);
@@ -140,6 +140,15 @@ internal sealed class LoggerInterpolatedStringTests : CodeFixVerifier
 
 		namespace Libronix.Utility.Logging
 		{
+			public enum LogLevel
+			{
+				Debug,
+				Info,
+				Warn,
+				Error,
+				Fatal,
+			}
+
 			public class Logger
 			{
 				public void Debug(string message) => throw new System.NotImplementedException();
@@ -150,6 +159,10 @@ internal sealed class LoggerInterpolatedStringTests : CodeFixVerifier
 				public void Warn(string message, params object[] args) => throw new System.NotImplementedException();
 				public void Error(string message) => throw new System.NotImplementedException();
 				public void Error(string message, params object[] args) => throw new System.NotImplementedException();
+				public void Fatal(string message) => throw new System.NotImplementedException();
+				public void Fatal(string message, params object[] args) => throw new System.NotImplementedException();
+				public void Write(LogLevel level, string message) => throw new System.NotImplementedException();
+				public void Write(LogLevel level, string message, params object[] args) => throw new System.NotImplementedException();
 			}
 		}
 		""";
