@@ -1,27 +1,24 @@
 name: Build
+
 on:
-  workflow_dispatch:
   push:
-    paths-ignore:
-    - '*.md'
-    - 'docs/**'
-    branches:
-    - 'master'
-    tags-ignore:
-    - '**'
+    branches: [master]
+    tags-ignore: ['**']
   pull_request:
-    paths-ignore:
-    - '*.md'
-    - 'docs/**'
+  workflow_dispatch:
+
 env:
-  DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
+  DOTNET_NOLOGO: 1
   DOTNET_CLI_TELEMETRY_OPTOUT: 1
+
 defaults:
   run:
     shell: pwsh
+
 permissions:
   contents: write
   id-token: write
+
 jobs:
   build:
     runs-on: ${{ matrix.os }}
@@ -39,6 +36,8 @@ jobs:
       run: .\build.ps1 build --skip restore
     - name: Test
       run: .\build.ps1 test --skip build
+    - name: Package
+      run: .\build.ps1 package --skip test
     - name: Log in to NuGet
       if: runner.os == 'Windows' && github.repository_owner == 'Faithlife' && github.ref == 'refs/heads/master'
       uses: NuGet/login@v1
@@ -48,6 +47,6 @@ jobs:
     - name: Publish
       if: runner.os == 'Windows' && github.repository_owner == 'Faithlife' && github.ref == 'refs/heads/master'
       env:
-        BUILD_BOT_PASSWORD: ${{ secrets.BUILD_BOT_PASSWORD }}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         NUGET_API_KEY: ${{ steps.nuget-login.outputs.NUGET_API_KEY }}
-      run: .\build.ps1 publish --skip test
+      run: .\build.ps1 publish --skip package
