@@ -364,43 +364,6 @@ internal sealed class IfNotNullTests : CodeFixVerifier
 		VerifyCSharpFix(invalidProgram, fixedCall is null ? invalidProgram : CreateProgram(fixedCall).Replace("using Libronix.Utility.IfNotNull;\n", "", StringComparison.Ordinal));
 	}
 
-	public void NonLocalInvocation()
-	{
-		string CreateProgram(string actualCall) => $$"""
-			{{c_preamble}}
-			namespace TestProgram
-			{
-				internal class TestClass
-				{
-					public event Action OnAction;
-
-					public void CallIfNotNull()
-					{
-						{{actualCall}}
-					}
-				}
-			}
-			""";
-
-		var expected = new DiagnosticResult
-		{
-			Id = IfNotNullAnalyzer.DiagnosticId,
-			Message = "Prefer modern language features over IfNotNull usage",
-			Severity = DiagnosticSeverity.Info,
-			Locations = [new DiagnosticResultLocation("Test0.cs", s_preambleLength + 8, 4)],
-		};
-
-		string invalidProgram = CreateProgram("OnAction.IfNotNull(x => x(), () => throw new InvalidOperationException());");
-
-		VerifyCSharpDiagnostic(invalidProgram, expected);
-
-		// Ensure that invocations on identifiers that are *not* local variables receive a local variable definition.
-		VerifyCSharpFix(invalidProgram, CreateProgram(@"if (OnAction is Action x)
-				x();
-			else
-				throw new InvalidOperationException();").Replace("using Libronix.Utility.IfNotNull;\n", "", StringComparison.Ordinal));
-	}
-
 	[TestCase(
 		"System.Threading.Tasks.Task.FromResult(default(ReferenceThing))",
 		"var result = possiblyNull.IfNotNull(async x => await x);")]

@@ -1,4 +1,5 @@
 using System.Collections.Immutable;
+using System.Diagnostics.CodeAnalysis;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -7,6 +8,7 @@ using Microsoft.CodeAnalysis.Diagnostics;
 namespace Faithlife.Analyzers;
 
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
+[SuppressMessage("Naming", "CA1711:Identifiers should not have incorrect suffix", Justification = "Legacy.")]
 public class LocalFunctionEventHandler : DiagnosticAnalyzer
 {
 	public override void Initialize(AnalysisContext context)
