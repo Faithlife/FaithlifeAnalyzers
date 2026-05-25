@@ -1,7 +1,4 @@
 <Project>
-  <PropertyGroup>
-    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
-  </PropertyGroup>
   <ItemGroup>
     <PackageVersion Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="4.14.0" />
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
@@ -10,9 +7,6 @@
   </ItemGroup>
   <ItemGroup>
     <GlobalPackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="4.14.0" />
-    <GlobalPackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" />
-    <GlobalPackageReference Include="NUnit.Analyzers" Version="4.10.0" />
-    <GlobalPackageReference Include="StyleCop.Analyzers" Version="1.2.0-beta.556" />
   </ItemGroup>
   <!-- DO NOT EDIT: faithlife-dotnet-library-targets-properties convention -->
   <PropertyGroup>
@@ -28,4 +22,7 @@
     <GlobalPackageReference Include="StyleCop.Analyzers" Version="1.*-*" />
   </ItemGroup>
   <!-- END DO NOT EDIT -->
+  <ItemGroup>
+    <GlobalPackageReference Remove="Faithlife.Analyzers" />
+  </ItemGroup>
 </Project>

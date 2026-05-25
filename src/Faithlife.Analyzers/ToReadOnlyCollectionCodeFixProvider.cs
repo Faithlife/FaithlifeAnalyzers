@@ -58,7 +58,7 @@ public sealed class ToReadOnlyCollectionCodeFixProvider : CodeFixProvider
 		var newExpression = invocation.Expression switch
 		{
 			MemberAccessExpressionSyntax memberAccess => (ExpressionSyntax) MemberAccessExpression(SyntaxKind.SimpleMemberAccessExpression, memberAccess.Expression, IdentifierName("ToList")),
-			MemberBindingExpressionSyntax _ => MemberBindingExpression(IdentifierName("ToList")),
+			MemberBindingExpressionSyntax => MemberBindingExpression(IdentifierName("ToList")),
 			_ => throw new NotSupportedException($"Can't handle {invocation.Expression.GetType()}"),
 		};
 
