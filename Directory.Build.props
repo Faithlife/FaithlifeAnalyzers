@@ -6,6 +6,7 @@
     <GitHubOrganization>Faithlife</GitHubOrganization>
     <RepositoryName>FaithlifeAnalyzers</RepositoryName>
   </PropertyGroup>
+
   <!-- DO NOT EDIT: faithlife-dotnet-library-props convention -->
   <PropertyGroup>
     <LangVersion>14.0</LangVersion>
