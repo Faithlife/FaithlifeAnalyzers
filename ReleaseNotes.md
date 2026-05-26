@@ -9,6 +9,10 @@ Prefix the description of the change with `[major]`, `[minor]`, or `[patch]` in 
 New analyzers are considered "minor" changes (even though adding a new analyzer is likely to generate warnings
 or errors for existing code when the package is upgraded).
 
+## 1.6.1
+
+* Update package README.
+
 ## 1.6.0
 
 * Add [FL0021](https://github.com/Faithlife/FaithlifeAnalyzers/wiki/FL0021): Use null propagation.
