@@ -79,5 +79,5 @@ public sealed class CurrentAsyncWorkItemAnalyzer : DiagnosticAnalyzer
 		category: "Usage",
 		defaultSeverity: DiagnosticSeverity.Warning,
 		isEnabledByDefault: true,
-		helpLinkUri: "https://github.com/Faithlife/FaithlifeAnalyzers/wiki/FL0001");
+		helpLinkUri: "https://github.com/Faithlife/FaithlifeAnalyzers/blob/-/docs/FL0001.md");
 }

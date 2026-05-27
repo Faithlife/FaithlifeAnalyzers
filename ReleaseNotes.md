@@ -1,13 +1,8 @@
 # Release Notes
 
-## Pending
+## 1.6.2
 
-Describe changes here when they're committed to the `master` branch. Move them to a version heading when the project version number is updated in preparation for publishing an updated NuGet package.
-
-Prefix the description of the change with `[major]`, `[minor]`, or `[patch]` in accordance with [Semantic Versioning](https://semver.org/).
-
-New analyzers are considered "minor" changes (even though adding a new analyzer is likely to generate warnings
-or errors for existing code when the package is upgraded).
+* Move analyzer documentation from wiki to repository content.
 
 ## 1.6.1
 

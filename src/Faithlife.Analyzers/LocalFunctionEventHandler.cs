@@ -95,7 +95,7 @@ public class LocalFunctionEventHandler : DiagnosticAnalyzer
 		category: "Usage",
 		defaultSeverity: DiagnosticSeverity.Warning,
 		isEnabledByDefault: true,
-		helpLinkUri: $"https://github.com/Faithlife/FaithlifeAnalyzers/wiki/{LocalFunctionDiagnosticId}"
+		helpLinkUri: $"https://github.com/Faithlife/FaithlifeAnalyzers/blob/-/docs/{LocalFunctionDiagnosticId}.md"
 	);
 
 	private static readonly DiagnosticDescriptor s_lambdaRule = new(
@@ -105,6 +105,6 @@ public class LocalFunctionEventHandler : DiagnosticAnalyzer
 		category: "Usage",
 		defaultSeverity: DiagnosticSeverity.Error,
 		isEnabledByDefault: true,
-		helpLinkUri: $"https://github.com/Faithlife/FaithlifeAnalyzers/wiki/{LambdaDiagnosticId}"
+		helpLinkUri: $"https://github.com/Faithlife/FaithlifeAnalyzers/blob/-/docs/{LambdaDiagnosticId}.md"
 	);
 }

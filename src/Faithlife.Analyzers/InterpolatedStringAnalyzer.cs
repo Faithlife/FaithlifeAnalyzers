@@ -57,7 +57,7 @@ public sealed class InterpolatedStringAnalyzer : DiagnosticAnalyzer
 		category: "Usage",
 		defaultSeverity: DiagnosticSeverity.Warning,
 		isEnabledByDefault: true,
-		helpLinkUri: $"https://github.com/Faithlife/FaithlifeAnalyzers/wiki/{DiagnosticIdDollar}");
+		helpLinkUri: $"https://github.com/Faithlife/FaithlifeAnalyzers/blob/-/docs/{DiagnosticIdDollar}.md");
 
 	private static readonly DiagnosticDescriptor s_ruleUnnecessary = new(
 		id: DiagnosticIdUnnecessary,
@@ -66,5 +66,5 @@ public sealed class InterpolatedStringAnalyzer : DiagnosticAnalyzer
 		category: "Usage",
 		defaultSeverity: DiagnosticSeverity.Warning,
 		isEnabledByDefault: true,
-		helpLinkUri: $"https://github.com/Faithlife/FaithlifeAnalyzers/wiki/{DiagnosticIdUnnecessary}");
+		helpLinkUri: $"https://github.com/Faithlife/FaithlifeAnalyzers/blob/-/docs/{DiagnosticIdUnnecessary}.md");
 }
