@@ -2,7 +2,7 @@
 
 Roslyn-based C# code analyzers used on Faithlife source code.
 
-[![Build](https://github.com/Faithlife/FaithlifeAnalyzers/workflows/Build/badge.svg)](https://github.com/Faithlife/FaithlifeAnalyzers/actions?query=workflow%3ABuild) [![NuGet](https://img.shields.io/nuget/v/Faithlife.Analyzers.svg)](https://www.nuget.org/packages/Faithlife.Analyzers)
+[![NuGet](https://img.shields.io/nuget/v/Faithlife.Analyzers.svg)](https://www.nuget.org/packages/Faithlife.Analyzers)
 
 [Analyzer Documentation](https://github.com/Faithlife/FaithlifeAnalyzers/wiki) | [Release Notes](ReleaseNotes.md)
 
