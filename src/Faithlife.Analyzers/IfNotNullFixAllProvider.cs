@@ -20,14 +20,14 @@ internal sealed class IfNotNullFixAllProvider : FixAllProvider
 
 		switch (fixAllContext.Scope)
 		{
-		case FixAllScope.Document:
+			case FixAllScope.Document:
 			{
 				allDiagnostics = await fixAllContext.GetDocumentDiagnosticsAsync(fixAllContext.Document).ConfigureAwait(false);
 				allSyntaxTrees = [(fixAllContext.Document, await fixAllContext.Document.GetSyntaxTreeAsync(fixAllContext.CancellationToken).ConfigureAwait(false))];
 				break;
 			}
 
-		case FixAllScope.Project:
+			case FixAllScope.Project:
 			{
 				allDiagnostics = await fixAllContext.GetAllDiagnosticsAsync(fixAllContext.Project).ConfigureAwait(false);
 				allSyntaxTrees = await Task.WhenAll(
@@ -38,7 +38,7 @@ internal sealed class IfNotNullFixAllProvider : FixAllProvider
 				break;
 			}
 
-		case FixAllScope.Solution:
+			case FixAllScope.Solution:
 			{
 				var solutionDiagnostics = await Task.WhenAll(fixAllContext.Solution.Projects.Select(async project => await fixAllContext.GetAllDiagnosticsAsync(project).ConfigureAwait(false))).ConfigureAwait(false);
 				allDiagnostics = solutionDiagnostics.SelectMany(x => x);
@@ -50,8 +50,8 @@ internal sealed class IfNotNullFixAllProvider : FixAllProvider
 				break;
 			}
 
-		default:
-			return null;
+			default:
+				return null;
 		}
 
 		var documentsWithDiagnostics = allSyntaxTrees

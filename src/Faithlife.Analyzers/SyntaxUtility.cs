@@ -17,7 +17,7 @@ internal static class SyntaxUtility
 	/// An optional syntax node designating an existing variable declaration.
 	/// If specified, this node will be ignored when checking for uniqueness.
 	/// </param>
-	/// <returns>A <see cref="Microsoft.CodeAnalysis.SyntaxToken">SyntaxToken</see> for the new identifier.</returns>
+	/// <returns>A <see cref="SyntaxToken">SyntaxToken</see> for the new identifier.</returns>
 	/// <remarks>
 	/// Currently, this method takes a conservative approach to declarations within the member and pays no attention at all
 	/// to identifiers declared outside the scope of the member.
@@ -29,9 +29,7 @@ internal static class SyntaxUtility
 		if (declarationLocation is null)
 			throw new ArgumentNullException(nameof(declarationLocation));
 
-		var containingMember = declarationLocation.FirstAncestorOrSelf<MemberDeclarationSyntax>();
-		if (containingMember is null)
-			throw new InvalidOperationException("Cannot declare a variable at this scope.");
+		var containingMember = declarationLocation.FirstAncestorOrSelf<MemberDeclarationSyntax>() ?? throw new InvalidOperationException("Cannot declare a variable at this scope.");
 
 		// Currently, this makes no attempt to be clever about scoping rules.
 		var unavailableNames = new HashSet<string>(

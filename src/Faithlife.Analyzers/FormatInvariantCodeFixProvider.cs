@@ -52,7 +52,7 @@ public sealed class FormatInvariantCodeFixProvider : CodeFixProvider
 			if (index < match.Index)
 				interpolatedStringExpression = interpolatedStringExpression.AddContents(InterpolatedStringText(formatString.Substring(index, match.Index - index)));
 
-			if (!int.TryParse(match.Groups[1].Value, NumberStyles.None, CultureInfo.InvariantCulture, out var argIndex) || argIndex < 0 || argIndex > invocation.ArgumentList.Arguments.Count )
+			if (!int.TryParse(match.Groups[1].Value, NumberStyles.None, CultureInfo.InvariantCulture, out var argIndex) || argIndex < 0 || argIndex > invocation.ArgumentList.Arguments.Count)
 				return;
 
 			var arg = invocation.ArgumentList.Arguments[argIndex];

@@ -22,8 +22,9 @@ internal sealed class SelfAnalysisTests
 			.AddProject(projectId, projectName, projectName, LanguageNames.CSharp)
 			.WithProjectCompilationOptions(projectId, new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary))
 			.AddMetadataReferences(projectId, s_metadataReferences);
+		var repositoryRoot = GetRepositoryRoot();
 
-		foreach (var source in Directory.GetFiles("../../../../../src/Faithlife.Analyzers", "*.cs").Concat(Directory.GetFiles("../../../../../tests/Faithlife.Analyzers.Tests", "*.cs")))
+		foreach (var source in Directory.GetFiles(Path.Combine(repositoryRoot, "src", "Faithlife.Analyzers"), "*.cs").Concat(Directory.GetFiles(Path.Combine(repositoryRoot, "tests", "Faithlife.Analyzers.Tests"), "*.cs")))
 		{
 			var fileName = Path.GetFileName(source);
 			var documentId = DocumentId.CreateNewId(projectId, debugName: fileName);
@@ -41,6 +42,15 @@ internal sealed class SelfAnalysisTests
 
 		var diagnostics = await compilationWithAnalyzers.GetAnalyzerDiagnosticsAsync().ConfigureAwait(false);
 		Assert.That(diagnostics, Is.Empty);
+	}
+
+	private static string GetRepositoryRoot()
+	{
+		var directory = new DirectoryInfo(AppContext.BaseDirectory);
+		while (directory is not null && !Directory.Exists(Path.Combine(directory.FullName, "src", "Faithlife.Analyzers")))
+			directory = directory.Parent;
+
+		return directory?.FullName ?? throw new DirectoryNotFoundException("Could not find the repository root.");
 	}
 
 	private static readonly IReadOnlyList<string> s_assemblyReferences =
