@@ -110,6 +110,76 @@ internal sealed class ExpressionBodiedMemberArrowTests : CodeFixVerifier
 	}
 
 	[Test]
+	public void InvalidExpressionBodiedConstructor()
+	{
+		const string invalidProgram = """
+			class Test
+			{
+				public int Value { get; }
+
+				public Test()
+					=> Value = 1;
+			}
+			""";
+		var expected = new DiagnosticResult
+		{
+			Id = ExpressionBodiedMemberArrowAnalyzer.DiagnosticId,
+			Message = "Move => to the end of the previous line",
+			Severity = DiagnosticSeverity.Warning,
+			Locations = [new DiagnosticResultLocation("Test0.cs", 6, 3)],
+		};
+
+		VerifyCSharpDiagnostic(invalidProgram, expected);
+
+		const string fixedProgram = """
+			class Test
+			{
+				public int Value { get; }
+
+				public Test() =>
+					Value = 1;
+			}
+			""";
+
+		VerifyCSharpFix(invalidProgram, fixedProgram, 0);
+	}
+
+	[Test]
+	public void InvalidExpressionBodiedStaticConstructor()
+	{
+		const string invalidProgram = """
+			class Test
+			{
+				public static int Value { get; }
+
+				static Test()
+					=> Value = 1;
+			}
+			""";
+		var expected = new DiagnosticResult
+		{
+			Id = ExpressionBodiedMemberArrowAnalyzer.DiagnosticId,
+			Message = "Move => to the end of the previous line",
+			Severity = DiagnosticSeverity.Warning,
+			Locations = [new DiagnosticResultLocation("Test0.cs", 6, 3)],
+		};
+
+		VerifyCSharpDiagnostic(invalidProgram, expected);
+
+		const string fixedProgram = """
+			class Test
+			{
+				public static int Value { get; }
+
+				static Test() =>
+					Value = 1;
+			}
+			""";
+
+		VerifyCSharpFix(invalidProgram, fixedProgram, 0);
+	}
+
+	[Test]
 	public void InvalidExpressionBodiedProperty()
 	{
 		const string invalidProgram = """
