@@ -95,5 +95,5 @@ public sealed class AvailableWorkStateAnalyzer : DiagnosticAnalyzer
 		category: "Usage",
 		defaultSeverity: DiagnosticSeverity.Error,
 		isEnabledByDefault: true,
-		helpLinkUri: "https://github.com/Faithlife/FaithlifeAnalyzers/wiki/FL0008");
+		helpLinkUri: "https://github.com/Faithlife/FaithlifeAnalyzers/blob/-/docs/FL0008.md");
 }

@@ -47,7 +47,7 @@ public sealed class OverloadWithStringComparerAnalyzer : DiagnosticAnalyzer
 		defaultSeverity: DiagnosticSeverity.Warning,
 		isEnabledByDefault: true,
 		description: "The desired comparer must be explicitly specified. Consider StringComparer.Ordinal.",
-		helpLinkUri: $"https://github.com/Faithlife/FaithlifeAnalyzers/wiki/{UseStringComparerDiagnosticId}");
+		helpLinkUri: $"https://github.com/Faithlife/FaithlifeAnalyzers/blob/-/docs/{UseStringComparerDiagnosticId}.md");
 
 	private static readonly ImmutableArray<DiagnosticDescriptor> s_rules = [s_useStringComparerRule];
 }

@@ -84,7 +84,7 @@ public sealed class OverloadWithStringComparisonAnalyzer : DiagnosticAnalyzer
 		defaultSeverity: DiagnosticSeverity.Warning,
 		isEnabledByDefault: true,
 		description: "The desired StringComparison must be explicitly specified.",
-		helpLinkUri: $"https://github.com/Faithlife/FaithlifeAnalyzers/wiki/{UseStringComparisonDiagnosticId}");
+		helpLinkUri: $"https://github.com/Faithlife/FaithlifeAnalyzers/blob/-/docs/{UseStringComparisonDiagnosticId}.md");
 
 	private static readonly DiagnosticDescriptor s_avoidStringEqualsRule = new(
 		id: AvoidStringEqualsDiagnosticId,
@@ -93,7 +93,7 @@ public sealed class OverloadWithStringComparisonAnalyzer : DiagnosticAnalyzer
 		category: "Usage",
 		defaultSeverity: DiagnosticSeverity.Warning,
 		isEnabledByDefault: true,
-		helpLinkUri: $"https://github.com/Faithlife/FaithlifeAnalyzers/wiki/{AvoidStringEqualsDiagnosticId}");
+		helpLinkUri: $"https://github.com/Faithlife/FaithlifeAnalyzers/blob/-/docs/{AvoidStringEqualsDiagnosticId}.md");
 
 	private static readonly ImmutableArray<DiagnosticDescriptor> s_rules = [s_useStringComparisonRule, s_avoidStringEqualsRule];
 }
