@@ -1,5 +1,9 @@
 # Release Notes
 
+## 1.7.0
+
+* Add [FL0024](https://github.com/Faithlife/FaithlifeAnalyzers/blob/master/docs/FL0024.md): Expression-bodied method arrows should end the previous line.
+
 ## 1.6.2
 
 * Move analyzer documentation from wiki to repository content.
