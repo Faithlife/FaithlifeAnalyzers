@@ -8,10 +8,10 @@ using Microsoft.CodeAnalysis.Text;
 
 namespace Faithlife.Analyzers;
 
-[ExportCodeFixProvider(LanguageNames.CSharp, Name = nameof(ExpressionBodiedMethodArrowCodeFixProvider)), Shared]
-public sealed class ExpressionBodiedMethodArrowCodeFixProvider : CodeFixProvider
+[ExportCodeFixProvider(LanguageNames.CSharp, Name = nameof(ExpressionBodiedMemberArrowCodeFixProvider)), Shared]
+public sealed class ExpressionBodiedMemberArrowCodeFixProvider : CodeFixProvider
 {
-	public override ImmutableArray<string> FixableDiagnosticIds => [ExpressionBodiedMethodArrowAnalyzer.DiagnosticId];
+	public override ImmutableArray<string> FixableDiagnosticIds => [ExpressionBodiedMemberArrowAnalyzer.DiagnosticId];
 
 	public override FixAllProvider GetFixAllProvider() => WellKnownFixAllProviders.BatchFixer;
 
@@ -34,7 +34,7 @@ public sealed class ExpressionBodiedMethodArrowCodeFixProvider : CodeFixProvider
 			CodeAction.Create(
 				title: "Move => to the previous line",
 				createChangedDocument: token => MoveArrowToPreviousLineAsync(context.Document, previousToken, arrowToken, token),
-				"move-expression-bodied-method-arrow"),
+				"move-expression-bodied-member-arrow"),
 			diagnostic);
 	}
 

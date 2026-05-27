@@ -8,14 +8,14 @@ using Microsoft.CodeAnalysis.Text;
 namespace Faithlife.Analyzers;
 
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
-public sealed class ExpressionBodiedMethodArrowAnalyzer : DiagnosticAnalyzer
+public sealed class ExpressionBodiedMemberArrowAnalyzer : DiagnosticAnalyzer
 {
 	public override void Initialize(AnalysisContext context)
 	{
 		context.EnableConcurrentExecution();
 		context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);
 
-		context.RegisterSyntaxNodeAction(AnalyzeSyntax, SyntaxKind.MethodDeclaration);
+		context.RegisterSyntaxNodeAction(AnalyzeSyntax, SyntaxKind.ArrowExpressionClause);
 	}
 
 	public const string DiagnosticId = "FL0024";
@@ -24,23 +24,21 @@ public sealed class ExpressionBodiedMethodArrowAnalyzer : DiagnosticAnalyzer
 
 	private static void AnalyzeSyntax(SyntaxNodeAnalysisContext context)
 	{
-		var methodDeclaration = (MethodDeclarationSyntax) context.Node;
-		var arrowToken = methodDeclaration.ExpressionBody?.ArrowToken;
-		if (arrowToken is null)
-			return;
+		var arrowExpressionClause = (ArrowExpressionClauseSyntax) context.Node;
+		var arrowToken = arrowExpressionClause.ArrowToken;
 
-		var previousToken = arrowToken.Value.GetPreviousToken();
+		var previousToken = arrowToken.GetPreviousToken();
 		if (previousToken.IsKind(SyntaxKind.None))
 			return;
 
-		var sourceText = arrowToken.Value.SyntaxTree.GetText(context.CancellationToken);
-		if (!IsFirstNonWhitespaceOnLine(sourceText, arrowToken.Value) ||
-			!ContainsOnlyWhitespace(sourceText, TextSpan.FromBounds(previousToken.Span.End, arrowToken.Value.SpanStart)))
+		var sourceText = arrowToken.SyntaxTree.GetText(context.CancellationToken);
+		if (!IsFirstNonWhitespaceOnLine(sourceText, arrowToken) ||
+			!ContainsOnlyWhitespace(sourceText, TextSpan.FromBounds(previousToken.Span.End, arrowToken.SpanStart)))
 		{
 			return;
 		}
 
-		context.ReportDiagnostic(Diagnostic.Create(s_rule, arrowToken.Value.GetLocation()));
+		context.ReportDiagnostic(Diagnostic.Create(s_rule, arrowToken.GetLocation()));
 	}
 
 	private static bool IsFirstNonWhitespaceOnLine(SourceText sourceText, SyntaxToken token)
@@ -62,7 +60,7 @@ public sealed class ExpressionBodiedMethodArrowAnalyzer : DiagnosticAnalyzer
 
 	private static readonly DiagnosticDescriptor s_rule = new(
 		id: DiagnosticId,
-		title: "Expression-bodied method arrow should end the previous line",
+		title: "Expression-bodied member arrow should end the previous line",
 		messageFormat: "Move => to the end of the previous line",
 		category: "Style",
 		defaultSeverity: DiagnosticSeverity.Warning,
