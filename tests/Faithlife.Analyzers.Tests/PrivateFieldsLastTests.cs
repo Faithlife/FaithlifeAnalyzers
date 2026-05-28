@@ -136,6 +136,52 @@ internal sealed class PrivateFieldsLastTests : CodeFixVerifier
 	}
 
 	[Test]
+	[TestCase("struct TestStruct")]
+	[TestCase("record TestRecord")]
+	[TestCase("record struct TestRecordStruct")]
+	public void InvalidWhenNonClassTypeStartsWithPrivateFields(string typeDeclaration)
+	{
+		var invalidProgram = $$"""
+			#pragma warning disable 0169, 0414
+
+			namespace TestApplication
+			{
+				public {{typeDeclaration}}
+				{
+					private readonly int _value;
+
+					public int Value => _value;
+				}
+			}
+			""";
+		var expected = new DiagnosticResult
+		{
+			Id = PrivateFieldsLastAnalyzer.DiagnosticId,
+			Message = "Move private fields to the end of the type",
+			Severity = DiagnosticSeverity.Warning,
+			Locations = [new DiagnosticResultLocation("Test0.cs", 7, 3)],
+		};
+
+		VerifyCSharpDiagnostic(invalidProgram, expected);
+
+		var fixedProgram = $$"""
+			#pragma warning disable 0169, 0414
+
+			namespace TestApplication
+			{
+				public {{typeDeclaration}}
+				{
+					public int Value => _value;
+
+					private readonly int _value;
+				}
+			}
+			""";
+
+		VerifyCSharpFix(invalidProgram, fixedProgram);
+	}
+
+	[Test]
 	public void CodeFixPreservesBlankLineBeforeMovedPrivateFields()
 	{
 		const string invalidProgram = """
@@ -161,6 +207,76 @@ internal sealed class PrivateFieldsLastTests : CodeFixVerifier
 					public int Value => _value;
 
 					private readonly int _value;
+				}
+			}
+			""";
+
+		VerifyCSharpFix(invalidProgram, fixedProgram);
+	}
+
+	[Test]
+	public void CodeFixPreservesLeadingCommentsOnMovedPrivateFields()
+	{
+		const string invalidProgram = """
+			#pragma warning disable 0169, 0414
+
+			namespace TestApplication
+			{
+				public class TestClass
+				{
+					// Comment about the field.
+					// Still about the field.
+					private readonly int _value;
+
+					public int Value => _value;
+				}
+			}
+			""";
+		const string fixedProgram = """
+			#pragma warning disable 0169, 0414
+
+			namespace TestApplication
+			{
+				public class TestClass
+				{
+					public int Value => _value;
+
+					// Comment about the field.
+					// Still about the field.
+					private readonly int _value;
+				}
+			}
+			""";
+
+		VerifyCSharpFix(invalidProgram, fixedProgram);
+	}
+
+	[Test]
+	public void CodeFixPreservesTrailingCommentsOnMovedPrivateFields()
+	{
+		const string invalidProgram = """
+			#pragma warning disable 0169, 0414
+
+			namespace TestApplication
+			{
+				public class TestClass
+				{
+					private readonly int _value; // Comment about the field.
+
+					public int Value => _value;
+				}
+			}
+			""";
+		const string fixedProgram = """
+			#pragma warning disable 0169, 0414
+
+			namespace TestApplication
+			{
+				public class TestClass
+				{
+					public int Value => _value;
+
+					private readonly int _value; // Comment about the field.
 				}
 			}
 			""";
