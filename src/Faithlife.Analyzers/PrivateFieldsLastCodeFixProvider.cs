@@ -72,9 +72,14 @@ public sealed class PrivateFieldsLastCodeFixProvider : CodeFixProvider
 		if (endOfLineCount > 1)
 			return separatorTrivia;
 
-		var lineEndingTrivia = memberIndentationTrivia.FirstOrDefault(IsEndOfLine);
+		var lineEndingTrivia = separatorTrivia.FirstOrDefault(IsEndOfLine);
+		if (lineEndingTrivia == default)
+			lineEndingTrivia = memberIndentationTrivia.FirstOrDefault(IsEndOfLine);
+		if (lineEndingTrivia == default)
+			return memberIndentationTrivia;
+
 		return default(SyntaxTriviaList)
-			.Add(lineEndingTrivia == default ? Microsoft.CodeAnalysis.CSharp.SyntaxFactory.EndOfLine("\n") : lineEndingTrivia)
+			.Add(lineEndingTrivia)
 			.AddRange(memberIndentationTrivia);
 	}
 
