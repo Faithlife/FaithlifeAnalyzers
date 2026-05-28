@@ -43,9 +43,14 @@ public sealed class ExpressionBodiedMemberArrowCodeFixProvider : CodeFixProvider
 		var sourceText = await document.GetTextAsync(cancellationToken).ConfigureAwait(false);
 		var nextToken = arrowToken.GetNextToken();
 		var whitespaceBeforeArrow = sourceText.ToString(TextSpan.FromBounds(previousToken.Span.End, arrowToken.SpanStart));
-		var changedText = sourceText.WithChanges(
-			new TextChange(TextSpan.FromBounds(previousToken.Span.End, arrowToken.SpanStart), " "),
-			new TextChange(TextSpan.FromBounds(arrowToken.Span.End, nextToken.SpanStart), whitespaceBeforeArrow));
+		var textAfterArrow = sourceText.ToString(TextSpan.FromBounds(arrowToken.Span.End, nextToken.SpanStart));
+		var changedText = ContainsOnlyWhitespace(textAfterArrow) ?
+			sourceText.WithChanges(
+				new TextChange(TextSpan.FromBounds(previousToken.Span.End, arrowToken.SpanStart), " "),
+				new TextChange(TextSpan.FromBounds(arrowToken.Span.End, nextToken.SpanStart), whitespaceBeforeArrow)) :
+			sourceText.WithChanges(new TextChange(TextSpan.FromBounds(previousToken.Span.End, arrowToken.SpanStart), " "));
 		return document.WithText(changedText);
 	}
+
+	private static bool ContainsOnlyWhitespace(string text) => text.All(char.IsWhiteSpace);
 }

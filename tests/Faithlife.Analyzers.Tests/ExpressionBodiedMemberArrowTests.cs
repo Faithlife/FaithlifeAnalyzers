@@ -110,6 +110,38 @@ internal sealed class ExpressionBodiedMemberArrowTests : CodeFixVerifier
 	}
 
 	[Test]
+	public void InvalidExpressionBodiedMethodWithCommentAfterArrow()
+	{
+		const string invalidProgram = """
+			class Test
+			{
+				public int GetValue()
+					=> // keep this comment
+					1;
+			}
+			""";
+		var expected = new DiagnosticResult
+		{
+			Id = ExpressionBodiedMemberArrowAnalyzer.DiagnosticId,
+			Message = "Move => to the end of the previous line",
+			Severity = DiagnosticSeverity.Warning,
+			Locations = [new DiagnosticResultLocation("Test0.cs", 4, 3)],
+		};
+
+		VerifyCSharpDiagnostic(invalidProgram, expected);
+
+		const string fixedProgram = """
+			class Test
+			{
+				public int GetValue() => // keep this comment
+					1;
+			}
+			""";
+
+		VerifyCSharpFix(invalidProgram, fixedProgram, 0);
+	}
+
+	[Test]
 	public void InvalidExpressionBodiedConstructor()
 	{
 		const string invalidProgram = """
