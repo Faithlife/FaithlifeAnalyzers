@@ -82,6 +82,7 @@ internal sealed class PrivateFieldsLastTests : CodeFixVerifier
 				public class TestClass
 				{
 					public int Sum() => _first + _second;
+
 					private readonly int _first;
 					private readonly int _second;
 				}
@@ -125,7 +126,41 @@ internal sealed class PrivateFieldsLastTests : CodeFixVerifier
 				public class TestClass
 				{
 					public int Value => _first;
+
 					int _first;
+				}
+			}
+			""";
+
+		VerifyCSharpFix(invalidProgram, fixedProgram);
+	}
+
+	[Test]
+	public void CodeFixPreservesBlankLineBeforeMovedPrivateFields()
+	{
+		const string invalidProgram = """
+			#pragma warning disable 0169, 0414
+
+			namespace TestApplication
+			{
+				public class TestClass
+				{
+					private readonly int _value;
+
+					public int Value => _value;
+				}
+			}
+			""";
+		const string fixedProgram = """
+			#pragma warning disable 0169, 0414
+
+			namespace TestApplication
+			{
+				public class TestClass
+				{
+					public int Value => _value;
+
+					private readonly int _value;
 				}
 			}
 			""";

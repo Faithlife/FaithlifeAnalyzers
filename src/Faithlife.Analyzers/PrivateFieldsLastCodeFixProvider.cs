@@ -5,7 +5,6 @@ using Microsoft.CodeAnalysis.CodeActions;
 using Microsoft.CodeAnalysis.CodeFixes;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Editing;
-using Microsoft.CodeAnalysis.Formatting;
 
 namespace Faithlife.Analyzers;
 
@@ -49,11 +48,15 @@ public sealed class PrivateFieldsLastCodeFixProvider : CodeFixProvider
 		var members = typeDeclaration.Members;
 		var firstMemberLeadingTrivia = GetLeadingWhitespaceTrivia(members[0].GetLeadingTrivia());
 		var reorderedMembers = members.Skip(leadingPrivateFieldCount).Concat(members.Take(leadingPrivateFieldCount)).ToArray();
+		var movedFieldStartIndex = members.Count - leadingPrivateFieldCount;
 		var reorderedFirstMemberLeadingTrivia = firstMemberLeadingTrivia.AddRange(reorderedMembers[0].GetLeadingTrivia().SkipWhile(IsWhitespaceOrEndOfLine));
 		reorderedMembers[0] = reorderedMembers[0].WithLeadingTrivia(reorderedFirstMemberLeadingTrivia);
+		var movedFieldLeadingTrivia = GetMemberSeparatorTrivia(firstMemberLeadingTrivia, members[leadingPrivateFieldCount].GetLeadingTrivia())
+			.AddRange(reorderedMembers[movedFieldStartIndex].GetLeadingTrivia().SkipWhile(IsWhitespaceOrEndOfLine));
+		reorderedMembers[movedFieldStartIndex] = reorderedMembers[movedFieldStartIndex].WithLeadingTrivia(movedFieldLeadingTrivia);
 
 		var editor = await DocumentEditor.CreateAsync(document, cancellationToken).ConfigureAwait(false);
-		editor.ReplaceNode(typeDeclaration, typeDeclaration.WithMembers(default(SyntaxList<MemberDeclarationSyntax>).AddRange(reorderedMembers)).WithAdditionalAnnotations(Formatter.Annotation));
+		editor.ReplaceNode(typeDeclaration, typeDeclaration.WithMembers(default(SyntaxList<MemberDeclarationSyntax>).AddRange(reorderedMembers)));
 		return editor.GetChangedDocument();
 	}
 
@@ -62,7 +65,23 @@ public sealed class PrivateFieldsLastCodeFixProvider : CodeFixProvider
 		return default(SyntaxTriviaList).AddRange(triviaList.TakeWhile(IsWhitespaceOrEndOfLine));
 	}
 
+	private static SyntaxTriviaList GetMemberSeparatorTrivia(SyntaxTriviaList memberIndentationTrivia, SyntaxTriviaList triviaList)
+	{
+		var separatorTrivia = GetLeadingWhitespaceTrivia(triviaList);
+		var endOfLineCount = separatorTrivia.Count(IsEndOfLine);
+		if (endOfLineCount > 1)
+			return separatorTrivia;
+
+		var lineEndingTrivia = memberIndentationTrivia.FirstOrDefault(IsEndOfLine);
+		return default(SyntaxTriviaList)
+			.Add(lineEndingTrivia == default ? Microsoft.CodeAnalysis.CSharp.SyntaxFactory.EndOfLine("\n") : lineEndingTrivia)
+			.AddRange(memberIndentationTrivia);
+	}
+
 	private static bool IsWhitespaceOrEndOfLine(SyntaxTrivia trivia) =>
 		trivia.IsKind(Microsoft.CodeAnalysis.CSharp.SyntaxKind.WhitespaceTrivia) ||
+		trivia.IsKind(Microsoft.CodeAnalysis.CSharp.SyntaxKind.EndOfLineTrivia);
+
+	private static bool IsEndOfLine(SyntaxTrivia trivia) =>
 		trivia.IsKind(Microsoft.CodeAnalysis.CSharp.SyntaxKind.EndOfLineTrivia);
 }
