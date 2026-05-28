@@ -47,10 +47,22 @@ public sealed class PrivateFieldsLastCodeFixProvider : CodeFixProvider
 			return document;
 
 		var members = typeDeclaration.Members;
-		var reorderedMembers = members.Skip(leadingPrivateFieldCount).Concat(members.Take(leadingPrivateFieldCount));
+		var firstMemberLeadingTrivia = GetLeadingWhitespaceTrivia(members[0].GetLeadingTrivia());
+		var reorderedMembers = members.Skip(leadingPrivateFieldCount).Concat(members.Take(leadingPrivateFieldCount)).ToArray();
+		var reorderedFirstMemberLeadingTrivia = firstMemberLeadingTrivia.AddRange(reorderedMembers[0].GetLeadingTrivia().SkipWhile(IsWhitespaceOrEndOfLine));
+		reorderedMembers[0] = reorderedMembers[0].WithLeadingTrivia(reorderedFirstMemberLeadingTrivia);
 
 		var editor = await DocumentEditor.CreateAsync(document, cancellationToken).ConfigureAwait(false);
-		editor.ReplaceNode(typeDeclaration, typeDeclaration.WithMembers([.. reorderedMembers]).WithAdditionalAnnotations(Formatter.Annotation));
+		editor.ReplaceNode(typeDeclaration, typeDeclaration.WithMembers(default(SyntaxList<MemberDeclarationSyntax>).AddRange(reorderedMembers)).WithAdditionalAnnotations(Formatter.Annotation));
 		return editor.GetChangedDocument();
 	}
+
+	private static SyntaxTriviaList GetLeadingWhitespaceTrivia(SyntaxTriviaList triviaList)
+	{
+		return default(SyntaxTriviaList).AddRange(triviaList.TakeWhile(IsWhitespaceOrEndOfLine));
+	}
+
+	private static bool IsWhitespaceOrEndOfLine(SyntaxTrivia trivia) =>
+		trivia.IsKind(Microsoft.CodeAnalysis.CSharp.SyntaxKind.WhitespaceTrivia) ||
+		trivia.IsKind(Microsoft.CodeAnalysis.CSharp.SyntaxKind.EndOfLineTrivia);
 }

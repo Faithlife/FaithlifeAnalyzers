@@ -12,13 +12,13 @@ internal sealed class PrivateFieldsLastTests : CodeFixVerifier
 	public void ValidWhenPrivateFieldsAreLast()
 	{
 		const string validProgram = """
+			#pragma warning disable 0169, 0414
+
 			namespace TestApplication
 			{
 				public class TestClass
 				{
-					public void TestMethod()
-					{
-					}
+					public int Value => _value;
 
 					private readonly int _value;
 				}
@@ -32,6 +32,8 @@ internal sealed class PrivateFieldsLastTests : CodeFixVerifier
 	public void ValidWhenAllMembersArePrivateFields()
 	{
 		const string validProgram = """
+			#pragma warning disable 0169, 0414
+
 			namespace TestApplication
 			{
 				public class TestClass
@@ -49,6 +51,8 @@ internal sealed class PrivateFieldsLastTests : CodeFixVerifier
 	public void InvalidWhenTypeStartsWithPrivateFields()
 	{
 		const string invalidProgram = """
+			#pragma warning disable 0169, 0414
+
 			namespace TestApplication
 			{
 				public class TestClass
@@ -56,9 +60,7 @@ internal sealed class PrivateFieldsLastTests : CodeFixVerifier
 					private readonly int _first;
 					private readonly int _second;
 
-					public void TestMethod()
-					{
-					}
+					public int Sum() => _first + _second;
 				}
 			}
 			""";
@@ -67,20 +69,19 @@ internal sealed class PrivateFieldsLastTests : CodeFixVerifier
 			Id = PrivateFieldsLastAnalyzer.DiagnosticId,
 			Message = "Move private fields to the end of the type",
 			Severity = DiagnosticSeverity.Warning,
-			Locations = [new DiagnosticResultLocation("Test0.cs", 5, 3)],
+			Locations = [new DiagnosticResultLocation("Test0.cs", 7, 3)],
 		};
 
 		VerifyCSharpDiagnostic(invalidProgram, expected);
 
 		const string fixedProgram = """
+			#pragma warning disable 0169, 0414
+
 			namespace TestApplication
 			{
 				public class TestClass
 				{
-					public void TestMethod()
-					{
-					}
-
+					public int Sum() => _first + _second;
 					private readonly int _first;
 					private readonly int _second;
 				}
@@ -94,6 +95,8 @@ internal sealed class PrivateFieldsLastTests : CodeFixVerifier
 	public void InvalidWhenImplicitlyPrivateFieldsAreFirst()
 	{
 		const string invalidProgram = """
+			#pragma warning disable 0169, 0414
+
 			namespace TestApplication
 			{
 				public class TestClass
@@ -109,12 +112,14 @@ internal sealed class PrivateFieldsLastTests : CodeFixVerifier
 			Id = PrivateFieldsLastAnalyzer.DiagnosticId,
 			Message = "Move private fields to the end of the type",
 			Severity = DiagnosticSeverity.Warning,
-			Locations = [new DiagnosticResultLocation("Test0.cs", 5, 3)],
+			Locations = [new DiagnosticResultLocation("Test0.cs", 7, 3)],
 		};
 
 		VerifyCSharpDiagnostic(invalidProgram, expected);
 
 		const string fixedProgram = """
+			#pragma warning disable 0169, 0414
+
 			namespace TestApplication
 			{
 				public class TestClass
