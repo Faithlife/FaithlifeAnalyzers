@@ -1,5 +1,5 @@
 <Project>
-  <!-- DO NOT EDIT: dotnet-library-props/properties convention -->
+  <!-- DO NOT EDIT: dotnet-common-props/properties convention -->
   <PropertyGroup>
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
     <CentralPackageTransitivePinningEnabled>true</CentralPackageTransitivePinningEnabled>
@@ -15,7 +15,7 @@
   <ItemGroup>
     <GlobalPackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="5.3.0" />
   </ItemGroup>
-  <!-- DO NOT EDIT: dotnet-library-props/analyzers convention -->
+  <!-- DO NOT EDIT: dotnet-common-props/analyzers convention -->
   <ItemGroup>
     <GlobalPackageReference Include="Faithlife.Analyzers" Version="1.*" />
     <GlobalPackageReference Include="NUnit.Analyzers" Version="4.*" />
@@ -25,18 +25,4 @@
   <ItemGroup>
     <GlobalPackageReference Remove="Faithlife.Analyzers" />
   </ItemGroup>
-  <!-- DO NOT EDIT: dotnet-common-props/properties convention -->
-  <PropertyGroup>
-    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
-    <CentralPackageTransitivePinningEnabled>true</CentralPackageTransitivePinningEnabled>
-    <CentralPackageFloatingVersionsEnabled>true</CentralPackageFloatingVersionsEnabled>
-  </PropertyGroup>
-  <!-- END DO NOT EDIT -->
-  <!-- DO NOT EDIT: dotnet-common-props/analyzers convention -->
-  <ItemGroup>
-    <GlobalPackageReference Include="Faithlife.Analyzers" Version="1.*" />
-    <GlobalPackageReference Include="NUnit.Analyzers" Version="4.*" />
-    <GlobalPackageReference Include="StyleCop.Analyzers" Version="1.*-*" />
-  </ItemGroup>
-  <!-- END DO NOT EDIT -->
 </Project>
