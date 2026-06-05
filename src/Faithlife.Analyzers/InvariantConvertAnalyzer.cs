@@ -169,7 +169,7 @@ public sealed class InvariantConvertAnalyzer : DiagnosticAnalyzer
 		if (invocation.Expression is not MemberAccessExpressionSyntax memberAccessExpression)
 			return null;
 
-		if (GetConversion(semanticModel.GetTypeInfo(memberAccessExpression.Expression, cancellationToken).Type?.SpecialType ?? SpecialType.None) is null)
+		if (GetConversion(methodSymbol.ContainingType.SpecialType) is null)
 			return null;
 
 		if (!IsInvariantCulture(invocation.ArgumentList.Arguments[0].Expression, semanticModel, cancellationToken))
