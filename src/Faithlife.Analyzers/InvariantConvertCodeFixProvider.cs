@@ -5,6 +5,7 @@ using Microsoft.CodeAnalysis.CodeActions;
 using Microsoft.CodeAnalysis.CodeFixes;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.CodeAnalysis.Editing;
 using Microsoft.CodeAnalysis.Formatting;
 using Microsoft.CodeAnalysis.Simplification;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
@@ -49,11 +50,14 @@ public sealed class InvariantConvertCodeFixProvider : CodeFixProvider
 	private static async Task<Document> ReplaceValueAsync(Document document, InvariantConvertMatch match, CancellationToken cancellationToken)
 	{
 		var root = await document.GetSyntaxRootAsync(cancellationToken).ConfigureAwait(false);
-		var replacement = CreateReplacement(match).WithTriviaFrom(match.Invocation).WithAdditionalAnnotations(Formatter.Annotation);
+		var replacement = CreateReplacement(match).WithTriviaFrom(match.Invocation).WithAdditionalAnnotations(
+			Formatter.Annotation,
+			Simplifier.Annotation,
+			s_addImportsAnnotation);
 		root = root.ReplaceNode(GetReplacementTarget(match), replacement);
+		document = await ImportAdder.AddImportsAsync(document.WithSyntaxRoot(root), s_addImportsAnnotation, null, cancellationToken).ConfigureAwait(false);
 
-		if (root is CompilationUnitSyntax compilationUnit)
-			root = AddInvariantUsing(compilationUnit);
+		root = await document.GetSyntaxRootAsync(cancellationToken).ConfigureAwait(false) ?? root;
 
 		foreach (var namespaceName in s_simplifiableNamespaces)
 			root = SimplifyUsing(root, namespaceName);
@@ -85,11 +89,7 @@ public sealed class InvariantConvertCodeFixProvider : CodeFixProvider
 		{
 			InvariantConvertMatchKind.Parse => CreateInvariantConvertInvocation(match.MethodName, match.InputExpression!),
 			InvariantConvertMatchKind.TryParse => CreateTryParseReplacement(match),
-			InvariantConvertMatchKind.ToString => InvocationExpression(
-				MemberAccessExpression(
-					SyntaxKind.SimpleMemberAccessExpression,
-					match.ReceiverExpression!,
-					IdentifierName("ToInvariantString"))),
+			InvariantConvertMatchKind.ToString => CreateInvariantConvertInvocation(match.MethodName, match.ReceiverExpression!),
 			_ => throw new InvalidOperationException("Unsupported InvariantConvert match."),
 		};
 
@@ -105,7 +105,7 @@ public sealed class InvariantConvertCodeFixProvider : CodeFixProvider
 
 	private static ExpressionSyntax CreateInvariantConvertInvocation(string methodName, ExpressionSyntax inputExpression) =>
 		SyntaxUtility.ReplaceIdentifier(
-			ParseExpression($"InvariantConvert.{methodName}(value)"),
+			ParseExpression($"global::Libronix.Utility.Invariant.InvariantConvert.{methodName}(value)"),
 			"value",
 			inputExpression);
 
@@ -121,22 +121,7 @@ public sealed class InvariantConvertCodeFixProvider : CodeFixProvider
 		return root.ReplaceNode(usingDirective, usingDirective.WithAdditionalAnnotations(Simplifier.Annotation));
 	}
 
-	private static CompilationUnitSyntax AddInvariantUsing(CompilationUnitSyntax root)
-	{
-		foreach (var usingDirective in root.Usings)
-		{
-			if (AreEquivalent(usingDirective.Name, s_invariantNamespace))
-				return root;
-		}
-
-		var trailingTrivia = root.Usings.Count == 0 ?
-			TriviaList(ElasticCarriageReturnLineFeed) :
-			root.Usings.Last().GetTrailingTrivia();
-
-		return root.WithUsings(root.Usings.Add(UsingDirective(s_invariantNamespace).WithTrailingTrivia(trailingTrivia)));
-	}
-
-	private static readonly NameSyntax s_invariantNamespace = ParseName("Libronix.Utility.Invariant");
+	private static readonly SyntaxAnnotation s_addImportsAnnotation = new();
 	private static readonly NameSyntax[] s_simplifiableNamespaces =
 	[
 		ParseName("System.Globalization"),

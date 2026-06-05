@@ -407,6 +407,19 @@ internal sealed class InvariantConvertTests : CodeFixVerifier
 		VerifyCSharpFix(invalidProgram, fixedProgram);
 	}
 
+	[Test]
+	public void InvariantUsingIsInsertedBeforeOtherNonSystemUsings()
+	{
+		const string invalidStatement = "var result = int.Parse(input, CultureInfo.InvariantCulture);";
+		const string fixedStatement = "var result = InvariantConvert.ParseInt32(input);";
+		const string extraUsings = "using Microsoft.CodeAnalysis;";
+		var invalidProgram = CreateProgram(invalidStatement, extraUsings: extraUsings);
+		var fixedProgram = CreateProgram(fixedStatement, includeSystemGlobalization: false, includeInvariantUsing: true, extraUsings: extraUsings);
+
+		VerifyCSharpDiagnostic(invalidProgram, CreateDiagnostic(invalidProgram, "int.Parse(input, CultureInfo.InvariantCulture)"));
+		VerifyCSharpFix(invalidProgram, fixedProgram);
+	}
+
 	protected override DiagnosticAnalyzer GetCSharpDiagnosticAnalyzer() => new InvariantConvertAnalyzer();
 
 	protected override CodeFixProvider GetCSharpCodeFixProvider() => new InvariantConvertCodeFixProvider();
