@@ -1,5 +1,9 @@
 # Release Notes
 
+## 1.7.0
+
+* Add [FL0026](https://github.com/Faithlife/FaithlifeAnalyzers/wiki/FL0026): Use `InvariantConvert`.
+
 ## 1.6.2
 
 * Move analyzer documentation from wiki to repository content.
