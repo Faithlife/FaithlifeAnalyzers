@@ -94,6 +94,120 @@ internal sealed class InvariantConvertTests : CodeFixVerifier
 	}
 
 	[Test]
+	public void ToStringClassPropertyReceiversAreFixed()
+	{
+		const string invalidStatement = """
+			var record = new DataRecord();
+			var length = record.Segment.Length.ToString(CultureInfo.InvariantCulture);
+			var offset = record.Segment.Offset.ToString(CultureInfo.InvariantCulture);
+			""";
+		const string fixedStatement = """
+			var record = new DataRecord();
+			var length = record.Segment.Length.ToInvariantString();
+			var offset = record.Segment.Offset.ToInvariantString();
+			""";
+		var invalidProgram = CreateProgram(invalidStatement, extraTypes: c_segmentTypes);
+		var fixedProgram = CreateProgram(fixedStatement, includeSystemGlobalization: false, includeInvariantUsing: true, extraTypes: c_segmentTypes);
+
+		VerifyCSharpDiagnostic(invalidProgram,
+			CreateDiagnostic(invalidProgram, "record.Segment.Length.ToString(CultureInfo.InvariantCulture)"),
+			CreateDiagnostic(invalidProgram, "record.Segment.Offset.ToString(CultureInfo.InvariantCulture)"));
+		VerifyCSharpFix(invalidProgram, fixedProgram);
+	}
+
+	[Test]
+	public void ToStringMethodCallReceiversAreFixed()
+	{
+		const string invalidStatement = """
+			var provider = new ValueProvider();
+			var length = provider.GetLength().ToString(CultureInfo.InvariantCulture);
+			var offset = provider.GetSegment().Offset.ToString(CultureInfo.InvariantCulture);
+			""";
+		const string fixedStatement = """
+			var provider = new ValueProvider();
+			var length = provider.GetLength().ToInvariantString();
+			var offset = provider.GetSegment().Offset.ToInvariantString();
+			""";
+		var invalidProgram = CreateProgram(invalidStatement, extraTypes: c_segmentTypes);
+		var fixedProgram = CreateProgram(fixedStatement, includeSystemGlobalization: false, includeInvariantUsing: true, extraTypes: c_segmentTypes);
+
+		VerifyCSharpDiagnostic(invalidProgram,
+			CreateDiagnostic(invalidProgram, "provider.GetLength().ToString(CultureInfo.InvariantCulture)"),
+			CreateDiagnostic(invalidProgram, "provider.GetSegment().Offset.ToString(CultureInfo.InvariantCulture)"));
+		VerifyCSharpFix(invalidProgram, fixedProgram);
+	}
+
+	[Test]
+	public void ToStringLambdaParameterReceiversAreFixed()
+	{
+		const string invalidStatement = "Func<int, string> formatter = x => x.ToString(CultureInfo.InvariantCulture);";
+		const string fixedStatement = "Func<int, string> formatter = x => x.ToInvariantString();";
+		var invalidProgram = CreateProgram(invalidStatement);
+		var fixedProgram = CreateProgram(fixedStatement, includeSystemGlobalization: false, includeInvariantUsing: true);
+
+		VerifyCSharpDiagnostic(invalidProgram, CreateDiagnostic(invalidProgram, "x.ToString(CultureInfo.InvariantCulture)"));
+		VerifyCSharpFix(invalidProgram, fixedProgram);
+	}
+
+	[Test]
+	public void ToStringLambdaMemberAccessReceiversAreFixed()
+	{
+		const string invalidStatement = """
+			Func<ValueFields, string> intFormatter = x => x.IntField.ToString(CultureInfo.InvariantCulture);
+			Func<ValueFields, string> longFormatter = x => x.LongField.ToString(CultureInfo.InvariantCulture);
+			Func<ValueFields, string> doubleFormatter = x => x.DoubleField.ToString(CultureInfo.InvariantCulture);
+			Func<ValueFields, string> boolFormatter = x => x.BoolField.ToString(CultureInfo.InvariantCulture);
+			""";
+		const string fixedStatement = """
+			Func<ValueFields, string> intFormatter = x => x.IntField.ToInvariantString();
+			Func<ValueFields, string> longFormatter = x => x.LongField.ToInvariantString();
+			Func<ValueFields, string> doubleFormatter = x => x.DoubleField.ToInvariantString();
+			Func<ValueFields, string> boolFormatter = x => x.BoolField.ToInvariantString();
+			""";
+		var invalidProgram = CreateProgram(invalidStatement, extraTypes: c_valueFieldTypes);
+		var fixedProgram = CreateProgram(fixedStatement, includeSystemGlobalization: false, includeInvariantUsing: true, extraTypes: c_valueFieldTypes);
+
+		VerifyCSharpDiagnostic(invalidProgram,
+			CreateDiagnostic(invalidProgram, "x.IntField.ToString(CultureInfo.InvariantCulture)"),
+			CreateDiagnostic(invalidProgram, "x.LongField.ToString(CultureInfo.InvariantCulture)"),
+			CreateDiagnostic(invalidProgram, "x.DoubleField.ToString(CultureInfo.InvariantCulture)"),
+			CreateDiagnostic(invalidProgram, "x.BoolField.ToString(CultureInfo.InvariantCulture)"));
+		VerifyCSharpFix(invalidProgram, fixedProgram);
+	}
+
+	[Test]
+	public void ParseComplexInputExpressionsAreFixed()
+	{
+		const string invalidStatement = """
+			var provider = new TextProvider();
+			var index = 0;
+			var values = new[] { "1", "2" };
+			var parsedProperty = int.Parse(provider.GetText().Value, CultureInfo.InvariantCulture);
+			var parsedElement = long.Parse(values[index], NumberStyles.Integer, CultureInfo.InvariantCulture);
+			var parsedConditional = double.Parse(boolValue ? provider.GetText().Value : input, NumberStyles.Float, CultureInfo.InvariantCulture);
+			var parsedCoalesce = bool.Parse(provider.GetNullableText() ?? input);
+			""";
+		const string fixedStatement = """
+			var provider = new TextProvider();
+			var index = 0;
+			var values = new[] { "1", "2" };
+			var parsedProperty = InvariantConvert.ParseInt32(provider.GetText().Value);
+			var parsedElement = InvariantConvert.ParseInt64(values[index]);
+			var parsedConditional = InvariantConvert.ParseDouble(boolValue ? provider.GetText().Value : input);
+			var parsedCoalesce = InvariantConvert.ParseBoolean(provider.GetNullableText() ?? input);
+			""";
+		var invalidProgram = CreateProgram(invalidStatement, extraTypes: c_textProviderTypes);
+		var fixedProgram = CreateProgram(fixedStatement, includeSystemGlobalization: false, includeInvariantUsing: true, extraTypes: c_textProviderTypes);
+
+		VerifyCSharpDiagnostic(invalidProgram,
+			CreateDiagnostic(invalidProgram, "int.Parse(provider.GetText().Value, CultureInfo.InvariantCulture)"),
+			CreateDiagnostic(invalidProgram, "long.Parse(values[index], NumberStyles.Integer, CultureInfo.InvariantCulture)"),
+			CreateDiagnostic(invalidProgram, "double.Parse(boolValue ? provider.GetText().Value : input, NumberStyles.Float, CultureInfo.InvariantCulture)"),
+			CreateDiagnostic(invalidProgram, "bool.Parse(provider.GetNullableText() ?? input)"));
+		VerifyCSharpFix(invalidProgram, fixedProgram);
+	}
+
+	[Test]
 	public void NoDiagnosticWithoutInvariantConvert()
 	{
 		VerifyCSharpDiagnostic(CreateProgram("var result = int.Parse(input, CultureInfo.InvariantCulture);", includeInvariantConvert: false));
@@ -335,7 +449,7 @@ internal sealed class InvariantConvertTests : CodeFixVerifier
 	}
 
 	private static string CreateProgram(string statement, bool includeInvariantConvert = true, bool includeSystemGlobalization = true,
-		bool includeInvariantUsing = false, string extraUsings = "")
+		bool includeInvariantUsing = false, string extraUsings = "", string extraTypes = "")
 	{
 		var usings = "using System;";
 		if (includeSystemGlobalization)
@@ -360,9 +474,59 @@ internal sealed class InvariantConvertTests : CodeFixVerifier
 						{{statement}}
 					}
 				}
+
+				{{extraTypes}}
 			}
 			""";
 	}
+
+	private const string c_segmentTypes = """
+		internal sealed class DataRecord
+		{
+			public Segment Segment { get; } = new();
+		}
+
+		internal sealed class Segment
+		{
+			public int Length { get; set; }
+
+			public int Offset { get; set; }
+		}
+
+		internal sealed class ValueProvider
+		{
+			public int GetLength() => 0;
+
+			public Segment GetSegment() => new();
+		}
+		""";
+
+	private const string c_valueFieldTypes = """
+		internal sealed class ValueFields
+		{
+			public int IntField;
+
+			public long LongField;
+
+			public double DoubleField;
+
+			public bool BoolField;
+		}
+		""";
+
+	private const string c_textProviderTypes = """
+		internal sealed class TextProvider
+		{
+			public TextRecord GetText() => new();
+
+			public string GetNullableText() => null!;
+		}
+
+		internal sealed class TextRecord
+		{
+			public string Value { get; } = "";
+		}
+		""";
 
 	private const string c_invariantConvert = """
 		namespace Libronix.Utility.Invariant
