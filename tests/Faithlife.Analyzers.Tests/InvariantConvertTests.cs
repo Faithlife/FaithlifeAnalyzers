@@ -29,7 +29,7 @@ internal sealed class InvariantConvertTests : CodeFixVerifier
 	public void Parse(string invalidStatement, string fixedStatement, string diagnosticText)
 	{
 		var invalidProgram = CreateProgram(invalidStatement);
-		var fixedProgram = CreateProgram(fixedStatement, includeInvariantUsing: true);
+		var fixedProgram = CreateProgram(fixedStatement, includeSystemGlobalization: false, includeInvariantUsing: true);
 
 		VerifyCSharpDiagnostic(invalidProgram, CreateDiagnostic(invalidProgram, diagnosticText));
 		VerifyCSharpFix(invalidProgram, fixedProgram);
@@ -51,7 +51,7 @@ internal sealed class InvariantConvertTests : CodeFixVerifier
 		var invalidStatement = $"if ({invalidCondition})\n\t\t\t\tGC.KeepAlive(value);";
 		var fixedStatement = $"if ({fixedCondition})\n\t\t\t\tGC.KeepAlive(value);";
 		var invalidProgram = CreateProgram(invalidStatement);
-		var fixedProgram = CreateProgram(fixedStatement, includeInvariantUsing: true);
+		var fixedProgram = CreateProgram(fixedStatement, includeSystemGlobalization: false, includeInvariantUsing: true);
 
 		VerifyCSharpDiagnostic(invalidProgram, CreateDiagnostic(invalidProgram, invalidCondition));
 		VerifyCSharpFix(invalidProgram, fixedProgram);
@@ -66,7 +66,7 @@ internal sealed class InvariantConvertTests : CodeFixVerifier
 		var invalidStatement = $"if ({invalidCondition})\n\t\t\t\treturn;\n\t\t\tGC.KeepAlive(value);";
 		var fixedStatement = $"if ({fixedCondition})\n\t\t\t\treturn;\n\t\t\tGC.KeepAlive(value);";
 		var invalidProgram = CreateProgram(invalidStatement);
-		var fixedProgram = CreateProgram(fixedStatement, includeInvariantUsing: true);
+		var fixedProgram = CreateProgram(fixedStatement, includeSystemGlobalization: false, includeInvariantUsing: true);
 
 		VerifyCSharpDiagnostic(invalidProgram, CreateDiagnostic(invalidProgram, diagnosticText));
 		VerifyCSharpFix(invalidProgram, fixedProgram);
@@ -81,7 +81,7 @@ internal sealed class InvariantConvertTests : CodeFixVerifier
 		var invalidStatement = $"var result = {invalidExpression};";
 		var fixedStatement = $"var result = {fixedExpression};";
 		var invalidProgram = CreateProgram(invalidStatement);
-		var fixedProgram = CreateProgram(fixedStatement, includeInvariantUsing: true);
+		var fixedProgram = CreateProgram(fixedStatement, includeSystemGlobalization: false, includeInvariantUsing: true);
 
 		VerifyCSharpDiagnostic(invalidProgram, CreateDiagnostic(invalidProgram, invalidExpression));
 		VerifyCSharpFix(invalidProgram, fixedProgram);
@@ -168,11 +168,14 @@ internal sealed class InvariantConvertTests : CodeFixVerifier
 		};
 	}
 
-	private static string CreateProgram(string statement, bool includeInvariantConvert = true, bool includeInvariantUsing = false)
+	private static string CreateProgram(string statement, bool includeInvariantConvert = true, bool includeSystemGlobalization = true, bool includeInvariantUsing = false)
 	{
-		var usings = includeInvariantUsing ?
-			"using System;\nusing System.Globalization;\nusing Libronix.Utility.Invariant;" :
-			"using System;\nusing System.Globalization;";
+		var usings = "using System;";
+		if (includeSystemGlobalization)
+			usings += "\nusing System.Globalization;";
+		if (includeInvariantUsing)
+			usings += "\nusing Libronix.Utility.Invariant;";
+
 		var invariantConvert = includeInvariantConvert ? c_invariantConvert : "";
 
 		return $$"""
