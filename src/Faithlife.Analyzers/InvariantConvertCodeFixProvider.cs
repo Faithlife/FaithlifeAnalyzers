@@ -123,7 +123,11 @@ public sealed class InvariantConvertCodeFixProvider : CodeFixProvider
 				return root;
 		}
 
-		return root.WithUsings(root.Usings.Add(UsingDirective(s_invariantNamespace).WithTrailingTrivia(TriviaList(CarriageReturnLineFeed))));
+		var trailingTrivia = root.Usings.Count == 0 ?
+			TriviaList(ElasticCarriageReturnLineFeed) :
+			root.Usings.Last().GetTrailingTrivia();
+
+		return root.WithUsings(root.Usings.Add(UsingDirective(s_invariantNamespace).WithTrailingTrivia(trailingTrivia)));
 	}
 
 	private static readonly NameSyntax s_invariantNamespace = ParseName("Libronix.Utility.Invariant");
