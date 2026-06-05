@@ -14,8 +14,11 @@ internal sealed class InvariantConvertTests : CodeFixVerifier
 	[TestCase("var result = int.Parse(input, CultureInfo.InvariantCulture);", "var result = InvariantConvert.ParseInt32(input);", "int.Parse(input, CultureInfo.InvariantCulture)")]
 	[TestCase("var result = Int32.Parse(input, CultureInfo.InvariantCulture);", "var result = InvariantConvert.ParseInt32(input);", "Int32.Parse(input, CultureInfo.InvariantCulture)")]
 	[TestCase("var result = System.Int32.Parse(input, CultureInfo.InvariantCulture);", "var result = InvariantConvert.ParseInt32(input);", "System.Int32.Parse(input, CultureInfo.InvariantCulture)")]
+	[TestCase("var result = int.Parse(s: input, provider: CultureInfo.InvariantCulture);", "var result = InvariantConvert.ParseInt32(input);", "int.Parse(s: input, provider: CultureInfo.InvariantCulture)")]
+	[TestCase("var result = int.Parse(provider: CultureInfo.InvariantCulture, s: input);", "var result = InvariantConvert.ParseInt32(input);", "int.Parse(provider: CultureInfo.InvariantCulture, s: input)")]
 	[TestCase("var result = int.Parse(input, NumberStyles.Integer, CultureInfo.InvariantCulture);", "var result = InvariantConvert.ParseInt32(input);", "int.Parse(input, NumberStyles.Integer, CultureInfo.InvariantCulture)")]
 	[TestCase("var result = Int32.Parse(input, NumberStyles.Integer, CultureInfo.InvariantCulture);", "var result = InvariantConvert.ParseInt32(input);", "Int32.Parse(input, NumberStyles.Integer, CultureInfo.InvariantCulture)")]
+	[TestCase("var result = int.Parse(style: NumberStyles.Integer, provider: CultureInfo.InvariantCulture, s: input);", "var result = InvariantConvert.ParseInt32(input);", "int.Parse(style: NumberStyles.Integer, provider: CultureInfo.InvariantCulture, s: input)")]
 	[TestCase("var result = double.Parse(input, CultureInfo.InvariantCulture);", "var result = InvariantConvert.ParseDouble(input);", "double.Parse(input, CultureInfo.InvariantCulture)")]
 	[TestCase("var result = Double.Parse(input, CultureInfo.InvariantCulture);", "var result = InvariantConvert.ParseDouble(input);", "Double.Parse(input, CultureInfo.InvariantCulture)")]
 	[TestCase("var result = System.Double.Parse(input, CultureInfo.InvariantCulture);", "var result = InvariantConvert.ParseDouble(input);", "System.Double.Parse(input, CultureInfo.InvariantCulture)")]
@@ -39,7 +42,9 @@ internal sealed class InvariantConvertTests : CodeFixVerifier
 	[TestCase("Boolean.TryParse(input, out bool value)", "InvariantConvert.TryParseBoolean(input) is { } value")]
 	[TestCase("int.TryParse(input, CultureInfo.InvariantCulture, out var value)", "InvariantConvert.TryParseInt32(input) is { } value")]
 	[TestCase("Int32.TryParse(input, CultureInfo.InvariantCulture, out int value)", "InvariantConvert.TryParseInt32(input) is { } value")]
+	[TestCase("int.TryParse(result: out var value, provider: CultureInfo.InvariantCulture, s: input)", "InvariantConvert.TryParseInt32(input) is { } value")]
 	[TestCase("int.TryParse(input, NumberStyles.Integer, CultureInfo.InvariantCulture, out var value)", "InvariantConvert.TryParseInt32(input) is { } value")]
+	[TestCase("int.TryParse(result: out var value, provider: CultureInfo.InvariantCulture, style: NumberStyles.Integer, s: input)", "InvariantConvert.TryParseInt32(input) is { } value")]
 	[TestCase("double.TryParse(input, CultureInfo.InvariantCulture, out var value)", "InvariantConvert.TryParseDouble(input) is { } value")]
 	[TestCase("Double.TryParse(input, CultureInfo.InvariantCulture, out double value)", "InvariantConvert.TryParseDouble(input) is { } value")]
 	[TestCase("double.TryParse(input, NumberStyles.Float, CultureInfo.InvariantCulture, out var value)", "InvariantConvert.TryParseDouble(input) is { } value")]
@@ -61,6 +66,7 @@ internal sealed class InvariantConvertTests : CodeFixVerifier
 	[TestCase("!int.TryParse(input, NumberStyles.Integer, CultureInfo.InvariantCulture, out var value)", "InvariantConvert.TryParseInt32(input) is not { } value", "int.TryParse(input, NumberStyles.Integer, CultureInfo.InvariantCulture, out var value)")]
 	[TestCase("!double.TryParse(input, NumberStyles.Float, CultureInfo.InvariantCulture, out var value)", "InvariantConvert.TryParseDouble(input) is not { } value", "double.TryParse(input, NumberStyles.Float, CultureInfo.InvariantCulture, out var value)")]
 	[TestCase("!long.TryParse(input, NumberStyles.Integer, CultureInfo.InvariantCulture, out var value)", "InvariantConvert.TryParseInt64(input) is not { } value", "long.TryParse(input, NumberStyles.Integer, CultureInfo.InvariantCulture, out var value)")]
+	[TestCase("!(int.TryParse(input, NumberStyles.Integer, CultureInfo.InvariantCulture, out var value))", "InvariantConvert.TryParseInt32(input) is not { } value", "int.TryParse(input, NumberStyles.Integer, CultureInfo.InvariantCulture, out var value)")]
 	public void NegatedTryParseCondition(string invalidCondition, string fixedCondition, string diagnosticText)
 	{
 		var invalidStatement = $"if ({invalidCondition})\n\t\t\t\treturn;\n\t\t\tGC.KeepAlive(value);";
@@ -90,9 +96,7 @@ internal sealed class InvariantConvertTests : CodeFixVerifier
 	[Test]
 	public void NoDiagnosticWithoutInvariantConvert()
 	{
-		var invalidProgram = CreateProgram("var result = int.Parse(input, CultureInfo.InvariantCulture);", includeInvariantConvert: false);
-
-		VerifyCSharpDiagnostic(invalidProgram);
+		VerifyCSharpDiagnostic(CreateProgram("var result = int.Parse(input, CultureInfo.InvariantCulture);", includeInvariantConvert: false));
 	}
 
 	[TestCase("var result = int.Parse(input, NumberStyles.None, CultureInfo.InvariantCulture);")]
@@ -102,6 +106,7 @@ internal sealed class InvariantConvertTests : CodeFixVerifier
 	[TestCase("var result = int.Parse(input);")]
 	[TestCase("var result = int.Parse(input, CultureInfo.CurrentCulture);")]
 	[TestCase("var result = decimal.Parse(input, CultureInfo.InvariantCulture);")]
+	[TestCase("var result = intValue.ToString(\"D\", CultureInfo.InvariantCulture);")]
 	[TestCase("var result = objectValue.ToString();")]
 	[TestCase("var result = DateTime.UtcNow.ToString(CultureInfo.InvariantCulture);")]
 	[TestCase("var result = nullableInt.ToString();")]
@@ -111,19 +116,21 @@ internal sealed class InvariantConvertTests : CodeFixVerifier
 	}
 
 	[Test]
-	public void DoesNotDiagnoseTryParseExistingOutVariable()
+	public void TryParseExistingOutVariableIsDiagnosedButNotFixed()
 	{
 		const string statement = """
 			int value;
 			if (int.TryParse(input, NumberStyles.Integer, CultureInfo.InvariantCulture, out value))
 				GC.KeepAlive(value);
 			""";
+		var invalidProgram = CreateProgram(statement);
 
-		VerifyCSharpDiagnostic(CreateProgram(statement));
+		VerifyCSharpDiagnostic(invalidProgram, CreateDiagnostic(invalidProgram, "int.TryParse(input, NumberStyles.Integer, CultureInfo.InvariantCulture, out value)"));
+		VerifyCSharpFix(invalidProgram, invalidProgram);
 	}
 
 	[Test]
-	public void DoesNotDiagnoseTryParseOutVariableUsedAfterCondition()
+	public void TryParseOutVariableUsedAfterConditionIsDiagnosedButNotFixed()
 	{
 		const string statement = """
 			if (int.TryParse(input, NumberStyles.Integer, CultureInfo.InvariantCulture, out var value))
@@ -131,13 +138,172 @@ internal sealed class InvariantConvertTests : CodeFixVerifier
 			}
 			GC.KeepAlive(value);
 			""";
+		var invalidProgram = CreateProgram(statement);
 
-		VerifyCSharpDiagnostic(CreateProgram(statement));
+		VerifyCSharpDiagnostic(invalidProgram, CreateDiagnostic(invalidProgram, "int.TryParse(input, NumberStyles.Integer, CultureInfo.InvariantCulture, out var value)"));
+		VerifyCSharpFix(invalidProgram, invalidProgram);
+	}
+
+	[Test]
+	public void TryParseOutVariableUsedInBodyAndAfterConditionIsDiagnosedButNotFixed()
+	{
+		const string statement = """
+			if (int.TryParse(input, NumberStyles.Integer, CultureInfo.InvariantCulture, out var value))
+				GC.KeepAlive(value);
+			GC.KeepAlive(value);
+			""";
+
+		VerifyDiagnosticWithoutFix(statement, "int.TryParse(input, NumberStyles.Integer, CultureInfo.InvariantCulture, out var value)");
+	}
+
+	[Test]
+	public void TryParseOutVariableUsedAfterElseReturnIsFixed()
+	{
+		const string invalidStatement = """
+			if (int.TryParse(input, NumberStyles.Integer, CultureInfo.InvariantCulture, out var value))
+			{
+			}
+			else
+			{
+				return;
+			}
+			GC.KeepAlive(value);
+			""";
+		const string fixedStatement = """
+			if (InvariantConvert.TryParseInt32(input) is { } value)
+			{
+			}
+			else
+			{
+				return;
+			}
+			GC.KeepAlive(value);
+			""";
+		var invalidProgram = CreateProgram(invalidStatement);
+		var fixedProgram = CreateProgram(fixedStatement, includeSystemGlobalization: false, includeInvariantUsing: true);
+
+		VerifyCSharpDiagnostic(invalidProgram, CreateDiagnostic(invalidProgram, "int.TryParse(input, NumberStyles.Integer, CultureInfo.InvariantCulture, out var value)"));
+		VerifyCSharpFix(invalidProgram, fixedProgram);
+	}
+
+	[Test]
+	public void TryParseDiscardIsDiagnosedButNotFixed()
+	{
+		const string statement = """
+			if (int.TryParse(input, NumberStyles.Integer, CultureInfo.InvariantCulture, out _))
+				return;
+			""";
+
+		VerifyDiagnosticWithoutFix(statement, "int.TryParse(input, NumberStyles.Integer, CultureInfo.InvariantCulture, out _)");
+	}
+
+	[Test]
+	public void TryParseStatementIsDiagnosedButNotFixed()
+	{
+		const string statement = "int.TryParse(input, NumberStyles.Integer, CultureInfo.InvariantCulture, out var value);";
+
+		VerifyDiagnosticWithoutFix(statement, "int.TryParse(input, NumberStyles.Integer, CultureInfo.InvariantCulture, out var value)");
+	}
+
+	[Test]
+	public void TryParseAndConditionIsDiagnosedButNotFixed()
+	{
+		const string statement = """
+			if (boolValue && int.TryParse(input, NumberStyles.Integer, CultureInfo.InvariantCulture, out var value))
+				GC.KeepAlive(value);
+			""";
+
+		VerifyDiagnosticWithoutFix(statement, "int.TryParse(input, NumberStyles.Integer, CultureInfo.InvariantCulture, out var value)");
+	}
+
+	[Test]
+	public void TryParseOrConditionIsDiagnosedButNotFixed()
+	{
+		const string statement = """
+			if (int.TryParse(input, NumberStyles.Integer, CultureInfo.InvariantCulture, out var value) || boolValue)
+				GC.KeepAlive(value);
+			""";
+
+		VerifyDiagnosticWithoutFix(statement, "int.TryParse(input, NumberStyles.Integer, CultureInfo.InvariantCulture, out var value)");
+	}
+
+	[Test]
+	public void StaticAndAliasUsingsAreRemovedByFix()
+	{
+		const string invalidStatement = """
+			if (TryParse(input, NS.Integer, CI.InvariantCulture, out var value))
+				GC.KeepAlive(value);
+			""";
+		const string fixedStatement = """
+			if (InvariantConvert.TryParseInt32(input) is { } value)
+				GC.KeepAlive(value);
+			""";
+		var invalidProgram = CreateProgram(
+			invalidStatement,
+			includeSystemGlobalization: false,
+			extraUsings: "using CI = System.Globalization.CultureInfo;\nusing NS = System.Globalization.NumberStyles;\nusing static System.Int32;");
+		var fixedProgram = CreateProgram(fixedStatement, includeSystemGlobalization: false, includeInvariantUsing: true);
+
+		VerifyCSharpDiagnostic(invalidProgram, CreateDiagnostic(invalidProgram, "TryParse(input, NS.Integer, CI.InvariantCulture, out var value)"));
+		VerifyCSharpFix(invalidProgram, fixedProgram);
+	}
+
+	[Test]
+	public void StaticCultureAndNumberStylesUsingsAreRemovedByFix()
+	{
+		const string invalidStatement = """
+			if (int.TryParse(input, Integer, InvariantCulture, out var value))
+				GC.KeepAlive(value);
+			""";
+		const string fixedStatement = """
+			if (InvariantConvert.TryParseInt32(input) is { } value)
+				GC.KeepAlive(value);
+			""";
+		var invalidProgram = CreateProgram(
+			invalidStatement,
+			includeSystemGlobalization: false,
+			extraUsings: "using static System.Globalization.CultureInfo;\nusing static System.Globalization.NumberStyles;");
+		var fixedProgram = CreateProgram(fixedStatement, includeSystemGlobalization: false, includeInvariantUsing: true);
+
+		VerifyCSharpDiagnostic(invalidProgram, CreateDiagnostic(invalidProgram, "int.TryParse(input, Integer, InvariantCulture, out var value)"));
+		VerifyCSharpFix(invalidProgram, fixedProgram);
+	}
+
+	[Test]
+	public void TypeAliasUsingIsRemovedByFix()
+	{
+		const string invalidStatement = "var result = Integer.Parse(input, CultureInfo.InvariantCulture);";
+		const string fixedStatement = "var result = InvariantConvert.ParseInt32(input);";
+		var invalidProgram = CreateProgram(invalidStatement, extraUsings: "using Integer = System.Int32;");
+		var fixedProgram = CreateProgram(fixedStatement, includeSystemGlobalization: false, includeInvariantUsing: true);
+
+		VerifyCSharpDiagnostic(invalidProgram, CreateDiagnostic(invalidProgram, "Integer.Parse(input, CultureInfo.InvariantCulture)"));
+		VerifyCSharpFix(invalidProgram, fixedProgram);
+	}
+
+	[Test]
+	public void ExistingInvariantUsingIsNotDuplicated()
+	{
+		const string invalidStatement = "var result = int.Parse(input, CultureInfo.InvariantCulture);";
+		const string fixedStatement = "var result = InvariantConvert.ParseInt32(input);";
+		var invalidProgram = CreateProgram(invalidStatement, includeInvariantUsing: true);
+		var fixedProgram = CreateProgram(fixedStatement, includeSystemGlobalization: false, includeInvariantUsing: true);
+
+		VerifyCSharpDiagnostic(invalidProgram, CreateDiagnostic(invalidProgram, "int.Parse(input, CultureInfo.InvariantCulture)"));
+		VerifyCSharpFix(invalidProgram, fixedProgram);
 	}
 
 	protected override DiagnosticAnalyzer GetCSharpDiagnosticAnalyzer() => new InvariantConvertAnalyzer();
 
 	protected override CodeFixProvider GetCSharpCodeFixProvider() => new InvariantConvertCodeFixProvider();
+
+	private void VerifyDiagnosticWithoutFix(string statement, string diagnosticText)
+	{
+		var invalidProgram = CreateProgram(statement);
+
+		VerifyCSharpDiagnostic(invalidProgram, CreateDiagnostic(invalidProgram, diagnosticText));
+		VerifyCSharpFix(invalidProgram, invalidProgram);
+	}
 
 	private static DiagnosticResult CreateDiagnostic(string program, string diagnosticText)
 	{
@@ -168,13 +334,16 @@ internal sealed class InvariantConvertTests : CodeFixVerifier
 		};
 	}
 
-	private static string CreateProgram(string statement, bool includeInvariantConvert = true, bool includeSystemGlobalization = true, bool includeInvariantUsing = false)
+	private static string CreateProgram(string statement, bool includeInvariantConvert = true, bool includeSystemGlobalization = true,
+		bool includeInvariantUsing = false, string extraUsings = "")
 	{
 		var usings = "using System;";
 		if (includeSystemGlobalization)
 			usings += "\nusing System.Globalization;";
 		if (includeInvariantUsing)
 			usings += "\nusing Libronix.Utility.Invariant;";
+		if (extraUsings.Length != 0)
+			usings += "\n" + extraUsings;
 
 		var invariantConvert = includeInvariantConvert ? c_invariantConvert : "";
 

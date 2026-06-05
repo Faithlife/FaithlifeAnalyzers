@@ -69,24 +69,33 @@ public sealed class InvariantConvertAnalyzer : DiagnosticAnalyzer
 		if (arguments.Count == 0 || !ParameterIsString(methodSymbol.Parameters[0]))
 			return null;
 
+		var inputArgument = GetArgument(arguments, methodSymbol, 0);
+		if (inputArgument is null)
+			return null;
+
 		if (conversion.SpecialType == SpecialType.System_Boolean)
 		{
 			return methodSymbol.Parameters.Length == 1 ?
-				InvariantConvertMatch.CreateParse(invocation, conversion.ParseMethodName, arguments[0].Expression) :
+				InvariantConvertMatch.CreateParse(invocation, conversion.ParseMethodName, inputArgument.Expression) :
 				null;
 		}
 
 		if (methodSymbol.Parameters.Length == 2)
 		{
-			if (IsInvariantCulture(arguments[1].Expression, semanticModel, cancellationToken))
-				return InvariantConvertMatch.CreateParse(invocation, conversion.ParseMethodName, arguments[0].Expression);
+			if (GetArgument(arguments, methodSymbol, 1) is { } providerArgument &&
+				IsInvariantCulture(providerArgument.Expression, semanticModel, cancellationToken))
+			{
+				return InvariantConvertMatch.CreateParse(invocation, conversion.ParseMethodName, inputArgument.Expression);
+			}
 		}
 		else if (methodSymbol.Parameters.Length == 3)
 		{
-			if (IsAllowedNumberStyle(arguments[1].Expression, conversion, semanticModel, cancellationToken) &&
-				IsInvariantCulture(arguments[2].Expression, semanticModel, cancellationToken))
+			if (GetArgument(arguments, methodSymbol, 1) is { } styleArgument &&
+				GetArgument(arguments, methodSymbol, 2) is { } providerArgument &&
+				IsAllowedNumberStyle(styleArgument.Expression, conversion, semanticModel, cancellationToken) &&
+				IsInvariantCulture(providerArgument.Expression, semanticModel, cancellationToken))
 			{
-				return InvariantConvertMatch.CreateParse(invocation, conversion.ParseMethodName, arguments[0].Expression);
+				return InvariantConvertMatch.CreateParse(invocation, conversion.ParseMethodName, inputArgument.Expression);
 			}
 		}
 
@@ -105,37 +114,51 @@ public sealed class InvariantConvertAnalyzer : DiagnosticAnalyzer
 		if (arguments.Count == 0 || !ParameterIsString(methodSymbol.Parameters[0]))
 			return null;
 
-		if (!TryGetOutVariable(arguments.Last(), out var outVariableIdentifier))
-			return null;
-
-		if (!TryGetSupportedTryParseCondition(invocation, out var isNegated, out var ifStatement))
-			return null;
-
-		if (!IsSafeTryParseScope(ifStatement, outVariableIdentifier, isNegated))
+		var inputArgument = GetArgument(arguments, methodSymbol, 0);
+		var outputArgument = GetArgument(arguments, methodSymbol, methodSymbol.Parameters.Length - 1);
+		if (inputArgument is null || outputArgument is null)
 			return null;
 
 		if (conversion.SpecialType == SpecialType.System_Boolean)
 		{
-			return methodSymbol.Parameters.Length == 2 ?
-				InvariantConvertMatch.CreateTryParse(invocation, conversion.TryParseMethodName, arguments[0].Expression, outVariableIdentifier, isNegated) :
-				null;
+			if (methodSymbol.Parameters.Length != 2)
+				return null;
+
+			return CreateTryParseMatch(invocation, conversion.TryParseMethodName, inputArgument.Expression, outputArgument);
 		}
 
 		if (methodSymbol.Parameters.Length == 3)
 		{
-			if (IsInvariantCulture(arguments[1].Expression, semanticModel, cancellationToken))
-				return InvariantConvertMatch.CreateTryParse(invocation, conversion.TryParseMethodName, arguments[0].Expression, outVariableIdentifier, isNegated);
+			if (GetArgument(arguments, methodSymbol, 1) is { } providerArgument &&
+				IsInvariantCulture(providerArgument.Expression, semanticModel, cancellationToken))
+			{
+				return CreateTryParseMatch(invocation, conversion.TryParseMethodName, inputArgument.Expression, outputArgument);
+			}
 		}
 		else if (methodSymbol.Parameters.Length == 4)
 		{
-			if (IsAllowedNumberStyle(arguments[1].Expression, conversion, semanticModel, cancellationToken) &&
-				IsInvariantCulture(arguments[2].Expression, semanticModel, cancellationToken))
+			if (GetArgument(arguments, methodSymbol, 1) is { } styleArgument &&
+				GetArgument(arguments, methodSymbol, 2) is { } providerArgument &&
+				IsAllowedNumberStyle(styleArgument.Expression, conversion, semanticModel, cancellationToken) &&
+				IsInvariantCulture(providerArgument.Expression, semanticModel, cancellationToken))
 			{
-				return InvariantConvertMatch.CreateTryParse(invocation, conversion.TryParseMethodName, arguments[0].Expression, outVariableIdentifier, isNegated);
+				return CreateTryParseMatch(invocation, conversion.TryParseMethodName, inputArgument.Expression, outputArgument);
 			}
 		}
 
 		return null;
+	}
+
+	private static InvariantConvertMatch CreateTryParseMatch(InvocationExpressionSyntax invocation, string methodName, ExpressionSyntax inputExpression, ArgumentSyntax outputArgument)
+	{
+		if (TryGetOutVariable(outputArgument, out var outVariableIdentifier) &&
+			TryGetSupportedTryParseCondition(invocation, out var isNegated, out var ifStatement) &&
+			IsSafeTryParseScope(ifStatement, outVariableIdentifier, isNegated))
+		{
+			return InvariantConvertMatch.CreateTryParse(invocation, methodName, inputExpression, outVariableIdentifier, isNegated);
+		}
+
+		return InvariantConvertMatch.CreateUnfixableTryParse(invocation);
 	}
 
 	private static InvariantConvertMatch? TryCreateToStringMatch(InvocationExpressionSyntax invocation, IMethodSymbol methodSymbol, SemanticModel semanticModel, CancellationToken cancellationToken)
@@ -157,6 +180,26 @@ public sealed class InvariantConvertAnalyzer : DiagnosticAnalyzer
 
 	private static bool ParameterIsString(IParameterSymbol parameter) =>
 		parameter.Type.SpecialType == SpecialType.System_String;
+
+	private static ArgumentSyntax? GetArgument(SeparatedSyntaxList<ArgumentSyntax> arguments, IMethodSymbol methodSymbol, int parameterIndex)
+	{
+		var parameter = methodSymbol.Parameters[parameterIndex];
+		for (int i = 0; i < arguments.Count; i++)
+		{
+			var argument = arguments[i];
+			if (argument.NameColon is null)
+			{
+				if (i == parameterIndex)
+					return argument;
+			}
+			else if (argument.NameColon.Name.Identifier.ValueText == parameter.Name)
+			{
+				return argument;
+			}
+		}
+
+		return null;
+	}
 
 	private static bool TryGetOutVariable(ArgumentSyntax argument, out SyntaxToken identifier)
 	{
@@ -205,12 +248,17 @@ public sealed class InvariantConvertAnalyzer : DiagnosticAnalyzer
 			return false;
 
 		if (ContainsIdentifierReference(ifStatement.Statement, outVariableIdentifier))
-			return !isNegated;
+		{
+			if (isNegated)
+				return false;
+		}
 
 		if (!ContainsReferenceAfterStatement(ifStatement, outVariableIdentifier))
 			return true;
 
-		return isNegated && StatementAlwaysExits(ifStatement.Statement);
+		return isNegated ?
+			StatementAlwaysExits(ifStatement.Statement) :
+			ifStatement.Else is not null && StatementAlwaysExits(ifStatement.Else.Statement);
 	}
 
 	private static bool ContainsReferenceAfterStatement(StatementSyntax statement, SyntaxToken identifier)

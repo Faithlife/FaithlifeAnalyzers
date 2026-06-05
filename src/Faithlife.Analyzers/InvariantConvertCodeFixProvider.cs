@@ -35,7 +35,7 @@ public sealed class InvariantConvertCodeFixProvider : CodeFixProvider
 			return;
 
 		var match = InvariantConvertAnalyzer.TryCreateMatch(invocation, semanticModel, context.CancellationToken);
-		if (match is null)
+		if (match is null || !match.CanFix)
 			return;
 
 		context.RegisterCodeFix(
@@ -55,7 +55,8 @@ public sealed class InvariantConvertCodeFixProvider : CodeFixProvider
 		if (root is CompilationUnitSyntax compilationUnit)
 			root = AddInvariantUsing(compilationUnit);
 
-		root = SimplifyUsing(root, s_systemGlobalizationNamespace);
+		foreach (var namespaceName in s_simplifiableNamespaces)
+			root = SimplifyUsing(root, namespaceName);
 
 		return await Simplifier.ReduceAsync(
 			await Simplifier.ReduceAsync(document.WithSyntaxRoot(root), cancellationToken: cancellationToken).ConfigureAwait(false),
@@ -64,9 +65,14 @@ public sealed class InvariantConvertCodeFixProvider : CodeFixProvider
 
 	private static SyntaxNode GetReplacementTarget(InvariantConvertMatch match)
 	{
-		if (match.Kind == InvariantConvertMatchKind.TryParse &&
-			match.IsNegated &&
-			match.Invocation.Parent is PrefixUnaryExpressionSyntax { RawKind: (int) SyntaxKind.LogicalNotExpression } logicalNotExpression)
+		if (match.Kind != InvariantConvertMatchKind.TryParse || !match.IsNegated)
+			return match.Invocation;
+
+		SyntaxNode currentNode = match.Invocation;
+		while (currentNode.Parent is ParenthesizedExpressionSyntax)
+			currentNode = currentNode.Parent;
+
+		if (currentNode.Parent is PrefixUnaryExpressionSyntax { RawKind: (int) SyntaxKind.LogicalNotExpression } logicalNotExpression)
 		{
 			return logicalNotExpression;
 		}
@@ -131,5 +137,14 @@ public sealed class InvariantConvertCodeFixProvider : CodeFixProvider
 	}
 
 	private static readonly NameSyntax s_invariantNamespace = ParseName("Libronix.Utility.Invariant");
-	private static readonly NameSyntax s_systemGlobalizationNamespace = ParseName("System.Globalization");
+	private static readonly NameSyntax[] s_simplifiableNamespaces =
+	[
+		ParseName("System.Globalization"),
+		ParseName("System.Globalization.CultureInfo"),
+		ParseName("System.Globalization.NumberStyles"),
+		ParseName("System.Boolean"),
+		ParseName("System.Double"),
+		ParseName("System.Int32"),
+		ParseName("System.Int64"),
+	];
 }
