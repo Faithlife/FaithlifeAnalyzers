@@ -351,7 +351,7 @@ public sealed class InvariantConvertAnalyzer : DiagnosticAnalyzer
 		title: "Use InvariantConvert",
 		messageFormat: "Use InvariantConvert for invariant culture conversions",
 		category: "Usage",
-		defaultSeverity: DiagnosticSeverity.Info,
+		defaultSeverity: DiagnosticSeverity.Warning,
 		isEnabledByDefault: true,
 		helpLinkUri: $"https://github.com/Faithlife/FaithlifeAnalyzers/blob/-/docs/{DiagnosticId}.md");
 }

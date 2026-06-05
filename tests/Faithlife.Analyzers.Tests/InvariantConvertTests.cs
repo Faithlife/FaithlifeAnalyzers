@@ -443,7 +443,7 @@ internal sealed class InvariantConvertTests : CodeFixVerifier
 		{
 			Id = InvariantConvertAnalyzer.DiagnosticId,
 			Message = "Use InvariantConvert for invariant culture conversions",
-			Severity = DiagnosticSeverity.Info,
+			Severity = DiagnosticSeverity.Warning,
 			Locations = [new DiagnosticResultLocation("Test0.cs", line, column)],
 		};
 	}
