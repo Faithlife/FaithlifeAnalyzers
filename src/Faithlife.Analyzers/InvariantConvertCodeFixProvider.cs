@@ -62,9 +62,10 @@ public sealed class InvariantConvertCodeFixProvider : CodeFixProvider
 		foreach (var namespaceName in s_simplifiableNamespaces)
 			root = SimplifyUsing(root, namespaceName);
 
-		return await Simplifier.ReduceAsync(
+		document = await Simplifier.ReduceAsync(
 			await Simplifier.ReduceAsync(document.WithSyntaxRoot(root), cancellationToken: cancellationToken).ConfigureAwait(false),
 			cancellationToken: cancellationToken).ConfigureAwait(false);
+		return await Formatter.OrganizeImportsAsync(document, cancellationToken).ConfigureAwait(false);
 	}
 
 	private static SyntaxNode GetReplacementTarget(InvariantConvertMatch match)

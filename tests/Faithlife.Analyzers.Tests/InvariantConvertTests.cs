@@ -408,15 +408,145 @@ internal sealed class InvariantConvertTests : CodeFixVerifier
 	}
 
 	[Test]
-	public void InvariantUsingIsInsertedBeforeOtherNonSystemUsings()
+	public void InvariantUsingIsInsertedWithinExistingUsings()
 	{
-		const string invalidStatement = "var result = int.Parse(input, CultureInfo.InvariantCulture);";
-		const string fixedStatement = "var result = InvariantConvert.ParseInt32(input);";
-		const string extraUsings = "using Microsoft.CodeAnalysis;";
-		var invalidProgram = CreateProgram(invalidStatement, extraUsings: extraUsings);
-		var fixedProgram = CreateProgram(fixedStatement, includeSystemGlobalization: false, includeInvariantUsing: true, extraUsings: extraUsings);
+		const string invalidProgram = $$"""
+			using System;
+			using System.Collections.Generic;
+			using System.Globalization;
+			using System.Linq;
+			using Libronix.Utility;
+			using Microsoft.CodeAnalysis;
+			using Microsoft.CodeAnalysis.CSharp;
 
-		VerifyCSharpDiagnostic(invalidProgram, CreateDiagnostic(invalidProgram, "int.Parse(input, CultureInfo.InvariantCulture)"));
+			{{c_invariantConvert}}
+			namespace Libronix.Utility
+			{
+			}
+
+			namespace TestApplication
+			{
+				internal static class TestClass
+				{
+					public static void Test(string input)
+					{
+						var result = int.Parse(input, System.Globalization.CultureInfo.InvariantCulture);
+					}
+				}
+			}
+			""";
+		const string fixedProgram = $$"""
+			using System;
+			using System.Collections.Generic;
+			using System.Linq;
+			using Libronix.Utility;
+			using Libronix.Utility.Invariant;
+			using Microsoft.CodeAnalysis;
+			using Microsoft.CodeAnalysis.CSharp;
+
+			{{c_invariantConvert}}
+			namespace Libronix.Utility
+			{
+			}
+
+			namespace TestApplication
+			{
+				internal static class TestClass
+				{
+					public static void Test(string input)
+					{
+						var result = InvariantConvert.ParseInt32(input);
+					}
+				}
+			}
+			""";
+
+		VerifyCSharpDiagnostic(invalidProgram, CreateDiagnostic(invalidProgram, "int.Parse(input, System.Globalization.CultureInfo.InvariantCulture)"));
+		VerifyCSharpFix(invalidProgram, fixedProgram);
+	}
+
+	[Test]
+	public void InvariantUsingIsInsertedWithinExistingLibronixUsingsForToString()
+	{
+		const string invalidProgram = $$"""
+			using System;
+			using System.Collections.Generic;
+			using System.IO;
+			using System.Linq;
+			using Libronix.Utility;
+			using Libronix.Utility.Data;
+			using Libronix.Utility.SQLite;
+			using Logos.ResourceViewTracking.Client;
+
+			{{c_invariantConvert}}
+			namespace Libronix.Utility
+			{
+			}
+
+			namespace Libronix.Utility.Data
+			{
+			}
+
+			namespace Libronix.Utility.SQLite
+			{
+			}
+
+			namespace Logos.ResourceViewTracking.Client
+			{
+			}
+
+			namespace TestApplication
+			{
+				internal static class TestClass
+				{
+					public static void Test(int length)
+					{
+						var result = length.ToString(System.Globalization.CultureInfo.InvariantCulture);
+					}
+				}
+			}
+			""";
+		const string fixedProgram = $$"""
+			using System;
+			using System.Collections.Generic;
+			using System.IO;
+			using System.Linq;
+			using Libronix.Utility;
+			using Libronix.Utility.Data;
+			using Libronix.Utility.Invariant;
+			using Libronix.Utility.SQLite;
+			using Logos.ResourceViewTracking.Client;
+
+			{{c_invariantConvert}}
+			namespace Libronix.Utility
+			{
+			}
+
+			namespace Libronix.Utility.Data
+			{
+			}
+
+			namespace Libronix.Utility.SQLite
+			{
+			}
+
+			namespace Logos.ResourceViewTracking.Client
+			{
+			}
+
+			namespace TestApplication
+			{
+				internal static class TestClass
+				{
+					public static void Test(int length)
+					{
+						var result = length.ToInvariantString();
+					}
+				}
+			}
+			""";
+
+		VerifyCSharpDiagnostic(invalidProgram, CreateDiagnostic(invalidProgram, "length.ToString(System.Globalization.CultureInfo.InvariantCulture)"));
 		VerifyCSharpFix(invalidProgram, fixedProgram);
 	}
 
