@@ -426,10 +426,6 @@ internal sealed class InvariantConvertTests : CodeFixVerifier
 			using Microsoft.CodeAnalysis.CSharp;
 
 			{{c_invariantConvert}}
-			namespace Libronix.Utility
-			{
-			}
-
 			namespace TestApplication
 			{
 				internal static class TestClass
@@ -451,10 +447,6 @@ internal sealed class InvariantConvertTests : CodeFixVerifier
 			using Microsoft.CodeAnalysis.CSharp;
 
 			{{c_invariantConvert}}
-			namespace Libronix.Utility
-			{
-			}
-
 			namespace TestApplication
 			{
 				internal static class TestClass
@@ -477,30 +469,12 @@ internal sealed class InvariantConvertTests : CodeFixVerifier
 		const string invalidProgram = $$"""
 			using System;
 			using System.Collections.Generic;
-			using System.IO;
 			using System.Linq;
 			using Libronix.Utility;
-			using Libronix.Utility.Data;
-			using Libronix.Utility.SQLite;
-			using Logos.ResourceViewTracking.Client;
+			using Microsoft.CodeAnalysis;
+			using Microsoft.CodeAnalysis.CSharp;
 
 			{{c_invariantConvert}}
-			namespace Libronix.Utility
-			{
-			}
-
-			namespace Libronix.Utility.Data
-			{
-			}
-
-			namespace Libronix.Utility.SQLite
-			{
-			}
-
-			namespace Logos.ResourceViewTracking.Client
-			{
-			}
-
 			namespace TestApplication
 			{
 				internal static class TestClass
@@ -515,31 +489,13 @@ internal sealed class InvariantConvertTests : CodeFixVerifier
 		const string fixedProgram = $$"""
 			using System;
 			using System.Collections.Generic;
-			using System.IO;
 			using System.Linq;
 			using Libronix.Utility;
-			using Libronix.Utility.Data;
 			using Libronix.Utility.Invariant;
-			using Libronix.Utility.SQLite;
-			using Logos.ResourceViewTracking.Client;
+			using Microsoft.CodeAnalysis;
+			using Microsoft.CodeAnalysis.CSharp;
 
 			{{c_invariantConvert}}
-			namespace Libronix.Utility
-			{
-			}
-
-			namespace Libronix.Utility.Data
-			{
-			}
-
-			namespace Libronix.Utility.SQLite
-			{
-			}
-
-			namespace Logos.ResourceViewTracking.Client
-			{
-			}
-
 			namespace TestApplication
 			{
 				internal static class TestClass
