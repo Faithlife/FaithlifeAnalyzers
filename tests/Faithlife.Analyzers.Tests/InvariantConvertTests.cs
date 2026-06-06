@@ -8,9 +8,6 @@ namespace Faithlife.Analyzers.Tests;
 [TestFixture]
 internal sealed class InvariantConvertTests : CodeFixVerifier
 {
-	[TestCase("var result = bool.Parse(input);", "var result = InvariantConvert.ParseBoolean(input);", "bool.Parse(input)")]
-	[TestCase("var result = Boolean.Parse(input);", "var result = InvariantConvert.ParseBoolean(input);", "Boolean.Parse(input)")]
-	[TestCase("var result = System.Boolean.Parse(input);", "var result = InvariantConvert.ParseBoolean(input);", "System.Boolean.Parse(input)")]
 	[TestCase("var result = int.Parse(input, CultureInfo.InvariantCulture);", "var result = InvariantConvert.ParseInt32(input);", "int.Parse(input, CultureInfo.InvariantCulture)")]
 	[TestCase("var result = Int32.Parse(input, CultureInfo.InvariantCulture);", "var result = InvariantConvert.ParseInt32(input);", "Int32.Parse(input, CultureInfo.InvariantCulture)")]
 	[TestCase("var result = System.Int32.Parse(input, CultureInfo.InvariantCulture);", "var result = InvariantConvert.ParseInt32(input);", "System.Int32.Parse(input, CultureInfo.InvariantCulture)")]
@@ -38,8 +35,6 @@ internal sealed class InvariantConvertTests : CodeFixVerifier
 		VerifyCSharpFix(invalidProgram, fixedProgram);
 	}
 
-	[TestCase("bool.TryParse(input, out var value)", "InvariantConvert.TryParseBoolean(input) is { } value")]
-	[TestCase("Boolean.TryParse(input, out bool value)", "InvariantConvert.TryParseBoolean(input) is { } value")]
 	[TestCase("int.TryParse(input, CultureInfo.InvariantCulture, out var value)", "InvariantConvert.TryParseInt32(input) is { } value")]
 	[TestCase("Int32.TryParse(input, CultureInfo.InvariantCulture, out int value)", "InvariantConvert.TryParseInt32(input) is { } value")]
 	[TestCase("int.TryParse(result: out var value, provider: CultureInfo.InvariantCulture, s: input)", "InvariantConvert.TryParseInt32(input) is { } value")]
@@ -62,7 +57,6 @@ internal sealed class InvariantConvertTests : CodeFixVerifier
 		VerifyCSharpFix(invalidProgram, fixedProgram);
 	}
 
-	[TestCase("!bool.TryParse(input, out var value)", "InvariantConvert.TryParseBoolean(input) is not { } value", "bool.TryParse(input, out var value)")]
 	[TestCase("!int.TryParse(input, NumberStyles.Integer, CultureInfo.InvariantCulture, out var value)", "InvariantConvert.TryParseInt32(input) is not { } value", "int.TryParse(input, NumberStyles.Integer, CultureInfo.InvariantCulture, out var value)")]
 	[TestCase("!double.TryParse(input, NumberStyles.Float, CultureInfo.InvariantCulture, out var value)", "InvariantConvert.TryParseDouble(input) is not { } value", "double.TryParse(input, NumberStyles.Float, CultureInfo.InvariantCulture, out var value)")]
 	[TestCase("!long.TryParse(input, NumberStyles.Integer, CultureInfo.InvariantCulture, out var value)", "InvariantConvert.TryParseInt64(input) is not { } value", "long.TryParse(input, NumberStyles.Integer, CultureInfo.InvariantCulture, out var value)")]
@@ -78,7 +72,6 @@ internal sealed class InvariantConvertTests : CodeFixVerifier
 		VerifyCSharpFix(invalidProgram, fixedProgram);
 	}
 
-	[TestCase("boolValue", "boolValue.ToString(CultureInfo.InvariantCulture)", "boolValue.ToInvariantString()")]
 	[TestCase("intValue", "intValue.ToString(CultureInfo.InvariantCulture)", "intValue.ToInvariantString()")]
 	[TestCase("doubleValue", "doubleValue.ToString(CultureInfo.InvariantCulture)", "doubleValue.ToInvariantString()")]
 	[TestCase("longValue", "longValue.ToString(CultureInfo.InvariantCulture)", "longValue.ToInvariantString()")]
@@ -156,13 +149,11 @@ internal sealed class InvariantConvertTests : CodeFixVerifier
 			Func<ValueFields, string> intFormatter = x => x.IntField.ToString(CultureInfo.InvariantCulture);
 			Func<ValueFields, string> longFormatter = x => x.LongField.ToString(CultureInfo.InvariantCulture);
 			Func<ValueFields, string> doubleFormatter = x => x.DoubleField.ToString(CultureInfo.InvariantCulture);
-			Func<ValueFields, string> boolFormatter = x => x.BoolField.ToString(CultureInfo.InvariantCulture);
 			""";
 		const string fixedStatement = """
 			Func<ValueFields, string> intFormatter = x => x.IntField.ToInvariantString();
 			Func<ValueFields, string> longFormatter = x => x.LongField.ToInvariantString();
 			Func<ValueFields, string> doubleFormatter = x => x.DoubleField.ToInvariantString();
-			Func<ValueFields, string> boolFormatter = x => x.BoolField.ToInvariantString();
 			""";
 		var invalidProgram = CreateProgram(invalidStatement, extraTypes: c_valueFieldTypes);
 		var fixedProgram = CreateProgram(fixedStatement, includeSystemGlobalization: false, includeInvariantUsing: true, extraTypes: c_valueFieldTypes);
@@ -170,8 +161,7 @@ internal sealed class InvariantConvertTests : CodeFixVerifier
 		VerifyCSharpDiagnostic(invalidProgram,
 			CreateDiagnostic(invalidProgram, "x.IntField.ToString(CultureInfo.InvariantCulture)"),
 			CreateDiagnostic(invalidProgram, "x.LongField.ToString(CultureInfo.InvariantCulture)"),
-			CreateDiagnostic(invalidProgram, "x.DoubleField.ToString(CultureInfo.InvariantCulture)"),
-			CreateDiagnostic(invalidProgram, "x.BoolField.ToString(CultureInfo.InvariantCulture)"));
+			CreateDiagnostic(invalidProgram, "x.DoubleField.ToString(CultureInfo.InvariantCulture)"));
 		VerifyCSharpFix(invalidProgram, fixedProgram);
 	}
 
@@ -185,7 +175,6 @@ internal sealed class InvariantConvertTests : CodeFixVerifier
 			var parsedProperty = int.Parse(provider.GetText().Value, CultureInfo.InvariantCulture);
 			var parsedElement = long.Parse(values[index], NumberStyles.Integer, CultureInfo.InvariantCulture);
 			var parsedConditional = double.Parse(boolValue ? provider.GetText().Value : input, NumberStyles.Float, CultureInfo.InvariantCulture);
-			var parsedCoalesce = bool.Parse(provider.GetNullableText() ?? input);
 			""";
 		const string fixedStatement = """
 			var provider = new TextProvider();
@@ -194,7 +183,6 @@ internal sealed class InvariantConvertTests : CodeFixVerifier
 			var parsedProperty = InvariantConvert.ParseInt32(provider.GetText().Value);
 			var parsedElement = InvariantConvert.ParseInt64(values[index]);
 			var parsedConditional = InvariantConvert.ParseDouble(boolValue ? provider.GetText().Value : input);
-			var parsedCoalesce = InvariantConvert.ParseBoolean(provider.GetNullableText() ?? input);
 			""";
 		var invalidProgram = CreateProgram(invalidStatement, extraTypes: c_textProviderTypes);
 		var fixedProgram = CreateProgram(fixedStatement, includeSystemGlobalization: false, includeInvariantUsing: true, extraTypes: c_textProviderTypes);
@@ -202,8 +190,7 @@ internal sealed class InvariantConvertTests : CodeFixVerifier
 		VerifyCSharpDiagnostic(invalidProgram,
 			CreateDiagnostic(invalidProgram, "int.Parse(provider.GetText().Value, CultureInfo.InvariantCulture)"),
 			CreateDiagnostic(invalidProgram, "long.Parse(values[index], NumberStyles.Integer, CultureInfo.InvariantCulture)"),
-			CreateDiagnostic(invalidProgram, "double.Parse(boolValue ? provider.GetText().Value : input, NumberStyles.Float, CultureInfo.InvariantCulture)"),
-			CreateDiagnostic(invalidProgram, "bool.Parse(provider.GetNullableText() ?? input)"));
+			CreateDiagnostic(invalidProgram, "double.Parse(boolValue ? provider.GetText().Value : input, NumberStyles.Float, CultureInfo.InvariantCulture)"));
 		VerifyCSharpFix(invalidProgram, fixedProgram);
 	}
 
@@ -227,6 +214,25 @@ internal sealed class InvariantConvertTests : CodeFixVerifier
 	public void UnsupportedUsage(string statement)
 	{
 		VerifyCSharpDiagnostic(CreateProgram(statement));
+	}
+
+	[Test]
+	public void BoolConversionsAreUnsupported()
+	{
+		const string statement = """
+			var parsed = bool.Parse(input);
+			var parsedType = Boolean.Parse(input);
+			var parsedQualified = System.Boolean.Parse(input);
+			var parsedCoalesce = bool.Parse(new TextProvider().GetNullableText() ?? input);
+			if (bool.TryParse(input, out var parsedValue))
+				GC.KeepAlive(parsedValue);
+			if (!bool.TryParse(input, out var negatedValue))
+				return;
+			var formatted = boolValue.ToString(CultureInfo.InvariantCulture);
+			Func<ValueFields, string> formatter = x => x.BoolField.ToString(CultureInfo.InvariantCulture);
+			""";
+
+		VerifyCSharpDiagnostic(CreateProgram(statement, extraTypes: c_valueFieldTypes + "\n\n" + c_textProviderTypes));
 	}
 
 	[Test]
@@ -676,9 +682,6 @@ internal sealed class InvariantConvertTests : CodeFixVerifier
 		{
 			public static class InvariantConvert
 			{
-				public static string ToInvariantString(this bool value) => throw new NotImplementedException();
-				public static bool? TryParseBoolean(string text) => throw new NotImplementedException();
-				public static bool ParseBoolean(string text) => throw new NotImplementedException();
 				public static string ToInvariantString(this double value) => throw new NotImplementedException();
 				public static double? TryParseDouble(string text) => throw new NotImplementedException();
 				public static double ParseDouble(string text) => throw new NotImplementedException();

@@ -27,11 +27,9 @@ public sealed class InvariantConvertAnalyzer : DiagnosticAnalyzer
 
 	internal static bool HasInvariantConvert(Compilation compilation) =>
 		compilation.GetTypeByMetadataName(c_invariantConvertMetadataName) is { } invariantConvertType &&
-		HasMethod(invariantConvertType, "ParseBoolean") &&
 		HasMethod(invariantConvertType, "ParseDouble") &&
 		HasMethod(invariantConvertType, "ParseInt32") &&
 		HasMethod(invariantConvertType, "ParseInt64") &&
-		HasMethod(invariantConvertType, "TryParseBoolean") &&
 		HasMethod(invariantConvertType, "TryParseDouble") &&
 		HasMethod(invariantConvertType, "TryParseInt32") &&
 		HasMethod(invariantConvertType, "TryParseInt64") &&
@@ -73,13 +71,6 @@ public sealed class InvariantConvertAnalyzer : DiagnosticAnalyzer
 		if (inputArgument is null)
 			return null;
 
-		if (conversion.SpecialType == SpecialType.System_Boolean)
-		{
-			return methodSymbol.Parameters.Length == 1 ?
-				InvariantConvertMatch.CreateParse(invocation, conversion.ParseMethodName, inputArgument.Expression) :
-				null;
-		}
-
 		if (methodSymbol.Parameters.Length == 2)
 		{
 			if (GetArgument(arguments, methodSymbol, 1) is { } providerArgument &&
@@ -118,14 +109,6 @@ public sealed class InvariantConvertAnalyzer : DiagnosticAnalyzer
 		var outputArgument = GetArgument(arguments, methodSymbol, methodSymbol.Parameters.Length - 1);
 		if (inputArgument is null || outputArgument is null)
 			return null;
-
-		if (conversion.SpecialType == SpecialType.System_Boolean)
-		{
-			if (methodSymbol.Parameters.Length != 2)
-				return null;
-
-			return CreateTryParseMatch(invocation, conversion.TryParseMethodName, inputArgument.Expression, outputArgument);
-		}
 
 		if (methodSymbol.Parameters.Length == 3)
 		{
@@ -319,7 +302,6 @@ public sealed class InvariantConvertAnalyzer : DiagnosticAnalyzer
 	private static InvariantConvertConversion? GetConversion(SpecialType specialType) =>
 		specialType switch
 		{
-			SpecialType.System_Boolean => s_booleanConversion,
 			SpecialType.System_Double => s_doubleConversion,
 			SpecialType.System_Int32 => s_int32Conversion,
 			SpecialType.System_Int64 => s_int64Conversion,
@@ -338,10 +320,8 @@ public sealed class InvariantConvertAnalyzer : DiagnosticAnalyzer
 	}
 
 	public const string DiagnosticId = "FL0026";
-
 	private const string c_invariantConvertMetadataName = "Libronix.Utility.Invariant.InvariantConvert";
 
-	private static readonly InvariantConvertConversion s_booleanConversion = new(SpecialType.System_Boolean, "ParseBoolean", "TryParseBoolean", "");
 	private static readonly InvariantConvertConversion s_doubleConversion = new(SpecialType.System_Double, "ParseDouble", "TryParseDouble", "Float");
 	private static readonly InvariantConvertConversion s_int32Conversion = new(SpecialType.System_Int32, "ParseInt32", "TryParseInt32", "Integer");
 	private static readonly InvariantConvertConversion s_int64Conversion = new(SpecialType.System_Int64, "ParseInt64", "TryParseInt64", "Integer");

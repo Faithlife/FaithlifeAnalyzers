@@ -128,7 +128,6 @@ public sealed class InvariantConvertCodeFixProvider : CodeFixProvider
 		ParseName("System.Globalization"),
 		ParseName("System.Globalization.CultureInfo"),
 		ParseName("System.Globalization.NumberStyles"),
-		ParseName("System.Boolean"),
 		ParseName("System.Double"),
 		ParseName("System.Int32"),
 		ParseName("System.Int64"),
