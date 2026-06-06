@@ -125,6 +125,7 @@ public sealed class InvariantConvertCodeFixProvider : CodeFixProvider
 	private static readonly SyntaxAnnotation s_addImportsAnnotation = new();
 	private static readonly NameSyntax[] s_simplifiableNamespaces =
 	[
+		ParseName("Libronix.Utility.Invariant"),
 		ParseName("System.Globalization"),
 		ParseName("System.Globalization.CultureInfo"),
 		ParseName("System.Globalization.NumberStyles"),
