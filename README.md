@@ -8,7 +8,21 @@ Roslyn-based C# code analyzers used on Faithlife source code.
 
 ## How to Use
 
-Use `PackageReference` in your `.csproj`:
+The simplest way to use the latest Faithlife analyzers is to add a global package reference to your `Directory.Packages.props`:
+
+```xml
+  <PropertyGroup>
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+    <CentralPackageFloatingVersionsEnabled>true</CentralPackageFloatingVersionsEnabled>
+  </PropertyGroup>
+  <ItemGroup>
+    <GlobalPackageReference Include="Faithlife.Analyzers" Version="1.*" />
+  </ItemGroup>
+```
+
+You don't need to enable floating versions if you specify a specific version.
+
+If you're not using central package management, add a `PackageReference` to each `.csproj`:
 
 ```xml
   <ItemGroup>
