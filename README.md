@@ -50,6 +50,7 @@ dotnet_diagnostic.FL0009.severity = none
 | [FL0021](docs/FL0021.md) | Use null propagation |
 | [FL0022](docs/FL0022.md) | Use AsyncMethodContext.WorkState |
 | [FL0023](docs/FL0023.md) | Replace obsolete Logos.Common.Logging.Extensions extension methods |
+| [FL0024](docs/FL0024.md) | Lambda operators should end the previous line |
 | [FL0026](docs/FL0026.md) | Use `InvariantConvert` |
 
 ## How to Help
