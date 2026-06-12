@@ -2,7 +2,7 @@
 
 ## 1.7.0
 
-* Add [FL0024](https://github.com/Faithlife/FaithlifeAnalyzers/blob/master/docs/FL0024.md): Expression-bodied member arrows should end the previous line.
+* Add [FL0024](https://github.com/Faithlife/FaithlifeAnalyzers/blob/master/docs/FL0024.md): Lambda operators should end the previous line.
 
 ## 1.6.2
 

@@ -6,7 +6,7 @@ using NUnit.Framework;
 namespace Faithlife.Analyzers.Tests;
 
 [TestFixture]
-internal sealed class ExpressionBodiedMemberArrowTests : CodeFixVerifier
+internal sealed class LambdaOperatorTests : CodeFixVerifier
 {
 	[Test]
 	public void ValidExpressionBodiedMethod()
@@ -40,8 +40,27 @@ internal sealed class ExpressionBodiedMemberArrowTests : CodeFixVerifier
 
 			class Test
 			{
-				private readonly Func<int, int> increment = x
-					=> x + 1;
+				private readonly Func<int, int> increment = x => x + 1;
+				private readonly Func<int, int, int> add = (x, y) => x + y;
+			}
+			""";
+		VerifyCSharpDiagnostic(validProgram);
+	}
+
+	[Test]
+	public void ValidSwitchExpression()
+	{
+		const string validProgram = """
+			class Test
+			{
+				public string GetText(int value)
+				{
+					return value switch
+					{
+						0 => "zero",
+						_ => "other",
+					};
+				}
 			}
 			""";
 		VerifyCSharpDiagnostic(validProgram);
@@ -57,15 +76,8 @@ internal sealed class ExpressionBodiedMemberArrowTests : CodeFixVerifier
 					=> 1;
 			}
 			""";
-		var expected = new DiagnosticResult
-		{
-			Id = ExpressionBodiedMemberArrowAnalyzer.DiagnosticId,
-			Message = "Move => to the end of the previous line",
-			Severity = DiagnosticSeverity.Warning,
-			Locations = [new DiagnosticResultLocation("Test0.cs", 4, 3)],
-		};
 
-		VerifyCSharpDiagnostic(invalidProgram, expected);
+		VerifyCSharpDiagnostic(invalidProgram, Expected(4, 3));
 
 		const string fixedProgram = """
 			class Test
@@ -88,15 +100,8 @@ internal sealed class ExpressionBodiedMemberArrowTests : CodeFixVerifier
 					=> new T();
 			}
 			""";
-		var expected = new DiagnosticResult
-		{
-			Id = ExpressionBodiedMemberArrowAnalyzer.DiagnosticId,
-			Message = "Move => to the end of the previous line",
-			Severity = DiagnosticSeverity.Warning,
-			Locations = [new DiagnosticResultLocation("Test0.cs", 4, 3)],
-		};
 
-		VerifyCSharpDiagnostic(invalidProgram, expected);
+		VerifyCSharpDiagnostic(invalidProgram, Expected(4, 3));
 
 		const string fixedProgram = """
 			class Test
@@ -110,7 +115,7 @@ internal sealed class ExpressionBodiedMemberArrowTests : CodeFixVerifier
 	}
 
 	[Test]
-	public void InvalidExpressionBodiedMethodWithCommentAfterArrow()
+	public void InvalidExpressionBodiedMethodWithCommentAfterOperator()
 	{
 		const string invalidProgram = """
 			class Test
@@ -120,15 +125,8 @@ internal sealed class ExpressionBodiedMemberArrowTests : CodeFixVerifier
 					1;
 			}
 			""";
-		var expected = new DiagnosticResult
-		{
-			Id = ExpressionBodiedMemberArrowAnalyzer.DiagnosticId,
-			Message = "Move => to the end of the previous line",
-			Severity = DiagnosticSeverity.Warning,
-			Locations = [new DiagnosticResultLocation("Test0.cs", 4, 3)],
-		};
 
-		VerifyCSharpDiagnostic(invalidProgram, expected);
+		VerifyCSharpDiagnostic(invalidProgram, Expected(4, 3));
 
 		const string fixedProgram = """
 			class Test
@@ -153,15 +151,8 @@ internal sealed class ExpressionBodiedMemberArrowTests : CodeFixVerifier
 					=> Value = 1;
 			}
 			""";
-		var expected = new DiagnosticResult
-		{
-			Id = ExpressionBodiedMemberArrowAnalyzer.DiagnosticId,
-			Message = "Move => to the end of the previous line",
-			Severity = DiagnosticSeverity.Warning,
-			Locations = [new DiagnosticResultLocation("Test0.cs", 6, 3)],
-		};
 
-		VerifyCSharpDiagnostic(invalidProgram, expected);
+		VerifyCSharpDiagnostic(invalidProgram, Expected(6, 3));
 
 		const string fixedProgram = """
 			class Test
@@ -188,15 +179,8 @@ internal sealed class ExpressionBodiedMemberArrowTests : CodeFixVerifier
 					=> Value = 1;
 			}
 			""";
-		var expected = new DiagnosticResult
-		{
-			Id = ExpressionBodiedMemberArrowAnalyzer.DiagnosticId,
-			Message = "Move => to the end of the previous line",
-			Severity = DiagnosticSeverity.Warning,
-			Locations = [new DiagnosticResultLocation("Test0.cs", 6, 3)],
-		};
 
-		VerifyCSharpDiagnostic(invalidProgram, expected);
+		VerifyCSharpDiagnostic(invalidProgram, Expected(6, 3));
 
 		const string fixedProgram = """
 			class Test
@@ -221,15 +205,8 @@ internal sealed class ExpressionBodiedMemberArrowTests : CodeFixVerifier
 					=> 1;
 			}
 			""";
-		var expected = new DiagnosticResult
-		{
-			Id = ExpressionBodiedMemberArrowAnalyzer.DiagnosticId,
-			Message = "Move => to the end of the previous line",
-			Severity = DiagnosticSeverity.Warning,
-			Locations = [new DiagnosticResultLocation("Test0.cs", 4, 3)],
-		};
 
-		VerifyCSharpDiagnostic(invalidProgram, expected);
+		VerifyCSharpDiagnostic(invalidProgram, Expected(4, 3));
 
 		const string fixedProgram = """
 			class Test
@@ -252,15 +229,8 @@ internal sealed class ExpressionBodiedMemberArrowTests : CodeFixVerifier
 					=> index;
 			}
 			""";
-		var expected = new DiagnosticResult
-		{
-			Id = ExpressionBodiedMemberArrowAnalyzer.DiagnosticId,
-			Message = "Move => to the end of the previous line",
-			Severity = DiagnosticSeverity.Warning,
-			Locations = [new DiagnosticResultLocation("Test0.cs", 4, 3)],
-		};
 
-		VerifyCSharpDiagnostic(invalidProgram, expected);
+		VerifyCSharpDiagnostic(invalidProgram, Expected(4, 3));
 
 		const string fixedProgram = """
 			class Test
@@ -286,15 +256,8 @@ internal sealed class ExpressionBodiedMemberArrowTests : CodeFixVerifier
 				}
 			}
 			""";
-		var expected = new DiagnosticResult
-		{
-			Id = ExpressionBodiedMemberArrowAnalyzer.DiagnosticId,
-			Message = "Move => to the end of the previous line",
-			Severity = DiagnosticSeverity.Warning,
-			Locations = [new DiagnosticResultLocation("Test0.cs", 6, 4)],
-		};
 
-		VerifyCSharpDiagnostic(invalidProgram, expected);
+		VerifyCSharpDiagnostic(invalidProgram, Expected(6, 4));
 
 		const string fixedProgram = """
 			class Test
@@ -311,34 +274,165 @@ internal sealed class ExpressionBodiedMemberArrowTests : CodeFixVerifier
 	}
 
 	[Test]
-	public void InvalidExpressionBodiedMethodsFixAll()
+	public void InvalidSimpleLambdaExpression()
+	{
+		const string invalidProgram = """
+			using System;
+
+			class Test
+			{
+				private readonly Func<int, int> increment = x
+					=> x + 1;
+			}
+			""";
+
+		VerifyCSharpDiagnostic(invalidProgram, Expected(6, 3));
+
+		const string fixedProgram = """
+			using System;
+
+			class Test
+			{
+				private readonly Func<int, int> increment = x =>
+					x + 1;
+			}
+			""";
+
+		VerifyCSharpFix(invalidProgram, fixedProgram, 0);
+	}
+
+	[Test]
+	public void InvalidParenthesizedLambdaExpression()
+	{
+		const string invalidProgram = """
+			using System;
+
+			class Test
+			{
+				private readonly Func<int, int, int> add = (x, y)
+					=> x + y;
+			}
+			""";
+
+		VerifyCSharpDiagnostic(invalidProgram, Expected(6, 3));
+
+		const string fixedProgram = """
+			using System;
+
+			class Test
+			{
+				private readonly Func<int, int, int> add = (x, y) =>
+					x + y;
+			}
+			""";
+
+		VerifyCSharpFix(invalidProgram, fixedProgram, 0);
+	}
+
+	[Test]
+	public void InvalidSwitchExpressionArm()
 	{
 		const string invalidProgram = """
 			class Test
 			{
-				public int GetFirst()
-					=> 1;
-
-				public int GetSecond()
-					=> 2;
+				public string GetText(int value)
+				{
+					return value switch
+					{
+						0
+							=> "zero",
+						_
+							=> "other",
+					};
+				}
 			}
 			""";
+
+		VerifyCSharpDiagnostic(invalidProgram, Expected(8, 5), Expected(10, 5));
 
 		const string fixedProgram = """
 			class Test
 			{
-				public int GetFirst() =>
-					1;
-
-				public int GetSecond() =>
-					2;
+				public string GetText(int value)
+				{
+					return value switch
+					{
+						0 =>
+							"zero",
+						_ =>
+							"other",
+					};
+				}
 			}
 			""";
 
 		VerifyCSharpFix(invalidProgram, fixedProgram);
 	}
 
-	protected override DiagnosticAnalyzer GetCSharpDiagnosticAnalyzer() => new ExpressionBodiedMemberArrowAnalyzer();
+	[Test]
+	public void InvalidExpressionBodiedMembersAndLambdaOperatorsFixAll()
+	{
+		const string invalidProgram = """
+			using System;
 
-	protected override CodeFixProvider GetCSharpCodeFixProvider() => new ExpressionBodiedMemberArrowCodeFixProvider();
+			class Test
+			{
+				private readonly Func<int, int> increment = x
+					=> x + 1;
+
+				public int GetFirst()
+					=> 1;
+
+				public string GetText(int value)
+				{
+					return value switch
+					{
+						0
+							=> "zero",
+						_
+							=> "other",
+					};
+				}
+			}
+			""";
+
+		const string fixedProgram = """
+			using System;
+
+			class Test
+			{
+				private readonly Func<int, int> increment = x =>
+					x + 1;
+
+				public int GetFirst() =>
+					1;
+
+				public string GetText(int value)
+				{
+					return value switch
+					{
+						0 =>
+							"zero",
+						_ =>
+							"other",
+					};
+				}
+			}
+			""";
+
+		VerifyCSharpFix(invalidProgram, fixedProgram);
+	}
+
+	protected override DiagnosticAnalyzer GetCSharpDiagnosticAnalyzer() => new LambdaOperatorAnalyzer();
+
+	protected override CodeFixProvider GetCSharpCodeFixProvider() => new LambdaOperatorCodeFixProvider();
+
+	private static DiagnosticResult Expected(int line, int column) =>
+		new()
+		{
+			Id = LambdaOperatorAnalyzer.DiagnosticId,
+			Message = "Move => to the end of the previous line",
+			Severity = DiagnosticSeverity.Warning,
+			Locations = [new DiagnosticResultLocation("Test0.cs", line, column)],
+		};
 }

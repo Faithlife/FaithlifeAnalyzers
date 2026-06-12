@@ -8,14 +8,18 @@ using Microsoft.CodeAnalysis.Text;
 namespace Faithlife.Analyzers;
 
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
-public sealed class ExpressionBodiedMemberArrowAnalyzer : DiagnosticAnalyzer
+public sealed class LambdaOperatorAnalyzer : DiagnosticAnalyzer
 {
 	public override void Initialize(AnalysisContext context)
 	{
 		context.EnableConcurrentExecution();
 		context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);
 
-		context.RegisterSyntaxNodeAction(AnalyzeSyntax, SyntaxKind.ArrowExpressionClause);
+		context.RegisterSyntaxNodeAction(AnalyzeSyntax,
+			SyntaxKind.ArrowExpressionClause,
+			SyntaxKind.SimpleLambdaExpression,
+			SyntaxKind.ParenthesizedLambdaExpression,
+			SyntaxKind.SwitchExpressionArm);
 	}
 
 	public const string DiagnosticId = "FL0024";
@@ -24,22 +28,33 @@ public sealed class ExpressionBodiedMemberArrowAnalyzer : DiagnosticAnalyzer
 
 	private static void AnalyzeSyntax(SyntaxNodeAnalysisContext context)
 	{
-		var arrowExpressionClause = (ArrowExpressionClauseSyntax) context.Node;
-		var arrowToken = arrowExpressionClause.ArrowToken;
+		var lambdaOperatorToken = GetLambdaOperatorToken(context.Node);
+		if (!lambdaOperatorToken.IsKind(SyntaxKind.EqualsGreaterThanToken))
+			return;
 
-		var previousToken = arrowToken.GetPreviousToken();
+		var previousToken = lambdaOperatorToken.GetPreviousToken();
 		if (previousToken.IsKind(SyntaxKind.None))
 			return;
 
-		var sourceText = arrowToken.SyntaxTree.GetText(context.CancellationToken);
-		if (!IsFirstNonWhitespaceOnLine(sourceText, arrowToken) ||
-			!ContainsOnlyWhitespace(sourceText, TextSpan.FromBounds(previousToken.Span.End, arrowToken.SpanStart)))
+		var sourceText = lambdaOperatorToken.SyntaxTree.GetText(context.CancellationToken);
+		if (!IsFirstNonWhitespaceOnLine(sourceText, lambdaOperatorToken) ||
+			!ContainsOnlyWhitespace(sourceText, TextSpan.FromBounds(previousToken.Span.End, lambdaOperatorToken.SpanStart)))
 		{
 			return;
 		}
 
-		context.ReportDiagnostic(Diagnostic.Create(s_rule, arrowToken.GetLocation()));
+		context.ReportDiagnostic(Diagnostic.Create(s_rule, lambdaOperatorToken.GetLocation()));
 	}
+
+	private static SyntaxToken GetLambdaOperatorToken(SyntaxNode node) =>
+		node switch
+		{
+			ArrowExpressionClauseSyntax arrowExpressionClause => arrowExpressionClause.ArrowToken,
+			ParenthesizedLambdaExpressionSyntax parenthesizedLambdaExpression => parenthesizedLambdaExpression.ArrowToken,
+			SimpleLambdaExpressionSyntax simpleLambdaExpression => simpleLambdaExpression.ArrowToken,
+			SwitchExpressionArmSyntax switchExpressionArm => switchExpressionArm.EqualsGreaterThanToken,
+			_ => default,
+		};
 
 	private static bool IsFirstNonWhitespaceOnLine(SourceText sourceText, SyntaxToken token)
 	{
@@ -60,7 +75,7 @@ public sealed class ExpressionBodiedMemberArrowAnalyzer : DiagnosticAnalyzer
 
 	private static readonly DiagnosticDescriptor s_rule = new(
 		id: DiagnosticId,
-		title: "Expression-bodied member arrow should end the previous line",
+		title: "Lambda operator should end the previous line",
 		messageFormat: "Move => to the end of the previous line",
 		category: "Style",
 		defaultSeverity: DiagnosticSeverity.Warning,
