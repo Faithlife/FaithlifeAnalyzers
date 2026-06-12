@@ -26,7 +26,7 @@ dotnet_diagnostic.FL0009.severity = none
 ## Analyzers
 
 | ID | Description |
-|---|---|
+| --- | --- |
 | [FL0001](docs/FL0001.md) | `AsyncWorkItem.Current` must only be used in methods that return `IEnumerable<AsyncAction>` |
 | [FL0002](docs/FL0002.md) | Optional `StringComparison` arguments must always be specified |
 | [FL0003](docs/FL0003.md) | `UntilCanceled()` may only be used in methods that return `IEnumerable<AsyncAction>` |
@@ -50,6 +50,8 @@ dotnet_diagnostic.FL0009.severity = none
 | [FL0021](docs/FL0021.md) | Use null propagation |
 | [FL0022](docs/FL0022.md) | Use AsyncMethodContext.WorkState |
 | [FL0023](docs/FL0023.md) | Replace obsolete Logos.Common.Logging.Extensions extension methods |
+| [FL0024](docs/FL0024.md) | Lambda operators should end the previous line |
+| [FL0025](docs/FL0025.md) | Private fields should be defined last |
 | [FL0026](docs/FL0026.md) | Use `InvariantConvert` |
 
 ## How to Help

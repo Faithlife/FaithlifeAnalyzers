@@ -1,0 +1,290 @@
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CodeFixes;
+using Microsoft.CodeAnalysis.Diagnostics;
+using NUnit.Framework;
+
+namespace Faithlife.Analyzers.Tests;
+
+[TestFixture]
+internal sealed class PrivateFieldsLastTests : CodeFixVerifier
+{
+	[Test]
+	public void ValidWhenPrivateFieldsAreLast()
+	{
+		const string validProgram = """
+			#pragma warning disable 0169, 0414
+
+			namespace TestApplication
+			{
+				public class TestClass
+				{
+					public int Value => _value;
+
+					private readonly int _value;
+				}
+			}
+			""";
+
+		VerifyCSharpDiagnostic(validProgram);
+	}
+
+	[Test]
+	public void ValidWhenAllMembersArePrivateFields()
+	{
+		const string validProgram = """
+			#pragma warning disable 0169, 0414
+
+			namespace TestApplication
+			{
+				public class TestClass
+				{
+					private readonly int _first;
+					int _second;
+				}
+			}
+			""";
+
+		VerifyCSharpDiagnostic(validProgram);
+	}
+
+	[Test]
+	public void InvalidWhenTypeStartsWithPrivateFields()
+	{
+		const string invalidProgram = """
+			#pragma warning disable 0169, 0414
+
+			namespace TestApplication
+			{
+				public class TestClass
+				{
+					private readonly int _first;
+					private readonly int _second;
+
+					public int Sum() => _first + _second;
+				}
+			}
+			""";
+		var expected = new DiagnosticResult
+		{
+			Id = PrivateFieldsLastAnalyzer.DiagnosticId,
+			Message = "Move private fields to the end of the type",
+			Severity = DiagnosticSeverity.Warning,
+			Locations = [new DiagnosticResultLocation("Test0.cs", 7, 3)],
+		};
+
+		VerifyCSharpDiagnostic(invalidProgram, expected);
+
+		const string fixedProgram = """
+			#pragma warning disable 0169, 0414
+
+			namespace TestApplication
+			{
+				public class TestClass
+				{
+					public int Sum() => _first + _second;
+
+					private readonly int _first;
+					private readonly int _second;
+				}
+			}
+			""";
+
+		VerifyCSharpFix(invalidProgram, fixedProgram);
+	}
+
+	[Test]
+	public void InvalidWhenImplicitlyPrivateFieldsAreFirst()
+	{
+		const string invalidProgram = """
+			#pragma warning disable 0169, 0414
+
+			namespace TestApplication
+			{
+				public class TestClass
+				{
+					int _first;
+
+					public int Value => _first;
+				}
+			}
+			""";
+		var expected = new DiagnosticResult
+		{
+			Id = PrivateFieldsLastAnalyzer.DiagnosticId,
+			Message = "Move private fields to the end of the type",
+			Severity = DiagnosticSeverity.Warning,
+			Locations = [new DiagnosticResultLocation("Test0.cs", 7, 3)],
+		};
+
+		VerifyCSharpDiagnostic(invalidProgram, expected);
+
+		const string fixedProgram = """
+			#pragma warning disable 0169, 0414
+
+			namespace TestApplication
+			{
+				public class TestClass
+				{
+					public int Value => _first;
+
+					int _first;
+				}
+			}
+			""";
+
+		VerifyCSharpFix(invalidProgram, fixedProgram);
+	}
+
+	[Test]
+	[TestCase("struct TestStruct")]
+	[TestCase("record TestRecord")]
+	[TestCase("record struct TestRecordStruct")]
+	public void InvalidWhenNonClassTypeStartsWithPrivateFields(string typeDeclaration)
+	{
+		var invalidProgram = $$"""
+			#pragma warning disable 0169, 0414
+
+			namespace TestApplication
+			{
+				public {{typeDeclaration}}
+				{
+					private readonly int _value;
+
+					public int Value => _value;
+				}
+			}
+			""";
+		var expected = new DiagnosticResult
+		{
+			Id = PrivateFieldsLastAnalyzer.DiagnosticId,
+			Message = "Move private fields to the end of the type",
+			Severity = DiagnosticSeverity.Warning,
+			Locations = [new DiagnosticResultLocation("Test0.cs", 7, 3)],
+		};
+
+		VerifyCSharpDiagnostic(invalidProgram, expected);
+
+		var fixedProgram = $$"""
+			#pragma warning disable 0169, 0414
+
+			namespace TestApplication
+			{
+				public {{typeDeclaration}}
+				{
+					public int Value => _value;
+
+					private readonly int _value;
+				}
+			}
+			""";
+
+		VerifyCSharpFix(invalidProgram, fixedProgram);
+	}
+
+	[Test]
+	public void CodeFixPreservesBlankLineBeforeMovedPrivateFields()
+	{
+		const string invalidProgram = """
+			#pragma warning disable 0169, 0414
+
+			namespace TestApplication
+			{
+				public class TestClass
+				{
+					private readonly int _value;
+
+					public int Value => _value;
+				}
+			}
+			""";
+		const string fixedProgram = """
+			#pragma warning disable 0169, 0414
+
+			namespace TestApplication
+			{
+				public class TestClass
+				{
+					public int Value => _value;
+
+					private readonly int _value;
+				}
+			}
+			""";
+
+		VerifyCSharpFix(invalidProgram, fixedProgram);
+	}
+
+	[Test]
+	public void CodeFixPreservesLeadingCommentsOnMovedPrivateFields()
+	{
+		const string invalidProgram = """
+			#pragma warning disable 0169, 0414
+
+			namespace TestApplication
+			{
+				public class TestClass
+				{
+					// Comment about the field.
+					// Still about the field.
+					private readonly int _value;
+
+					public int Value => _value;
+				}
+			}
+			""";
+		const string fixedProgram = """
+			#pragma warning disable 0169, 0414
+
+			namespace TestApplication
+			{
+				public class TestClass
+				{
+					public int Value => _value;
+
+					// Comment about the field.
+					// Still about the field.
+					private readonly int _value;
+				}
+			}
+			""";
+
+		VerifyCSharpFix(invalidProgram, fixedProgram);
+	}
+
+	[Test]
+	public void CodeFixPreservesTrailingCommentsOnMovedPrivateFields()
+	{
+		const string invalidProgram = """
+			#pragma warning disable 0169, 0414
+
+			namespace TestApplication
+			{
+				public class TestClass
+				{
+					private readonly int _value; // Comment about the field.
+
+					public int Value => _value;
+				}
+			}
+			""";
+		const string fixedProgram = """
+			#pragma warning disable 0169, 0414
+
+			namespace TestApplication
+			{
+				public class TestClass
+				{
+					public int Value => _value;
+
+					private readonly int _value; // Comment about the field.
+				}
+			}
+			""";
+
+		VerifyCSharpFix(invalidProgram, fixedProgram);
+	}
+
+	protected override DiagnosticAnalyzer GetCSharpDiagnosticAnalyzer() => new PrivateFieldsLastAnalyzer();
+
+	protected override CodeFixProvider GetCSharpCodeFixProvider() => new PrivateFieldsLastCodeFixProvider();
+}

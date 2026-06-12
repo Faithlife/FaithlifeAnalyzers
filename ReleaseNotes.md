@@ -1,5 +1,11 @@
 # Release Notes
 
+## 1.7.0
+
+* Add [FL0024](https://github.com/Faithlife/FaithlifeAnalyzers/blob/master/docs/FL0024.md): Lambda operators should end the previous line.
+* Add [FL0025](https://github.com/Faithlife/FaithlifeAnalyzers/blob/master/docs/FL0025.md): Private fields should be defined last.
+* Add [FL0026](https://github.com/Faithlife/FaithlifeAnalyzers/blob/master/docs/FL0026.md): Use `InvariantConvert`.
+
 ## 1.6.2
 
 * Move analyzer documentation from wiki to repository content.
