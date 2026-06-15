@@ -47,10 +47,13 @@ public sealed class PrivateFieldsLastAnalyzer : DiagnosticAnalyzer
 	{
 		if (member is not FieldDeclarationSyntax { Declaration.Variables.Count: > 0 } field)
 			return false;
+		if (field.GetLeadingTrivia().Any(static trivia => trivia.GetStructure() is DirectiveTriviaSyntax))
+			return false;
 
 		return semanticModel.GetDeclaredSymbol(field.Declaration.Variables[0], cancellationToken) is IFieldSymbol
 		{
 			DeclaredAccessibility: Accessibility.Private,
+			IsStatic: false,
 		};
 	}
 
