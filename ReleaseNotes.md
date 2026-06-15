@@ -1,5 +1,9 @@
 # Release Notes
 
+## 1.7.1
+
+* FL0025: Don't flag static fields or fields with preprocessor directives above them, since auto-fixing either can introduce bugs without compiler errors.
+
 ## 1.7.0
 
 * Add [FL0024](https://github.com/Faithlife/FaithlifeAnalyzers/blob/master/docs/FL0024.md): Lambda operators should end the previous line.
