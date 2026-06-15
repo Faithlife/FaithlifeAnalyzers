@@ -48,6 +48,48 @@ internal sealed class PrivateFieldsLastTests : CodeFixVerifier
 	}
 
 	[Test]
+	public void ValidWhenPrivateStaticFieldsAreFirst()
+	{
+		const string validProgram = """
+			#pragma warning disable 0169, 0414
+
+			namespace TestApplication
+			{
+				public class TestClass
+				{
+					private static readonly int s_value;
+
+					public int Value => s_value;
+				}
+			}
+			""";
+
+		VerifyCSharpDiagnostic(validProgram);
+	}
+
+	[Test]
+	public void ValidWhenPrivateFieldHasPreprocessorDirectives()
+	{
+		const string validProgram = """
+			#pragma warning disable 0169, 0414
+
+			namespace TestApplication
+			{
+				public class TestClass
+				{
+				#if true
+					private readonly int _value;
+				#endif
+
+					public int Value => _value;
+				}
+			}
+			""";
+
+		VerifyCSharpDiagnostic(validProgram);
+	}
+
+	[Test]
 	public void InvalidWhenTypeStartsWithPrivateFields()
 	{
 		const string invalidProgram = """
