@@ -46,7 +46,13 @@ public sealed class IfNotNullCodeFixProvider : CodeFixProvider
 		// The location of each of the arguments changes based on whether the method is invoked as an extension method.
 		var targetExpression = methodSymbol.IsStatic ?
 			ifNotNullInvocation.ArgumentList.Arguments[0].Expression :
-			GetInvocationTargetExpression(ifNotNullInvocation);
+			ifNotNullInvocation.Expression switch
+			{
+				MemberAccessExpressionSyntax memberAccess => memberAccess.Expression,
+				MemberBindingExpressionSyntax memberBinding => (memberBinding.Parent.Parent as ConditionalAccessExpressionSyntax)?.Expression,
+				ElementBindingExpressionSyntax elementBinding => (elementBinding.Parent.Parent as ConditionalAccessExpressionSyntax)?.Expression,
+				_ => null,
+			};
 		if (targetExpression is null)
 			return;
 
@@ -269,7 +275,11 @@ public sealed class IfNotNullCodeFixProvider : CodeFixProvider
 							title: "Use conditional access operator",
 							createChangedDocument: token => ReplaceValueAsync(
 								context.Document,
-								GetReplacementTarget(ifNotNullInvocation),
+								ifNotNullInvocation.Expression is MemberBindingExpressionSyntax or ElementBindingExpressionSyntax &&
+								ifNotNullInvocation.Parent is ConditionalAccessExpressionSyntax conditionalAccess &&
+								conditionalAccess.WhenNotNull == ifNotNullInvocation
+									? conditionalAccess
+									: ifNotNullInvocation,
 								finalExpression,
 								token),
 							c_fixName),
@@ -359,7 +369,11 @@ public sealed class IfNotNullCodeFixProvider : CodeFixProvider
 		}
 		else if (defaultValueExpression is object || outputTypeArgument!.CanBeReferencedByName) //// TODO: verify this null coercion is safe
 		{
-			replacementTarget = GetReplacementTarget(ifNotNullInvocation);
+			replacementTarget = ifNotNullInvocation.Expression is MemberBindingExpressionSyntax or ElementBindingExpressionSyntax &&
+				ifNotNullInvocation.Parent is ConditionalAccessExpressionSyntax conditionalAccess &&
+				conditionalAccess.WhenNotNull == ifNotNullInvocation
+					? conditionalAccess
+					: ifNotNullInvocation;
 			replacementExpression = ConditionalExpression(
 				conditionExpression,
 				SyntaxUtility.SimplifiableParentheses(lambdaExpressionBody),
@@ -424,29 +438,6 @@ public sealed class IfNotNullCodeFixProvider : CodeFixProvider
 		}
 
 		return currentExpression;
-	}
-
-	private static ExpressionSyntax? GetInvocationTargetExpression(InvocationExpressionSyntax ifNotNullInvocation)
-	{
-		if (ifNotNullInvocation.Expression is MemberAccessExpressionSyntax memberAccess)
-			return memberAccess.Expression;
-
-		if (ifNotNullInvocation.Expression is MemberBindingExpressionSyntax or ElementBindingExpressionSyntax &&
-			ifNotNullInvocation.Parent is ConditionalAccessExpressionSyntax conditionalAccess &&
-			conditionalAccess.WhenNotNull == ifNotNullInvocation)
-			return conditionalAccess.Expression;
-
-		return null;
-	}
-
-	private static SyntaxNode GetReplacementTarget(InvocationExpressionSyntax ifNotNullInvocation)
-	{
-		if (ifNotNullInvocation.Expression is MemberBindingExpressionSyntax or ElementBindingExpressionSyntax &&
-			ifNotNullInvocation.Parent is ConditionalAccessExpressionSyntax conditionalAccess &&
-			conditionalAccess.WhenNotNull == ifNotNullInvocation)
-			return conditionalAccess;
-
-		return ifNotNullInvocation;
 	}
 
 	private static async Task<Document> ReplaceValueAsync(Document document, SyntaxNode replacementTarget, SyntaxNode replacementNode, CancellationToken cancellationToken)
