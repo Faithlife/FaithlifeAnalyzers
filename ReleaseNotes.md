@@ -1,5 +1,9 @@
 # Release Notes
 
+## 1.7.2
+
+* Fix FL0010 code-fix handling for conditional-access invocations such as `possiblyNull?.IfNotNull(...)` so they apply without crashing.
+
 ## 1.7.1
 
 * FL0025: Don't flag static fields or fields with preprocessor directives above them, since auto-fixing either can introduce bugs without compiler errors.

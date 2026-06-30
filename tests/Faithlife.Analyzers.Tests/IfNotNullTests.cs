@@ -260,6 +260,54 @@ internal sealed class IfNotNullTests : CodeFixVerifier
 		VerifyCSharpFix(invalidProgram, validProgram);
 	}
 
+	[Test]
+	public void ConditionalAccessInvocation()
+	{
+		const string invalidCall = "var result = possiblyNull?.IfNotNull(x => x.ValueTypeProperty);";
+		const string fixedCall = "var result = possiblyNull?.ValueTypeProperty ?? default(int);";
+		var invalidProgram = $$"""
+			{{c_preamble}}
+			namespace TestProgram
+			{
+				internal static class TestClass
+				{
+					public static void CallIfNotNull()
+					{
+						var possiblyNull = new ReferenceThing();
+						{{invalidCall}}
+					}
+				}
+			}
+			""";
+
+		var expected = new DiagnosticResult
+		{
+			Id = IfNotNullAnalyzer.DiagnosticId,
+			Message = "Prefer modern language features over IfNotNull usage",
+			Severity = DiagnosticSeverity.Info,
+			Locations = [new DiagnosticResultLocation("Test0.cs", s_preambleLength + 8, 30)],
+		};
+
+		VerifyCSharpDiagnostic(invalidProgram, expected);
+
+		var validProgram = $$"""
+			{{c_preamble}}
+			namespace TestProgram
+			{
+				internal static class TestClass
+				{
+					public static void CallIfNotNull()
+					{
+						var possiblyNull = new ReferenceThing();
+						{{fixedCall}}
+					}
+				}
+			}
+			""".Replace("using Libronix.Utility.IfNotNull;\n", "", StringComparison.Ordinal);
+
+		VerifyCSharpFix(invalidProgram, validProgram);
+	}
+
 	[TestCase(
 		"new ReferenceThing()",
 		"var result = possiblyNull.IfNotNull(x => x.RecursiveProperty.IfNotNull(y => y.CalculateValue()));",
