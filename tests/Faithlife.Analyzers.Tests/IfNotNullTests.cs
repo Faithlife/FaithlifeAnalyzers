@@ -154,6 +154,17 @@ internal sealed class IfNotNullTests : CodeFixVerifier
 		"var result = IfNotNullExtensionMethod.IfNotNull(possiblyNull, (ValueThing x) => x.ValueTypeProperty, () => 0);",
 		"var result = possiblyNull?.ValueTypeProperty ?? 0;")]
 
+	// Explicitly supplying default(SomeType) as the default value is identical to not supplying one:
+	// it should be cleared out so that the most concise conditional-access form is still used.
+	[TestCase(
+		"new ReferenceThing()",
+		"var result = possiblyNull.IfNotNull(x => x.CalculateValue(), default(ReferenceThing));",
+		"var result = possiblyNull?.CalculateValue();")]
+	[TestCase(
+		"new ReferenceThing()",
+		"var result = possiblyNull.IfNotNull(x => x.NullableProperty, default(int?));",
+		"var result = possiblyNull?.NullableProperty;")]
+
 	// Supplying a reference type default value requires falling back to pattern matching.
 	[TestCase(
 		"new ReferenceThing()",

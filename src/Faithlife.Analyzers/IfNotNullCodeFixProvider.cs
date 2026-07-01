@@ -110,7 +110,7 @@ public sealed class IfNotNullCodeFixProvider : CodeFixProvider
 
 		if (methodSymbol.Arity == 2)
 		{
-			// Explicitly supplying default, default(SomeType), or null is identical to not supplying anything.
+			// Explicitly supplying default(SomeType) or null is identical to not supplying anything.
 			// However, the presence of a defaultValueExpression will prevent us from using
 			// the most concise formulation for reference types. Clearing this out allows the other
 			// optimizations to take place.
@@ -122,9 +122,7 @@ public sealed class IfNotNullCodeFixProvider : CodeFixProvider
 			// evaluates to the correct type.
 			if (outputTypeIsNullable &&
 				(defaultValueExpression is DefaultExpressionSyntax ||
-					defaultValueExpression is LiteralExpressionSyntax defaultOrNullLiteral &&
-						(defaultOrNullLiteral.IsKind(SyntaxKind.DefaultLiteralExpression) ||
-						defaultOrNullLiteral.IsKind(SyntaxKind.NullLiteralExpression))))
+					(defaultValueExpression is LiteralExpressionSyntax defaultLiteral && defaultLiteral.IsKind(SyntaxKind.NullLiteralExpression))))
 			{
 				defaultValueExpression = null;
 			}
