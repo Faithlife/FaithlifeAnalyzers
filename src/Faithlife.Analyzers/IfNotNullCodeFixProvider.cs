@@ -131,7 +131,7 @@ public sealed class IfNotNullCodeFixProvider : CodeFixProvider
 				if (!outputTypeArgument!.CanBeReferencedByName)
 					return;
 
-				defaultValueExpression = DefaultExpression(GetTypeSyntax(outputTypeArgument));
+				defaultValueExpression = LiteralExpression(SyntaxKind.DefaultLiteralExpression);
 			}
 		}
 
@@ -377,7 +377,7 @@ public sealed class IfNotNullCodeFixProvider : CodeFixProvider
 			replacementExpression = ConditionalExpression(
 				conditionExpression,
 				SyntaxUtility.SimplifiableParentheses(lambdaExpressionBody),
-				defaultValueExpression ?? DefaultExpression(GetTypeSyntax(outputTypeArgument!))); // TODO: verify this null coercion is safe
+				defaultValueExpression ?? LiteralExpression(SyntaxKind.DefaultLiteralExpression)); // TODO: verify this null coercion is safe
 		}
 		else
 		{
