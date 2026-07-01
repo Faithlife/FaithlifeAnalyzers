@@ -3,6 +3,7 @@
 ## 1.7.2
 
 * Fix FL0010 code-fix handling for conditional-access invocations such as `possiblyNull?.IfNotNull(...)` so they apply without crashing.
+* Simplify `IfNotNull` fixer output to use default literals.
 
 ## 1.7.1
 
