@@ -110,7 +110,7 @@ public sealed class IfNotNullCodeFixProvider : CodeFixProvider
 
 		if (methodSymbol.Arity == 2)
 		{
-			// Explicitly supplying default(SomeType) or null is identical to not supplying anything.
+			// Explicitly supplying default, default(SomeType), or null is identical to not supplying anything.
 			// However, the presence of a defaultValueExpression will prevent us from using
 			// the most concise formulation for reference types. Clearing this out allows the other
 			// optimizations to take place.
@@ -122,7 +122,9 @@ public sealed class IfNotNullCodeFixProvider : CodeFixProvider
 			// evaluates to the correct type.
 			if (outputTypeIsNullable &&
 				(defaultValueExpression is DefaultExpressionSyntax ||
-					(defaultValueExpression is LiteralExpressionSyntax defaultLiteral && defaultLiteral.IsKind(SyntaxKind.NullLiteralExpression))))
+					defaultValueExpression is LiteralExpressionSyntax defaultOrNullLiteral &&
+						(defaultOrNullLiteral.IsKind(SyntaxKind.DefaultLiteralExpression) ||
+						defaultOrNullLiteral.IsKind(SyntaxKind.NullLiteralExpression))))
 			{
 				defaultValueExpression = null;
 			}
@@ -131,7 +133,7 @@ public sealed class IfNotNullCodeFixProvider : CodeFixProvider
 				if (!outputTypeArgument!.CanBeReferencedByName)
 					return;
 
-				defaultValueExpression = DefaultExpression(GetTypeSyntax(outputTypeArgument));
+				defaultValueExpression = LiteralExpression(SyntaxKind.DefaultLiteralExpression);
 			}
 		}
 
@@ -377,7 +379,7 @@ public sealed class IfNotNullCodeFixProvider : CodeFixProvider
 			replacementExpression = ConditionalExpression(
 				conditionExpression,
 				SyntaxUtility.SimplifiableParentheses(lambdaExpressionBody),
-				defaultValueExpression ?? DefaultExpression(GetTypeSyntax(outputTypeArgument!))); // TODO: verify this null coercion is safe
+				defaultValueExpression ?? LiteralExpression(SyntaxKind.DefaultLiteralExpression)); // TODO: verify this null coercion is safe
 		}
 		else
 		{
