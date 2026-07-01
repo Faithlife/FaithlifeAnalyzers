@@ -13,13 +13,13 @@ internal sealed class IfNotNullTests : CodeFixVerifier
 	[TestCase(
 		"new ReferenceThing()",
 		"var result = possiblyNull.IfNotNull(x => x.ValueTypeProperty);",
-		"var result = possiblyNull?.ValueTypeProperty ?? default(int);")]
+		"var result = possiblyNull?.ValueTypeProperty ?? default;")]
 
 	// Complex expressions of a value type still need the null coalescing operator
 	[TestCase(
 		"new ReferenceThing()",
 		"var result = possiblyNull.IfNotNull(x => x.CalculateValue().ValueTypeProperty);",
-		"var result = possiblyNull?.CalculateValue().ValueTypeProperty ?? default(int);")]
+		"var result = possiblyNull?.CalculateValue().ValueTypeProperty ?? default;")]
 
 	// Most usages of the default parameter cannot be combined with the conditional operator,
 	// but value types are fine.
@@ -51,42 +51,42 @@ internal sealed class IfNotNullTests : CodeFixVerifier
 	[TestCase(
 		"new ReferenceThing()",
 		"var result = possiblyNull.IfNotNull(x => (x.CalculateValue()));",
-		"var result = possiblyNull is ReferenceThing ? (possiblyNull.CalculateValue()) : default(ReferenceThing);")]
+		"var result = possiblyNull is ReferenceThing ? (possiblyNull.CalculateValue()) : default;")]
 	[TestCase(
 		"new ReferenceThing()",
 		"var result = possiblyNull.RecursiveProperty.IfNotNull(x => (x.CalculateValue()));",
-		"var result = possiblyNull.RecursiveProperty is ReferenceThing x ? (x.CalculateValue()) : default(ReferenceThing);")]
+		"var result = possiblyNull.RecursiveProperty is ReferenceThing x ? (x.CalculateValue()) : default;")]
 	[TestCase(
 		"new ReferenceThing()",
 		"var result = possiblyNull.IfNotNull(x => (x).CalculateValue());",
-		"var result = possiblyNull is ReferenceThing ? (possiblyNull).CalculateValue() : default(ReferenceThing);")]
+		"var result = possiblyNull is ReferenceThing ? (possiblyNull).CalculateValue() : default;")]
 	[TestCase(
 		"new ReferenceThing()",
 		"var result = possiblyNull.RecursiveProperty.IfNotNull(x => (x).CalculateValue());",
-		"var result = possiblyNull.RecursiveProperty is ReferenceThing x ? (x).CalculateValue() : default(ReferenceThing);")]
+		"var result = possiblyNull.RecursiveProperty is ReferenceThing x ? (x).CalculateValue() : default;")]
 	[TestCase(
 		"new ReferenceThing()",
 		"var result = possiblyNull.IfNotNull(x => (x.RecursiveProperty).CalculateValue());",
-		"var result = possiblyNull is ReferenceThing ? (possiblyNull.RecursiveProperty).CalculateValue() : default(ReferenceThing);")]
+		"var result = possiblyNull is ReferenceThing ? (possiblyNull.RecursiveProperty).CalculateValue() : default;")]
 	[TestCase(
 		"new ReferenceThing()",
 		"var result = possiblyNull.IfNotNull(x => ((x.RecursiveProperty).RecursiveProperty).CalculateValue());",
-		"var result = possiblyNull is ReferenceThing ? ((possiblyNull.RecursiveProperty).RecursiveProperty).CalculateValue() : default(ReferenceThing);")]
+		"var result = possiblyNull is ReferenceThing ? ((possiblyNull.RecursiveProperty).RecursiveProperty).CalculateValue() : default;")]
 	[TestCase(
 		"new ReferenceThing()",
 		"var result = possiblyNull.IfNotNull(x => (x.RecursiveProperty?.RecursiveProperty).CalculateValue());",
-		"var result = possiblyNull is ReferenceThing ? (possiblyNull.RecursiveProperty?.RecursiveProperty).CalculateValue() : default(ReferenceThing);")]
+		"var result = possiblyNull is ReferenceThing ? (possiblyNull.RecursiveProperty?.RecursiveProperty).CalculateValue() : default;")]
 
 	// When using pattern matching, the input type must be used for the declaration type.
 	// (in most of these tests, the input type and output type are the same)
 	[TestCase(
 		"new ReferenceThing()",
 		"var result = possiblyNull.IfNotNull(x => (x.ValueTypeProperty));",
-		"var result = possiblyNull is ReferenceThing ? (possiblyNull.ValueTypeProperty) : default(int);")]
+		"var result = possiblyNull is ReferenceThing ? (possiblyNull.ValueTypeProperty) : default;")]
 	[TestCase(
 		"new ReferenceThing()",
 		"var result = possiblyNull.RecursiveProperty.IfNotNull(x => (x.ValueTypeProperty));",
-		"var result = possiblyNull.RecursiveProperty is ReferenceThing x ? (x.ValueTypeProperty) : default(int);")]
+		"var result = possiblyNull.RecursiveProperty is ReferenceThing x ? (x.ValueTypeProperty) : default;")]
 
 	// Conditional operators should also work with indexed access.
 	[TestCase(
@@ -110,11 +110,11 @@ internal sealed class IfNotNullTests : CodeFixVerifier
 	[TestCase(
 		"new ReferenceThing()",
 		"var result = possiblyNull.IfNotNull(ReferenceThing.CalculateStatic);",
-		"var result = possiblyNull is ReferenceThing ? ReferenceThing.CalculateStatic(possiblyNull) : default(ReferenceThing);")]
+		"var result = possiblyNull is ReferenceThing ? ReferenceThing.CalculateStatic(possiblyNull) : default;")]
 	[TestCase(
 		"new ReferenceThing()",
 		"var result = possiblyNull.RecursiveProperty.IfNotNull(ReferenceThing.CalculateStatic);",
-		"var result = possiblyNull.RecursiveProperty is ReferenceThing value ? ReferenceThing.CalculateStatic(value) : default(ReferenceThing);")]
+		"var result = possiblyNull.RecursiveProperty is ReferenceThing value ? ReferenceThing.CalculateStatic(value) : default;")]
 	[TestCase(
 		"new ReferenceThing()",
 		"var result = possiblyNull.IfNotNull(ReferenceThing.CalculateStatic, ReferenceThing.Factory);",
@@ -128,15 +128,15 @@ internal sealed class IfNotNullTests : CodeFixVerifier
 	[TestCase(
 		"(ValueThing?) new ValueThing()",
 		"var result = possiblyNull.IfNotNull((ValueThing x) => x.ValueTypeProperty);",
-		"var result = possiblyNull?.ValueTypeProperty ?? default(int);")]
+		"var result = possiblyNull?.ValueTypeProperty ?? default;")]
 	[TestCase(
 		"(ValueThing?) new ValueThing()",
 		"var result = possiblyNull.IfNotNull((ValueThing x) => x.RecursiveProperty);",
-		"var result = possiblyNull?.RecursiveProperty ?? default(ValueThing);")]
+		"var result = possiblyNull?.RecursiveProperty ?? default;")]
 	[TestCase(
 		"(ValueThing?) new ValueThing()",
 		"var result = IfNotNullExtensionMethod.IfNotNull(possiblyNull, (ValueThing x) => x.ValueTypeProperty);",
-		"var result = possiblyNull?.ValueTypeProperty ?? default(int);")]
+		"var result = possiblyNull?.ValueTypeProperty ?? default;")]
 	[TestCase(
 		"(ValueThing?) new ValueThing()",
 		"var result = possiblyNull.IfNotNull((ValueThing x) => x.ValueTypeProperty, 0);",
@@ -153,6 +153,17 @@ internal sealed class IfNotNullTests : CodeFixVerifier
 		"(ValueThing?) new ValueThing()",
 		"var result = IfNotNullExtensionMethod.IfNotNull(possiblyNull, (ValueThing x) => x.ValueTypeProperty, () => 0);",
 		"var result = possiblyNull?.ValueTypeProperty ?? 0;")]
+
+	// Explicitly supplying default(SomeType) as the default value is identical to not supplying one:
+	// it should be cleared out so that the most concise conditional-access form is still used.
+	[TestCase(
+		"new ReferenceThing()",
+		"var result = possiblyNull.IfNotNull(x => x.CalculateValue(), default(ReferenceThing));",
+		"var result = possiblyNull?.CalculateValue();")]
+	[TestCase(
+		"new ReferenceThing()",
+		"var result = possiblyNull.IfNotNull(x => x.NullableProperty, default(int?));",
+		"var result = possiblyNull?.NullableProperty;")]
 
 	// Supplying a reference type default value requires falling back to pattern matching.
 	[TestCase(
@@ -194,11 +205,11 @@ internal sealed class IfNotNullTests : CodeFixVerifier
 	[TestCase(
 		"new ReferenceThing()",
 		"var result = possiblyNull.IfNotNull(x => x.CalculateValue(x));",
-		"var result = possiblyNull is ReferenceThing ? possiblyNull.CalculateValue(possiblyNull) : default(ReferenceThing);")]
+		"var result = possiblyNull is ReferenceThing ? possiblyNull.CalculateValue(possiblyNull) : default;")]
 	[TestCase(
 		"new ReferenceThing()",
 		"var result = possiblyNull.RecursiveProperty.IfNotNull(x => x.CalculateValue(x));",
-		"var result = possiblyNull.RecursiveProperty is ReferenceThing x ? x.CalculateValue(x) : default(ReferenceThing);")]
+		"var result = possiblyNull.RecursiveProperty is ReferenceThing x ? x.CalculateValue(x) : default;")]
 
 	// This cast makes the call equivalent to the null-conditional operator, which means that
 	// pattern matching is unnecessary and the cast can be discarded.
@@ -260,6 +271,54 @@ internal sealed class IfNotNullTests : CodeFixVerifier
 		VerifyCSharpFix(invalidProgram, validProgram);
 	}
 
+	[Test]
+	public void ConditionalAccessInvocation()
+	{
+		const string invalidCall = "var result = possiblyNull?.IfNotNull(x => x.ValueTypeProperty);";
+		const string fixedCall = "var result = possiblyNull?.ValueTypeProperty ?? default;";
+		var invalidProgram = $$"""
+			{{c_preamble}}
+			namespace TestProgram
+			{
+				internal static class TestClass
+				{
+					public static void CallIfNotNull()
+					{
+						var possiblyNull = new ReferenceThing();
+						{{invalidCall}}
+					}
+				}
+			}
+			""";
+
+		var expected = new DiagnosticResult
+		{
+			Id = IfNotNullAnalyzer.DiagnosticId,
+			Message = "Prefer modern language features over IfNotNull usage",
+			Severity = DiagnosticSeverity.Info,
+			Locations = [new DiagnosticResultLocation("Test0.cs", s_preambleLength + 8, 30)],
+		};
+
+		VerifyCSharpDiagnostic(invalidProgram, expected);
+
+		var validProgram = $$"""
+			{{c_preamble}}
+			namespace TestProgram
+			{
+				internal static class TestClass
+				{
+					public static void CallIfNotNull()
+					{
+						var possiblyNull = new ReferenceThing();
+						{{fixedCall}}
+					}
+				}
+			}
+			""".Replace("using Libronix.Utility.IfNotNull;\n", "", StringComparison.Ordinal);
+
+		VerifyCSharpFix(invalidProgram, validProgram);
+	}
+
 	[TestCase(
 		"new ReferenceThing()",
 		"var result = possiblyNull.IfNotNull(x => x.RecursiveProperty.IfNotNull(y => y.CalculateValue()));",
@@ -273,12 +332,12 @@ internal sealed class IfNotNullTests : CodeFixVerifier
 	[TestCase(
 		"new ReferenceThing()",
 		"var result = possiblyNull.IfNotNull(x => ReferenceThing.CalculateStatic(x)).IfNotNull(x => ReferenceThing.CalculateStatic(x));",
-		"var result = (possiblyNull is ReferenceThing ? ReferenceThing.CalculateStatic(possiblyNull) : default(ReferenceThing)) is ReferenceThing x1 ? ReferenceThing.CalculateStatic(x1) : default(ReferenceThing);",
+		"var result = (possiblyNull is ReferenceThing ? ReferenceThing.CalculateStatic(possiblyNull) : default) is ReferenceThing x1 ? ReferenceThing.CalculateStatic(x1) : default;",
 		17, 17)]
 	[TestCase(
 		"new ReferenceThing()",
 		"var result = possiblyNull.IfNotNull(ReferenceThing.CalculateStatic).IfNotNull(ReferenceThing.CalculateStatic);",
-		"var result = (possiblyNull is ReferenceThing ? ReferenceThing.CalculateStatic(possiblyNull) : default(ReferenceThing)) is ReferenceThing value ? ReferenceThing.CalculateStatic(value) : default(ReferenceThing);",
+		"var result = (possiblyNull is ReferenceThing ? ReferenceThing.CalculateStatic(possiblyNull) : default) is ReferenceThing value ? ReferenceThing.CalculateStatic(value) : default;",
 		17, 17)]
 	public void MultipleMethodCalls(string possiblyNull, string call, string fixedCall, int firstColumn, int secondColumn)
 	{
