@@ -23,7 +23,9 @@ public sealed class IfNotNullAnalyzer : DiagnosticAnalyzer
 			if (ifNotNullMethods.Length == 0)
 				return;
 
-			compilationStartAnalysisContext.RegisterSyntaxNodeAction(c => AnalyzeSyntax(c, ifNotNullMethods), SyntaxKind.InvocationExpression);
+			var expressionType = compilationStartAnalysisContext.Compilation.GetTypeByMetadataName("System.Linq.Expressions.Expression`1");
+
+			compilationStartAnalysisContext.RegisterSyntaxNodeAction(c => AnalyzeSyntax(c, ifNotNullMethods, expressionType), SyntaxKind.InvocationExpression);
 		});
 	}
 
@@ -31,7 +33,7 @@ public sealed class IfNotNullAnalyzer : DiagnosticAnalyzer
 
 	public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => [s_rule];
 
-	private static void AnalyzeSyntax(SyntaxNodeAnalysisContext context, ImmutableArray<ISymbol> ifNotNullMethods)
+	private static void AnalyzeSyntax(SyntaxNodeAnalysisContext context, ImmutableArray<ISymbol> ifNotNullMethods, INamedTypeSymbol? expressionType)
 	{
 		var syntax = (InvocationExpressionSyntax) context.Node;
 
@@ -40,7 +42,24 @@ public sealed class IfNotNullAnalyzer : DiagnosticAnalyzer
 			!ifNotNullMethods.Any(x => SymbolEqualityComparer.Default.Equals(x, methodSymbol.ReducedFrom) || SymbolEqualityComparer.Default.Equals(x, methodSymbol.ConstructedFrom)))
 			return;
 
+		if (expressionType is not null && IsInExpressionTree(context, syntax, expressionType))
+			return;
+
 		context.ReportDiagnostic(Diagnostic.Create(s_rule, syntax.GetLocation()));
+	}
+
+	private static bool IsInExpressionTree(SyntaxNodeAnalysisContext context, InvocationExpressionSyntax syntax, INamedTypeSymbol expressionType)
+	{
+		foreach (var anonymousFunction in syntax.Ancestors().OfType<AnonymousFunctionExpressionSyntax>())
+		{
+			if (context.SemanticModel.GetTypeInfo(anonymousFunction, context.CancellationToken).ConvertedType is INamedTypeSymbol convertedType &&
+				SymbolEqualityComparer.Default.Equals(convertedType.OriginalDefinition, expressionType))
+			{
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	private static readonly DiagnosticDescriptor s_rule = new(

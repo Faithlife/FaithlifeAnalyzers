@@ -319,6 +319,33 @@ internal sealed class IfNotNullTests : CodeFixVerifier
 		VerifyCSharpFix(invalidProgram, validProgram);
 	}
 
+	[Test]
+	public void NoDiagnosticInExpressionTree()
+	{
+		var validProgram = $$"""
+			{{c_preamble}}
+			namespace TestProgram
+			{
+				internal static class TestClass
+				{
+					public static void CallIfNotNull()
+					{
+						Expression<Func<ReferenceThing, int>> expression = thing => thing.IfNotNull(x => x.ValueTypeProperty);
+						Expression<Func<ReferenceThing, Func<int>>> nestedExpression = thing => () => thing.IfNotNull(x => x.ValueTypeProperty);
+						AcceptExpression(thing => thing.IfNotNull(x => x.ValueTypeProperty));
+						AcceptNestedExpression(thing => () => thing.IfNotNull(x => x.ValueTypeProperty));
+					}
+
+					private static void AcceptExpression(Expression<Func<ReferenceThing, int>> expression) { }
+
+					private static void AcceptNestedExpression(Expression<Func<ReferenceThing, Func<int>>> expression) { }
+				}
+			}
+			""";
+
+		VerifyCSharpDiagnostic(validProgram);
+	}
+
 	[TestCase(
 		"new ReferenceThing()",
 		"var result = possiblyNull.IfNotNull(x => x.RecursiveProperty.IfNotNull(y => y.CalculateValue()));",
@@ -473,8 +500,14 @@ internal sealed class IfNotNullTests : CodeFixVerifier
 
 	private const string c_preamble = """
 		using System;
+		using System.Linq.Expressions;
 		using Libronix.Utility.IfNotNull;
 		using TestProgram;
+
+		namespace System.Linq.Expressions
+		{
+			public abstract class Expression<TDelegate>;
+		}
 
 		namespace Libronix.Utility.IfNotNull
 		{
