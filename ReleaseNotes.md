@@ -1,5 +1,9 @@
 # Release Notes
 
+## 1.7.3
+
+* Fix FL0010 false positives for `IfNotNull` usages inside `Expression<>` lambdas, where null-conditional access is not supported.
+
 ## 1.7.2
 
 * Fix FL0010 code-fix handling for conditional-access invocations such as `possiblyNull?.IfNotNull(...)` so they apply without crashing.
