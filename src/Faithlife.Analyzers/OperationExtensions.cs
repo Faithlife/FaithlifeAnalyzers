@@ -20,8 +20,8 @@ internal static class OperationExtensions
 				}
 				break;
 
-			case OrderingSyntax ordering:
-				return ((OrderByClauseSyntax) ordering.Parent).OrderByKeyword.GetLocation();
+			case OrderingSyntax ordering when ordering.Parent is OrderByClauseSyntax orderByClause:
+				return orderByClause.OrderByKeyword.GetLocation();
 		}
 
 		return invocationOperation.Syntax.GetLocation();

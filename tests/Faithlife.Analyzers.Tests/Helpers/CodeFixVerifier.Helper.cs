@@ -1,3 +1,4 @@
+using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CodeActions;
 using Microsoft.CodeAnalysis.Formatting;
@@ -60,7 +61,7 @@ internal abstract partial class CodeFixVerifier : DiagnosticVerifier
 	/// </summary>
 	/// <param name="document">The Document to run the compiler diagnostic analyzers on</param>
 	/// <returns>The compiler diagnostics that were found in the code</returns>
-	private static IEnumerable<Diagnostic> GetCompilerDiagnostics(Document document)
+	private static ImmutableArray<Diagnostic> GetCompilerDiagnostics(Document document)
 	{
 		return document.GetSemanticModelAsync().GetAwaiter().GetResult()!.GetDiagnostics();
 	}

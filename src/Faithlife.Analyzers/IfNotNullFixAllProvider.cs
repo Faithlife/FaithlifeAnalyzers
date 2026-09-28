@@ -16,7 +16,7 @@ internal sealed class IfNotNullFixAllProvider : FixAllProvider
 	public override async Task<CodeAction?> GetFixAsync(FixAllContext fixAllContext)
 	{
 		IEnumerable<Diagnostic> allDiagnostics;
-		IEnumerable<(Document Document, SyntaxTree SyntaxTree)> allSyntaxTrees;
+		IEnumerable<(Document Document, SyntaxTree? SyntaxTree)> allSyntaxTrees;
 
 		switch (fixAllContext.Scope)
 		{

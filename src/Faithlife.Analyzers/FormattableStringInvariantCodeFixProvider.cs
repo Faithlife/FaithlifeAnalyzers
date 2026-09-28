@@ -45,6 +45,7 @@ public sealed class FormattableStringInvariantCodeFixProvider : CodeFixProvider
 	private static async Task<Document> ReplaceValueAsync(Document document, InvocationExpressionSyntax invocation, SyntaxAnnotation annotation, CancellationToken cancellationToken)
 	{
 		var root = (CompilationUnitSyntax) (await document.GetSyntaxRootAsync(cancellationToken).ConfigureAwait(false))!;
+		var originalLeadingTrivia = root.GetLeadingTrivia();
 		var memberAccess = (MemberAccessExpressionSyntax) invocation.Expression;
 		var replacement = invocation.WithExpression(IdentifierName("Invariant").WithTriviaFrom(memberAccess)).WithAdditionalAnnotations(annotation);
 		root = root.ReplaceNode(invocation, replacement);
@@ -59,6 +60,8 @@ public sealed class FormattableStringInvariantCodeFixProvider : CodeFixProvider
 				root = root.ReplaceNode(usingDirective, usingDirective.WithAdditionalAnnotations(Simplifier.Annotation));
 		}
 
-		return await Simplifier.ReduceAsync(document.WithSyntaxRoot(root), cancellationToken: cancellationToken).ConfigureAwait(false);
+		document = await Simplifier.ReduceAsync(document.WithSyntaxRoot(root), cancellationToken: cancellationToken).ConfigureAwait(false);
+		root = (CompilationUnitSyntax) (await document.GetSyntaxRootAsync(cancellationToken).ConfigureAwait(false))!;
+		return document.WithSyntaxRoot(root.WithLeadingTrivia(originalLeadingTrivia));
 	}
 }

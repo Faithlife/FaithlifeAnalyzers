@@ -53,7 +53,7 @@ public sealed class ToReadOnlyCollectionCodeFixProvider : CodeFixProvider
 		return await Simplifier.ReduceAsync(document.WithSyntaxRoot(root), cancellationToken: cancellationToken).ConfigureAwait(false);
 	}
 
-	private static ExpressionSyntax ReplaceInvocation(InvocationExpressionSyntax invocation)
+	private static InvocationExpressionSyntax ReplaceInvocation(InvocationExpressionSyntax invocation)
 	{
 		var newExpression = invocation.Expression switch
 		{

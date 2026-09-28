@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <VersionPrefix>1.8.0</VersionPrefix>
-    <NoWarn>$(NoWarn);1591;1998;NU5105;CA1014;CA1508;CA1859;NU1507</NoWarn>
+    <NoWarn>$(NoWarn);CS1591;NU1507</NoWarn>
     <GitHubOrganization>Faithlife</GitHubOrganization>
     <RepositoryName>FaithlifeAnalyzers</RepositoryName>
   </PropertyGroup>

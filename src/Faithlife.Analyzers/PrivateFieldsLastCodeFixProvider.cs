@@ -21,8 +21,7 @@ public sealed class PrivateFieldsLastCodeFixProvider : CodeFixProvider
 		if (root?.FindNode(context.Diagnostics[0].Location.SourceSpan) is not { } node)
 			return;
 
-		if (node is not FieldDeclarationSyntax fieldDeclaration)
-			fieldDeclaration = node.FirstAncestorOrSelf<FieldDeclarationSyntax>();
+		var fieldDeclaration = node as FieldDeclarationSyntax ?? node.FirstAncestorOrSelf<FieldDeclarationSyntax>();
 		if (fieldDeclaration?.Parent is not TypeDeclarationSyntax typeDeclaration)
 			return;
 

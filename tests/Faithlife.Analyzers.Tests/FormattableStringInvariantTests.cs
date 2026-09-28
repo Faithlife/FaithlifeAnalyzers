@@ -16,10 +16,11 @@ internal sealed class FormattableStringInvariantTests : CodeFixVerifier
 	public void QualifiedCallsAreFixed(string invocation)
 	{
 		var invalidProgram = CreateProgram(invocation);
+		var lineBreak = invalidProgram.Contains("\r\n", StringComparison.Ordinal) ? "\r\n" : "\n";
 		var fixedProgram = CreateProgram(invocation.Replace("FormattableString.Invariant", "Invariant", StringComparison.Ordinal)
 			.Replace("System.Invariant", "Invariant", StringComparison.Ordinal)
 			.Replace("global::Invariant", "Invariant", StringComparison.Ordinal),
-			$"using System;{Environment.NewLine}using static System.FormattableString;");
+			$"using System;{lineBreak}using static System.FormattableString;");
 
 		VerifyCSharpDiagnostic(invalidProgram, CreateDiagnostic(invalidProgram, invocation));
 		VerifyCSharpFix(invalidProgram, fixedProgram);
@@ -198,10 +199,11 @@ internal sealed class FormattableStringInvariantTests : CodeFixVerifier
 		VerifyCSharpFix(invalidProgram, fixedProgram);
 	}
 
-	[Test]
-	public void FileHeaderIsPreservedWhenOldUsingIsRemoved()
+	[TestCase("\n")]
+	[TestCase("\r\n")]
+	public void FileHeaderIsPreservedWhenOldUsingIsRemoved(string lineBreak)
 	{
-		const string invalidProgram = """
+		const string invalidSource = """
 			// File header
 			using System;
 
@@ -210,7 +212,7 @@ internal sealed class FormattableStringInvariantTests : CodeFixVerifier
 				public static string Format(int value) => FormattableString.Invariant($"text = {value}");
 			}
 			""";
-		const string fixedProgram = """
+		const string fixedSource = """
 			// File header
 			using static System.FormattableString;
 
@@ -219,6 +221,8 @@ internal sealed class FormattableStringInvariantTests : CodeFixVerifier
 				public static string Format(int value) => Invariant($"text = {value}");
 			}
 			""";
+		var invalidProgram = invalidSource.Replace("\r\n", "\n", StringComparison.Ordinal).Replace("\n", lineBreak, StringComparison.Ordinal);
+		var fixedProgram = fixedSource.Replace("\r\n", "\n", StringComparison.Ordinal).Replace("\n", lineBreak, StringComparison.Ordinal);
 
 		VerifyCSharpDiagnostic(invalidProgram, CreateDiagnostic(invalidProgram, "FormattableString.Invariant($\"text = {value}\")"));
 		VerifyCSharpFix(invalidProgram, fixedProgram);
