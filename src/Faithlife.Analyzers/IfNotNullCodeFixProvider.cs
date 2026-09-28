@@ -41,7 +41,8 @@ public sealed class IfNotNullCodeFixProvider : CodeFixProvider
 		if (ifNotNullInvocation is null)
 			return;
 
-		var methodSymbol = (IMethodSymbol) semanticModel.GetSymbolInfo(ifNotNullInvocation).Symbol;
+		if (semanticModel.GetSymbolInfo(ifNotNullInvocation).Symbol is not IMethodSymbol methodSymbol)
+			return;
 
 		// The location of each of the arguments changes based on whether the method is invoked as an extension method.
 		var targetExpression = methodSymbol.IsStatic ?
