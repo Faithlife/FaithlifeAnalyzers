@@ -77,24 +77,28 @@ public sealed class FormatInvariantCodeFixProvider : CodeFixProvider
 			interpolatedStringExpression = interpolatedStringExpression.AddContents(InterpolatedStringText(formatString.Substring(index)));
 
 		ExpressionSyntax replacement = interpolatedStringExpression;
+		var annotation = new SyntaxAnnotation();
 		if (requiresInvariant)
 		{
 			replacement = InvocationExpression(
-				MemberAccessExpression(
-					SyntaxKind.SimpleMemberAccessExpression,
-					ParseExpression("global::System.FormattableString").WithAdditionalAnnotations(Simplifier.Annotation),
-					IdentifierName("Invariant")),
-				ArgumentList().AddArguments(Argument(interpolatedStringExpression)));
+				IdentifierName("Invariant"),
+				ArgumentList().AddArguments(Argument(interpolatedStringExpression)))
+				.WithAdditionalAnnotations(annotation);
 		}
+
+		var changedDocument = await ReplaceValueAsync(
+			context.Document,
+			invocation,
+			SyntaxUtility.SimplifiableParentheses(replacement),
+			requiresInvariant,
+			context.CancellationToken).ConfigureAwait(false);
+		if (requiresInvariant && !await FormattableStringInvariantUsing.BindsToInvariantAsync(changedDocument, annotation, context.CancellationToken).ConfigureAwait(false))
+			return;
 
 		context.RegisterCodeFix(
 			CodeAction.Create(
 				title: "Use interpolated string",
-				createChangedDocument: token => ReplaceValueAsync(
-					context.Document,
-					invocation,
-					SyntaxUtility.SimplifiableParentheses(replacement),
-					token),
+				createChangedDocument: _ => Task.FromResult(changedDocument),
 				c_fixName),
 			diagnostic);
 	}
@@ -117,10 +121,14 @@ public sealed class FormatInvariantCodeFixProvider : CodeFixProvider
 			TriviaList());
 	}
 
-	private static async Task<Document> ReplaceValueAsync(Document document, SyntaxNode replacementTarget, SyntaxNode replacementNode, CancellationToken cancellationToken)
+	private static async Task<Document> ReplaceValueAsync(Document document, InvocationExpressionSyntax replacementTarget, SyntaxNode replacementNode, bool requiresInvariant, CancellationToken cancellationToken)
 	{
-		var root = (await document.GetSyntaxRootAsync(cancellationToken).ConfigureAwait(false))
+		var root = (CompilationUnitSyntax) (await document.GetSyntaxRootAsync(cancellationToken).ConfigureAwait(false))!;
+		root = root
 			.ReplaceNode(replacementTarget, replacementNode);
+
+		if (requiresInvariant)
+			root = FormattableStringInvariantUsing.AddIfMissing(root, replacementTarget);
 
 		var usingDirective = root.DescendantNodes()
 			.OfType<UsingDirectiveSyntax>()

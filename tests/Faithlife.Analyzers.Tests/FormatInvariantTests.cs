@@ -50,7 +50,7 @@ internal sealed class FormatInvariantTests : CodeFixVerifier
 	}
 
 	[TestCase(@"""pre {0} post"".FormatInvariant(foo)", @"$""pre {foo} post""")]
-	[TestCase(@"""pre {0} mid {1} dup {0} format {1:D1} parens {2} alignment {1,-10} alignment+format {1,10:D1} post"".FormatInvariant(foo, 10, b ? 1 : 2)", @"FormattableString.Invariant($""pre {foo} mid {10} dup {foo} format {10:D1} parens {(b ? 1 : 2)} alignment {10,-10} alignment+format {10,10:D1} post"")")]
+	[TestCase(@"""pre {0} mid {1} dup {0} format {1:D1} parens {2} alignment {1,-10} alignment+format {1,10:D1} post"".FormatInvariant(foo, 10, b ? 1 : 2)", @"Invariant($""pre {foo} mid {10} dup {foo} format {10:D1} parens {(b ? 1 : 2)} alignment {10,-10} alignment+format {10,10:D1} post"")")]
 	[TestCase(@"""with quotes \""{0}\"" post"".FormatInvariant(foo)", @"$""with quotes \""{foo}\"" post""")]
 	[TestCase(@"""with newline \n{0} post"".FormatInvariant(foo)", @"$""with newline \n{foo} post""")]
 	[TestCase(@"""with enum {0} {1} post"".FormatInvariant(DateTimeKind.Local, foo)", @"$""with enum {DateTimeKind.Local} {foo} post""")]
@@ -94,8 +94,11 @@ internal sealed class FormatInvariantTests : CodeFixVerifier
 
 		VerifyCSharpDiagnostic(invalidProgram, expected);
 
+		var fixedUsing = fixedCode.StartsWith("Invariant(", StringComparison.Ordinal) ?
+			"using System;\nusing static System.FormattableString;" :
+			"using System;";
 		var fixedProgram = $$"""
-			using System;
+			{{fixedUsing}}
 
 			namespace Libronix.Utility
 			{
@@ -123,6 +126,82 @@ internal sealed class FormatInvariantTests : CodeFixVerifier
 			""";
 
 		VerifyCSharpFix(invalidProgram, fixedProgram, 0);
+	}
+
+	[Test]
+	public void ConflictingInvariantMethodPreventsUnsafeFix()
+	{
+		const string program = """
+			using System;
+			using Libronix.Utility;
+
+			namespace Libronix.Utility
+			{
+				public static class StringUtility
+				{
+					public static string FormatInvariant(this string format, params object[] args) => throw new NotImplementedException();
+				}
+			}
+
+			internal static class TestClass
+			{
+				public static string Format(int value) => "{0}".FormatInvariant(value);
+
+				private static string Invariant(FormattableString value) => "";
+			}
+			""";
+		var expected = new DiagnosticResult
+		{
+			Id = FormatInvariantAnalyzer.DiagnosticId,
+			Message = "Prefer string interpolation over FormatInvariant",
+			Severity = DiagnosticSeverity.Info,
+			Locations = [new DiagnosticResultLocation("Test0.cs", 14, 44)],
+		};
+
+		VerifyCSharpDiagnostic(program, expected);
+		VerifyCSharpFix(program, program);
+	}
+
+	[Test]
+	public void MultipleInvariantFormatsAddOnlyOneStaticUsing()
+	{
+		const string invalidProgram = """
+			using System;
+			using Libronix.Utility;
+
+			namespace Libronix.Utility
+			{
+				public static class StringUtility
+				{
+					public static string FormatInvariant(this string format, params object[] args) => throw new NotImplementedException();
+				}
+			}
+
+			internal static class TestClass
+			{
+				public static string Format(int first, int second) =>
+					"{0}".FormatInvariant(first) + "{0}".FormatInvariant(second);
+			}
+			""";
+		const string fixedProgram = """
+			using System;
+			using static System.FormattableString;
+
+			namespace Libronix.Utility
+			{
+				public static class StringUtility
+				{
+					public static string FormatInvariant(this string format, params object[] args) => throw new NotImplementedException();
+				}
+			}
+
+			internal static class TestClass
+			{
+				public static string Format(int first, int second) => Invariant($"{first}") + Invariant($"{second}");
+			}
+			""";
+
+		VerifyCSharpFix(invalidProgram, fixedProgram);
 	}
 
 	protected override DiagnosticAnalyzer GetCSharpDiagnosticAnalyzer() => new FormatInvariantAnalyzer();

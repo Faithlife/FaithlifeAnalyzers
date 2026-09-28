@@ -1,5 +1,9 @@
 # Release Notes
 
+## 1.8.0
+
+* Add [FL0027](https://github.com/Faithlife/FaithlifeAnalyzers/blob/master/docs/FL0027.md): Use a static import for `FormattableString.Invariant`. The FL0018 code fix now emits this form directly.
+
 ## 1.7.3
 
 * Fix FL0010 false positives for `IfNotNull` usages inside `Expression<>` lambdas, where null-conditional access is not supported.
