@@ -6,7 +6,7 @@
     <PackageTags>roslyn;analyzer</PackageTags>
     <IsPackable>true</IsPackable>
     <IncludeBuildOutput>false</IncludeBuildOutput>
-    <NoWarn>$(NoWarn);RS2008;CS8602;CS8604;CS8631</NoWarn>
+    <NoWarn>$(NoWarn);CS8602;CS8604;CS8631;RS2008</NoWarn>
     <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <RewritePackageReadmeLinks>true</RewritePackageReadmeLinks>
