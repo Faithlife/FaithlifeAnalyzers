@@ -67,6 +67,7 @@ dotnet_diagnostic.FL0009.severity = none
 | [FL0024](docs/FL0024.md) | Lambda operators should end the previous line |
 | [FL0025](docs/FL0025.md) | Private fields should be defined last |
 | [FL0026](docs/FL0026.md) | Use `InvariantConvert` |
+| [FL0027](docs/FL0027.md) | Use a static import for `FormattableString.Invariant` |
 
 ## How to Help
 
