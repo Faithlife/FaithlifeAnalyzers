@@ -45,9 +45,9 @@ public sealed class IfNotNullCodeFixProvider : CodeFixProvider
 			return;
 
 		// The location of each of the arguments changes based on whether the method is invoked as an extension method.
-		var targetExpression = methodSymbol.IsStatic ?
-			ifNotNullInvocation.ArgumentList.Arguments[0].Expression :
-			ifNotNullInvocation.Expression switch
+		var targetExpression = methodSymbol.IsStatic
+			? ifNotNullInvocation.ArgumentList.Arguments[0].Expression
+			: ifNotNullInvocation.Expression switch
 			{
 				MemberAccessExpressionSyntax memberAccess => memberAccess.Expression,
 				MemberBindingExpressionSyntax memberBinding => (memberBinding.Parent.Parent as ConditionalAccessExpressionSyntax)?.Expression,
@@ -57,14 +57,14 @@ public sealed class IfNotNullCodeFixProvider : CodeFixProvider
 		if (targetExpression is null)
 			return;
 
-		var delegateExpression = methodSymbol.IsStatic ?
-			ifNotNullInvocation.ArgumentList.Arguments[1].Expression :
-			ifNotNullInvocation.ArgumentList.Arguments[0].Expression;
+		var delegateExpression = methodSymbol.IsStatic
+			? ifNotNullInvocation.ArgumentList.Arguments[1].Expression
+			: ifNotNullInvocation.ArgumentList.Arguments[0].Expression;
 
 		var defaultArgumentIndex = methodSymbol.IsStatic ? 2 : 1;
-		var defaultValueExpression = ifNotNullInvocation.ArgumentList.Arguments.Count > defaultArgumentIndex ?
-			ifNotNullInvocation.ArgumentList.Arguments[defaultArgumentIndex].Expression :
-			default;
+		var defaultValueExpression = ifNotNullInvocation.ArgumentList.Arguments.Count > defaultArgumentIndex
+			? ifNotNullInvocation.ArgumentList.Arguments[defaultArgumentIndex].Expression
+			: default;
 
 		var outputTypeArgument = methodSymbol.Arity == 2 ? methodSymbol.TypeArguments[1] : default;
 
@@ -276,9 +276,7 @@ public sealed class IfNotNullCodeFixProvider : CodeFixProvider
 							title: "Use conditional access operator",
 							createChangedDocument: token => ReplaceValueAsync(
 								context.Document,
-								ifNotNullInvocation.Expression is MemberBindingExpressionSyntax or ElementBindingExpressionSyntax &&
-								ifNotNullInvocation.Parent is ConditionalAccessExpressionSyntax conditionalAccess &&
-								conditionalAccess.WhenNotNull == ifNotNullInvocation
+								ifNotNullInvocation.Expression is MemberBindingExpressionSyntax or ElementBindingExpressionSyntax && ifNotNullInvocation.Parent is ConditionalAccessExpressionSyntax conditionalAccess && conditionalAccess.WhenNotNull == ifNotNullInvocation
 									? conditionalAccess
 									: ifNotNullInvocation,
 								finalExpression,
@@ -370,11 +368,9 @@ public sealed class IfNotNullCodeFixProvider : CodeFixProvider
 		}
 		else if (defaultValueExpression is object || outputTypeArgument!.CanBeReferencedByName) //// TODO: verify this null coercion is safe
 		{
-			replacementTarget = ifNotNullInvocation.Expression is MemberBindingExpressionSyntax or ElementBindingExpressionSyntax &&
-				ifNotNullInvocation.Parent is ConditionalAccessExpressionSyntax conditionalAccess &&
-				conditionalAccess.WhenNotNull == ifNotNullInvocation
-					? conditionalAccess
-					: ifNotNullInvocation;
+			replacementTarget = ifNotNullInvocation.Expression is MemberBindingExpressionSyntax or ElementBindingExpressionSyntax && ifNotNullInvocation.Parent is ConditionalAccessExpressionSyntax conditionalAccess && conditionalAccess.WhenNotNull == ifNotNullInvocation
+				? conditionalAccess
+				: ifNotNullInvocation;
 			replacementExpression = ConditionalExpression(
 				conditionExpression,
 				SyntaxUtility.SimplifiableParentheses(lambdaExpressionBody),

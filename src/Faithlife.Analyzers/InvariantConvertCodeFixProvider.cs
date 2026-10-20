@@ -97,9 +97,9 @@ public sealed class InvariantConvertCodeFixProvider : CodeFixProvider
 	private static ExpressionSyntax CreateTryParseReplacement(InvariantConvertMatch match)
 	{
 		var replacement = CreateInvariantConvertInvocation(match.MethodName, match.InputExpression!);
-		var patternText = match.IsNegated ?
-			$"value is not {{ }} {match.OutVariableIdentifier.ValueText}" :
-			$"value is {{ }} {match.OutVariableIdentifier.ValueText}";
+		var patternText = match.IsNegated
+			? $"value is not {{ }} {match.OutVariableIdentifier.ValueText}"
+			: $"value is {{ }} {match.OutVariableIdentifier.ValueText}";
 
 		return SyntaxUtility.ReplaceIdentifier(ParseExpression(patternText), "value", replacement);
 	}

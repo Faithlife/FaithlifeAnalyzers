@@ -38,7 +38,7 @@ internal sealed class SelfAnalysisTests
 			.GetTypes()
 			.Where(x => x.BaseType == typeof(DiagnosticAnalyzer))
 			.Select(Activator.CreateInstance)
-			.Cast<DiagnosticAnalyzer>()]);
+			.Cast<DiagnosticAnalyzer>(),]);
 
 		var diagnostics = await compilationWithAnalyzers.GetAnalyzerDiagnosticsAsync().ConfigureAwait(false);
 		Assert.That(diagnostics, Is.Empty);
