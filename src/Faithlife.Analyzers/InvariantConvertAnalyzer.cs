@@ -239,9 +239,9 @@ public sealed class InvariantConvertAnalyzer : DiagnosticAnalyzer
 		if (!ContainsReferenceAfterStatement(ifStatement, outVariableIdentifier))
 			return true;
 
-		return isNegated ?
-			StatementAlwaysExits(ifStatement.Statement) :
-			ifStatement.Else is not null && StatementAlwaysExits(ifStatement.Else.Statement);
+		return isNegated
+			? StatementAlwaysExits(ifStatement.Statement)
+			: ifStatement.Else is not null && StatementAlwaysExits(ifStatement.Else.Statement);
 	}
 
 	private static bool ContainsReferenceAfterStatement(StatementSyntax statement, SyntaxToken identifier)

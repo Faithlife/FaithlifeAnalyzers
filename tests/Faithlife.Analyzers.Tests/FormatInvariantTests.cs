@@ -94,9 +94,9 @@ internal sealed class FormatInvariantTests : CodeFixVerifier
 
 		VerifyCSharpDiagnostic(invalidProgram, expected);
 
-		var fixedUsing = fixedCode.StartsWith("Invariant(", StringComparison.Ordinal) ?
-			"using System;\nusing static System.FormattableString;" :
-			"using System;";
+		var fixedUsing = fixedCode.StartsWith("Invariant(", StringComparison.Ordinal)
+			? "using System;\nusing static System.FormattableString;"
+			: "using System;";
 		var fixedProgram = $$"""
 			{{fixedUsing}}
 

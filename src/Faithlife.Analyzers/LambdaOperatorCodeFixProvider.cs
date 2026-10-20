@@ -44,11 +44,11 @@ public sealed class LambdaOperatorCodeFixProvider : CodeFixProvider
 		var nextToken = lambdaOperatorToken.GetNextToken();
 		var whitespaceBeforeLambdaOperator = sourceText.ToString(TextSpan.FromBounds(previousToken.Span.End, lambdaOperatorToken.SpanStart));
 		var textAfterLambdaOperator = sourceText.ToString(TextSpan.FromBounds(lambdaOperatorToken.Span.End, nextToken.SpanStart));
-		var changedText = ContainsOnlyWhitespace(textAfterLambdaOperator) ?
-			sourceText.WithChanges(
+		var changedText = ContainsOnlyWhitespace(textAfterLambdaOperator)
+			? sourceText.WithChanges(
 				new TextChange(TextSpan.FromBounds(previousToken.Span.End, lambdaOperatorToken.SpanStart), " "),
-				new TextChange(TextSpan.FromBounds(lambdaOperatorToken.Span.End, nextToken.SpanStart), whitespaceBeforeLambdaOperator)) :
-			sourceText.WithChanges(new TextChange(TextSpan.FromBounds(previousToken.Span.End, lambdaOperatorToken.SpanStart), " "));
+				new TextChange(TextSpan.FromBounds(lambdaOperatorToken.Span.End, nextToken.SpanStart), whitespaceBeforeLambdaOperator))
+			: sourceText.WithChanges(new TextChange(TextSpan.FromBounds(previousToken.Span.End, lambdaOperatorToken.SpanStart), " "));
 		return document.WithText(changedText);
 	}
 

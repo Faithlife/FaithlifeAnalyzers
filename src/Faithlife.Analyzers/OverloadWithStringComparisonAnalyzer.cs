@@ -29,8 +29,9 @@ public sealed class OverloadWithStringComparisonAnalyzer : DiagnosticAnalyzer
 						if (!IsAcceptableOverload(methodSymbol, stringComparisonType, cultureInfoType))
 						{
 							// wrong overload
-							var rule = (methodSymbol.Name == "Equals" && ((methodSymbol.Parameters.Length == 1 && !methodSymbol.IsStatic) || (methodSymbol.Parameters.Length == 2 && methodSymbol.IsStatic))) ?
-								s_avoidStringEqualsRule : s_useStringComparisonRule;
+							var rule = (methodSymbol.Name == "Equals" && ((methodSymbol.Parameters.Length == 1 && !methodSymbol.IsStatic) || (methodSymbol.Parameters.Length == 2 && methodSymbol.IsStatic)))
+								? s_avoidStringEqualsRule
+								: s_useStringComparisonRule;
 							operationContext.ReportDiagnostic(Diagnostic.Create(rule, operation.GetMethodNameLocation()));
 						}
 						else if (methodSymbol.Name == "Equals" && ((methodSymbol.Parameters.Length == 2 && !methodSymbol.IsStatic) || (methodSymbol.Parameters.Length == 3 && methodSymbol.IsStatic)))
