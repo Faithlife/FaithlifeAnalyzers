@@ -6,10 +6,10 @@ using Microsoft.CodeAnalysis.Simplification;
 
 namespace Faithlife.Analyzers.Tests;
 
-/// <summary>
+/// <content>
 /// Diagnostic Producer class with extra methods dealing with applying codefixes
 /// All methods are static
-/// </summary>
+/// </content>
 internal abstract partial class CodeFixVerifier : DiagnosticVerifier
 {
 	/// <summary>
