@@ -82,7 +82,8 @@ public sealed class NullableHasValueConditionalCodeFixProvider : CodeFixProvider
 			{
 				Expression: IdentifierNameSyntax { } identifier,
 				Name.Identifier.ValueText: "Value",
-			} when identifier.Identifier.ValueText == nullableIdentifierName:
+			}
+			when identifier.Identifier.ValueText == nullableIdentifierName:
 				// this is nullable.Value - this should be removed and the parent should use conditional access
 				return IdentifierName(nullableIdentifierName);
 
@@ -93,7 +94,8 @@ public sealed class NullableHasValueConditionalCodeFixProvider : CodeFixProvider
 					Expression: IdentifierNameSyntax { } innerIdentifier,
 					Name.Identifier.ValueText: "Value",
 				},
-			} memberAccess when innerIdentifier.Identifier.ValueText == nullableIdentifierName:
+			}
+			memberAccess when innerIdentifier.Identifier.ValueText == nullableIdentifierName:
 				// transform nullable.Value.Something to nullable?.Something
 				return ConditionalAccessExpression(
 					IdentifierName(nullableIdentifierName),
