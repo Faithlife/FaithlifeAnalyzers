@@ -1,5 +1,8 @@
+using System.Collections.Immutable;
 using System.Globalization;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CodeActions;
+using Microsoft.CodeAnalysis.CodeFixes;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.CodeAnalysis.Text;
@@ -8,7 +11,7 @@ using NUnit.Framework;
 namespace Faithlife.Analyzers.Tests;
 
 [TestFixture]
-internal sealed class RedundantCancellationCheckTests : DiagnosticVerifier
+internal sealed class RedundantCancellationCheckTests : CodeFixVerifier
 {
 	[TestCase("ToThreadPool()")]
 	[TestCase("ToThreadPoolQueue()")]
@@ -392,7 +395,211 @@ internal sealed class RedundantCancellationCheckTests : DiagnosticVerifier
 		Assert.That(diagnostics, Is.Empty);
 	}
 
+	[TestCase("context.Switch(token);\ncontext.ThrowIfCanceled();", "context.Switch(token);")]
+	[TestCase("context.Switch(await other.ToThreadPool());\ncontext.ThrowIfCanceled();", "context.Switch(await other.ToThreadPool());")]
+	[TestCase("context.Switch(token); context.ThrowIfCanceled(); GC.KeepAlive(context);", "context.Switch(token); GC.KeepAlive(context);")]
+	[TestCase("context.Switch(token);\n(context).ThrowIfCanceled();", "context.Switch(token);")]
+	[TestCase("var local = context;\nlocal.Switch(token);\nlocal.ThrowIfCanceled();", "var local = context;\nlocal.Switch(token);")]
+	public void CodeFixRemovesOnlyRedundantStatement(string body, string expectedBody)
+	{
+		VerifyCSharpFix(CreateSource(body), CreateSource(expectedBody));
+	}
+
+	[TestCase("\n")]
+	[TestCase("\r\n")]
+	public void CodeFixPreservesLineEndings(string lineEnding)
+	{
+		var source = CreateSource("context.Switch(token);\ncontext.ThrowIfCanceled();").ReplaceLineEndings(lineEnding);
+		var expected = CreateSource("context.Switch(token);").ReplaceLineEndings(lineEnding);
+		VerifyCSharpFix(source, expected);
+	}
+
+	[TestCase("""
+		context.Switch(token);
+		// Keep the leading comment.
+		context.ThrowIfCanceled(); // Keep the trailing comment.
+		""", "// Keep the leading comment.", "// Keep the trailing comment.")]
+	[TestCase("""
+		context.Switch(token); // Keep the switch comment.
+		context /* Keep the receiver comment. */.ThrowIfCanceled(/* Keep the argument comment. */);
+		""", "// Keep the switch comment.", "/* Keep the receiver comment. */", "/* Keep the argument comment. */")]
+	[TestCase("""
+		context.Switch(token);
+		context // Keep the internal line comment.
+			.ThrowIfCanceled();
+		""", "// Keep the internal line comment.")]
+	[TestCase("""
+		#region Keep the region
+		context.Switch(token);
+		context.ThrowIfCanceled();
+		#endregion
+		""", "#region Keep the region", "#endregion")]
+	[TestCase("""
+		#if true
+		context.Switch(token);
+		context.ThrowIfCanceled();
+		#endif
+		#pragma warning disable CS0168
+		""", "#if true", "#endif", "#pragma warning disable CS0168")]
+	public async Task CodeFixPreservesCommentsAndDirectives(string body, params string[] preservedText)
+	{
+		var document = await ApplyCodeFixAsync(CreateDocument(CreateSource(body))).ConfigureAwait(false);
+		var text = (await document.GetTextAsync().ConfigureAwait(false)).ToString();
+		foreach (var value in preservedText)
+			Assert.That(text.Split(value, StringSplitOptions.None), Has.Length.EqualTo(2), value);
+		Assert.That(text, Does.Not.Contain(".ThrowIfCanceled("));
+		Assert.That(GetSortedDiagnosticsFromDocuments(new RedundantCancellationCheckAnalyzer(), [document]), Is.Empty);
+	}
+
+	[TestCase("""
+		switch (0)
+		{
+		case 0:
+			context.Switch(token);
+			context.ThrowIfCanceled();
+			break;
+		}
+		""")]
+	[TestCase("""
+		void Nested(AsyncMethodContext nested)
+		{
+			nested.Switch(token);
+			nested.ThrowIfCanceled();
+		}
+		Nested(context);
+		""")]
+	public async Task CodeFixHandlesNestedStatementLists(string body)
+	{
+		var document = await ApplyCodeFixAsync(CreateDocument(CreateSource(body))).ConfigureAwait(false);
+		var text = (await document.GetTextAsync().ConfigureAwait(false)).ToString();
+		Assert.That(text, Does.Not.Contain(".ThrowIfCanceled("));
+		Assert.That(text, Does.Contain(".Switch(token)"));
+		Assert.That(GetSortedDiagnosticsFromDocuments(new RedundantCancellationCheckAnalyzer(), [document]), Is.Empty);
+	}
+
+	[Test]
+	public async Task CodeFixRemovesTopLevelStatement()
+	{
+		var source = $$"""
+			{{c_usings}}
+			var context = new AsyncMethodContext();
+			context.Switch(await context.ToThreadPool());
+			context.ThrowIfCanceled();
+			{{CreateApi(c_contextMembers)}}
+			""";
+		var original = CreateDocument(source);
+		var project = original.Project.WithCompilationOptions(new CSharpCompilationOptions(OutputKind.ConsoleApplication));
+		var document = await ApplyCodeFixAsync(project.GetDocument(original.Id)!).ConfigureAwait(false);
+		Assert.That((await document.GetTextAsync().ConfigureAwait(false)).ToString(), Is.EqualTo(source.Replace("context.ThrowIfCanceled();\n", "", StringComparison.Ordinal)));
+		Assert.That(GetSortedDiagnosticsFromDocuments(new RedundantCancellationCheckAnalyzer(), [document]), Is.Empty);
+	}
+
+	[TestCase(false)]
+	[TestCase(true)]
+	public async Task CodeFixRemovesLastTopLevelStatement(bool finalNewLine)
+	{
+		var source = c_usings + "\nvar context = new AsyncMethodContext();\ncontext.Switch(await context.ToThreadPool());\ncontext.ThrowIfCanceled();" + (finalNewLine ? "\n" : "");
+		var original = CreateDocument(source);
+		var api = original.Project.AddDocument("Api.cs", SourceText.From(c_usings + Environment.NewLine + CreateApi(c_contextMembers)));
+		var project = api.Project.WithCompilationOptions(new CSharpCompilationOptions(OutputKind.ConsoleApplication));
+		var document = await ApplyCodeFixAsync(project.GetDocument(original.Id)!).ConfigureAwait(false);
+		var expected = source.Replace("context.ThrowIfCanceled();" + (finalNewLine ? "\n" : ""), "", StringComparison.Ordinal);
+		Assert.That((await document.GetTextAsync().ConfigureAwait(false)).ToString(), Is.EqualTo(expected));
+		Assert.That(GetSortedDiagnosticsFromDocuments(new RedundantCancellationCheckAnalyzer(), [document]), Is.Empty);
+	}
+
+	[TestCase(FixAllScope.Document)]
+	[TestCase(FixAllScope.Project)]
+	[TestCase(FixAllScope.Solution)]
+	public async Task CodeFixSupportsFixAll(FixAllScope scope)
+	{
+		const string body = """
+			context.Switch(token);
+			context.ThrowIfCanceled(); // Keep the first checkpoint comment.
+			context.Switch(token);
+			context.ThrowIfCanceled(); // Keep the second checkpoint comment.
+			""";
+		var original = CreateDocument(CreateSource(body));
+		var second = original.Project.AddDocument("Second.cs", SourceText.From(CreateSource(body)
+			.Replace("class Example", "class SecondExample", StringComparison.Ordinal)
+			.Replace(CreateApi(c_contextMembers), "", StringComparison.Ordinal)));
+		var otherProjectId = ProjectId.CreateNewId();
+		var otherDocumentId = DocumentId.CreateNewId(otherProjectId);
+		var solution = second.Project.Solution
+			.AddProject(otherProjectId, "OtherProject", "OtherProject", LanguageNames.CSharp)
+			.WithProjectCompilationOptions(otherProjectId, original.Project.CompilationOptions!)
+			.AddMetadataReferences(otherProjectId, original.Project.MetadataReferences)
+			.AddDocument(otherDocumentId, "Third.cs", SourceText.From(CreateSource(body)));
+		var documents = new[] { solution.GetDocument(original.Id)!, solution.GetDocument(second.Id)!, solution.GetDocument(otherDocumentId)! };
+		var diagnostics = documents.ToDictionary(x => x.Id, x => GetSortedDiagnosticsFromDocuments(new RedundantCancellationCheckAnalyzer(), [x]).ToImmutableArray());
+		Assert.That(diagnostics.Values.All(x => x.Length == 2), Is.True);
+		var provider = new RedundantCancellationCheckCodeFixProvider();
+		var context = new FixAllContext(documents[0], provider, scope, "remove-redundant-cancellation-check", provider.FixableDiagnosticIds,
+			new FixAllDiagnostics(diagnostics), CancellationToken.None);
+		var action = await provider.GetFixAllProvider().GetFixAsync(context).ConfigureAwait(false);
+		Assert.That(action, Is.Not.Null);
+		var changedSolution = (await action!.GetOperationsAsync(CancellationToken.None).ConfigureAwait(false)).OfType<ApplyChangesOperation>().Single().ChangedSolution;
+		for (var index = 0; index < documents.Length; index++)
+		{
+			var document = changedSolution.GetDocument(documents[index].Id)!;
+			var shouldFix = index == 0 || scope == FixAllScope.Solution || index == 1 && scope == FixAllScope.Project;
+			Assert.That(GetSortedDiagnosticsFromDocuments(new RedundantCancellationCheckAnalyzer(), [document]), Has.Length.EqualTo(shouldFix ? 0 : 2));
+			var text = (await document.GetTextAsync().ConfigureAwait(false)).ToString();
+			Assert.That(text.Split(".Switch(token);", StringSplitOptions.None), Has.Length.EqualTo(3));
+			Assert.That(text.Split(".ThrowIfCanceled();", StringSplitOptions.None), Has.Length.EqualTo(shouldFix ? 1 : 3));
+			Assert.That(text.Split("// Keep the first checkpoint comment.", StringSplitOptions.None), Has.Length.EqualTo(2));
+			Assert.That(text.Split("// Keep the second checkpoint comment.", StringSplitOptions.None), Has.Length.EqualTo(2));
+		}
+	}
+
+	[TestCase("\n")]
+	[TestCase("\r\n")]
+	public async Task CodeFixPreservesCommentLineEndings(string lineEnding)
+	{
+		var source = CreateSource("""
+			context.Switch(token);
+			// Keep the leading comment.
+			context /* Keep the internal comment. */.ThrowIfCanceled(); // Keep the trailing comment.
+			""").ReplaceLineEndings(lineEnding);
+		var document = await ApplyCodeFixAsync(CreateDocument(source)).ConfigureAwait(false);
+		var text = (await document.GetTextAsync().ConfigureAwait(false)).ToString();
+		Assert.That(text, Does.Contain("// Keep the leading comment."));
+		Assert.That(text, Does.Contain("/* Keep the internal comment. */"));
+		Assert.That(text, Does.Contain("// Keep the trailing comment."));
+		Assert.That(text, Does.Not.Contain(".ThrowIfCanceled("));
+		Assert.That(text.Replace(lineEnding, "", StringComparison.Ordinal), Does.Not.Contain("\r").And.Not.Contain("\n"));
+		Assert.That(GetSortedDiagnosticsFromDocuments(new RedundantCancellationCheckAnalyzer(), [document]), Is.Empty);
+	}
+
 	protected override DiagnosticAnalyzer GetCSharpDiagnosticAnalyzer() => new RedundantCancellationCheckAnalyzer();
+
+	protected override CodeFixProvider GetCSharpCodeFixProvider() => new RedundantCancellationCheckCodeFixProvider();
+
+	private static async Task<Document> ApplyCodeFixAsync(Document document)
+	{
+		var diagnostics = GetSortedDiagnosticsFromDocuments(new RedundantCancellationCheckAnalyzer(), [document]);
+		Assert.That(diagnostics, Has.Length.EqualTo(1));
+		var actions = new List<CodeAction>();
+		var provider = new RedundantCancellationCheckCodeFixProvider();
+		await provider.RegisterCodeFixesAsync(new CodeFixContext(document, diagnostics[0], (action, _) => actions.Add(action), CancellationToken.None)).ConfigureAwait(false);
+		Assert.That(actions, Has.Count.EqualTo(1));
+		Assert.That(actions[0].Title, Is.EqualTo("Remove redundant ThrowIfCanceled call"));
+		Assert.That(actions[0].EquivalenceKey, Is.EqualTo("remove-redundant-cancellation-check"));
+		var solution = (await actions[0].GetOperationsAsync(CancellationToken.None).ConfigureAwait(false)).OfType<ApplyChangesOperation>().Single().ChangedSolution;
+		return solution.GetDocument(document.Id)!;
+	}
+
+	private sealed class FixAllDiagnostics(IReadOnlyDictionary<DocumentId, ImmutableArray<Diagnostic>> diagnostics) : FixAllContext.DiagnosticProvider
+	{
+		public override Task<IEnumerable<Diagnostic>> GetDocumentDiagnosticsAsync(Document document, CancellationToken cancellationToken) =>
+			Task.FromResult<IEnumerable<Diagnostic>>(diagnostics[document.Id]);
+
+		public override Task<IEnumerable<Diagnostic>> GetProjectDiagnosticsAsync(Project project, CancellationToken cancellationToken) =>
+			Task.FromResult(Enumerable.Empty<Diagnostic>());
+
+		public override Task<IEnumerable<Diagnostic>> GetAllDiagnosticsAsync(Project project, CancellationToken cancellationToken) =>
+			Task.FromResult(project.Documents.SelectMany(x => diagnostics[x.Id]));
+	}
 
 	private static string CreateSource(string body, string members = "", string? contextMembers = null) => $$"""
 		{{c_usings}}

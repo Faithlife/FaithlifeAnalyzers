@@ -2,7 +2,7 @@
 
 ## 1.9.0
 
-* Add [FL0028](https://github.com/Faithlife/FaithlifeAnalyzers/blob/master/docs/FL0028.md): Avoid repeating the cancellation check immediately after `AsyncMethodContext.Switch`.
+* Add [FL0028](https://github.com/Faithlife/FaithlifeAnalyzers/blob/master/docs/FL0028.md): Avoid repeating the cancellation check immediately after `AsyncMethodContext.Switch`, with a code fix to remove the redundant check.
 
 ## 1.8.0
 
