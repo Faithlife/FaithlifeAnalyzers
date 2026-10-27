@@ -1,5 +1,9 @@
 # Release Notes
 
+## 1.9.0
+
+* Add [FL0028](https://github.com/Faithlife/FaithlifeAnalyzers/blob/master/docs/FL0028.md): Avoid repeating the cancellation check immediately after `AsyncMethodContext.Switch`.
+
 ## 1.8.0
 
 * Add [FL0027](https://github.com/Faithlife/FaithlifeAnalyzers/blob/master/docs/FL0027.md): Use a static import for `FormattableString.Invariant`. The FL0018 code fix now emits this form directly.
