@@ -68,6 +68,7 @@ dotnet_diagnostic.FL0009.severity = none
 | [FL0025](docs/FL0025.md) | Private fields should be defined last |
 | [FL0026](docs/FL0026.md) | Use `InvariantConvert` |
 | [FL0027](docs/FL0027.md) | Use a static import for `FormattableString.Invariant` |
+| [FL0028](docs/FL0028.md) | Avoid repeating the cancellation check immediately after `AsyncMethodContext.Switch` |
 
 ## How to Help
 
