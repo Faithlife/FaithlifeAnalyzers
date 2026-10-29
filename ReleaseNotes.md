@@ -1,5 +1,9 @@
 # Release Notes
 
+## 1.8.1
+
+* Fix FL0018 code fixes replacing escaped composite-format placeholders such as `{{0}}` with argument expressions.
+
 ## 1.8.0
 
 * Add [FL0027](https://github.com/Faithlife/FaithlifeAnalyzers/blob/master/docs/FL0027.md): Use a static import for `FormattableString.Invariant`. The FL0018 code fix now emits this form directly.

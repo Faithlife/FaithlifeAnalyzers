@@ -54,6 +54,19 @@ internal sealed class FormatInvariantTests : CodeFixVerifier
 	[TestCase(@"""with quotes \""{0}\"" post"".FormatInvariant(foo)", @"$""with quotes \""{foo}\"" post""")]
 	[TestCase(@"""with newline \n{0} post"".FormatInvariant(foo)", @"$""with newline \n{foo} post""")]
 	[TestCase(@"""with enum {0} {1} post"".FormatInvariant(DateTimeKind.Local, foo)", @"$""with enum {DateTimeKind.Local} {foo} post""")]
+	[TestCase(@"""{{0}} in ({0})"".FormatInvariant(foo)", @"$""{{0}} in ({foo})""")]
+	[TestCase(@"""@{0}{{0}}"".FormatInvariant(foo)", @"$""@{foo}{{0}}""")]
+	[TestCase(@"""{{0}} = {0}"".FormatInvariant(foo)", @"$""{{0}} = {foo}""")]
+	[TestCase(@"""{{0}} = {0}"".FormatInvariant(foo.Length)", @"Invariant($""{{0}} = {foo.Length}"")")]
+	[TestCase(@"""{{99}} {0} {{1,-10:D1}}"".FormatInvariant(foo)", @"$""{{99}} {foo} {{1,-10:D1}}""")]
+	[TestCase(@"""{{{0}}}"".FormatInvariant(foo)", @"$""{{{foo}}}""")]
+	[TestCase(@"""{{{{0}}}} {0}"".FormatInvariant(foo)", @"$""{{{{0}}}} {foo}""")]
+	[TestCase(@"""{{{{{0}}}}}"".FormatInvariant(foo)", @"$""{{{{{foo}}}}}""")]
+	[TestCase(@"""{{0}}{{{0}}}{{0}}"".FormatInvariant(foo)", @"$""{{0}}{{{foo}}}{{0}}""")]
+	[TestCase(@"""{{}} {0} {{}}"".FormatInvariant(foo)", @"$""{{}} {foo} {{}}""")]
+	[TestCase(@"""{0} {{0}} {1,-10:D1} {{1}} {1,10:D1}"".FormatInvariant(foo, 10)", @"Invariant($""{foo} {{0}} {10,-10:D1} {{1}} {10,10:D1}"")")]
+	[TestCase(@"""\\{0} {{0}}"".FormatInvariant(foo)", @"$""\\{foo} {{0}}""")]
+	[TestCase(@"@""{{0}} in ({0})"".FormatInvariant(foo)", @"$""{{0}} in ({foo})""")]
 	public void InvalidFormat(string invalidCode, string fixedCode)
 	{
 		var invalidProgram = $$"""
@@ -126,6 +139,31 @@ internal sealed class FormatInvariantTests : CodeFixVerifier
 			""";
 
 		VerifyCSharpFix(invalidProgram, fixedProgram, 0);
+	}
+
+	[TestCase("{{0}}")]
+	[TestCase("{{{{0}}}}")]
+	[TestCase("{{0}} {{1,-10:D1}}")]
+	public void EscapedPlaceholdersOnlyHaveNoCodeFix(string format)
+	{
+		var program = $$"""
+			using Libronix.Utility;
+
+			namespace Libronix.Utility
+			{
+				public static class StringUtility
+				{
+					public static string FormatInvariant(this string format, params object[] args) => format;
+				}
+			}
+
+			internal static class TestClass
+			{
+				public static string Format(string value) => "{{format}}".FormatInvariant(value);
+			}
+			""";
+
+		VerifyCSharpFix(program, program);
 	}
 
 	[Test]
