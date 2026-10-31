@@ -39,8 +39,11 @@ public sealed class FormatInvariantCodeFixProvider : CodeFixProvider
 		if (invocationTarget.Token.Value is not string formatString)
 			return;
 
-		var matches = Regex.Matches(formatString, @"(?!\\){\s*(\d+)(,-?\d+)?(:[^}]+)?\s*}");
-		if (matches.Count == 0)
+		var matches = Regex.Matches(formatString, @"{{|{\s*(\d+)(,-?\d+)?(:[^}]+)?\s*}")
+			.Cast<Match>()
+			.Where(x => x.Groups[1].Success)
+			.ToArray();
+		if (matches.Length == 0)
 			return;
 
 		var requiresInvariant = false;
