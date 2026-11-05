@@ -121,7 +121,7 @@ internal sealed class NullableHasValueConditionalTests : CodeFixVerifier
 			}
 			""";
 
-		VerifyCSharpFix(invalidProgram, fixedProgram, 0);
+		VerifyCSharpFix(invalidProgram, fixedProgram);
 	}
 
 	[Test]
@@ -178,7 +178,7 @@ internal sealed class NullableHasValueConditionalTests : CodeFixVerifier
 			}
 			""";
 
-		VerifyCSharpFix(invalidProgram, fixedProgram, 0);
+		VerifyCSharpFix(invalidProgram, fixedProgram);
 	}
 
 	[Test]
@@ -223,7 +223,7 @@ internal sealed class NullableHasValueConditionalTests : CodeFixVerifier
 			}
 			""";
 
-		VerifyCSharpFix(invalidProgram, fixedProgram, 0);
+		VerifyCSharpFix(invalidProgram, fixedProgram);
 	}
 
 	[Test]
@@ -272,7 +272,7 @@ internal sealed class NullableHasValueConditionalTests : CodeFixVerifier
 			}
 			""";
 
-		VerifyCSharpFix(invalidProgram, fixedProgram, 0);
+		VerifyCSharpFix(invalidProgram, fixedProgram);
 	}
 
 	[Test]
@@ -419,7 +419,7 @@ internal sealed class NullableHasValueConditionalTests : CodeFixVerifier
 			}
 			""";
 
-		VerifyCSharpFix(invalidProgram, fixedProgram, 0);
+		VerifyCSharpFix(invalidProgram, fixedProgram);
 	}
 
 	[Test]
@@ -470,7 +470,93 @@ internal sealed class NullableHasValueConditionalTests : CodeFixVerifier
 			}
 			""";
 
-		VerifyCSharpFix(invalidProgram, fixedProgram, 0);
+		VerifyCSharpFix(invalidProgram, fixedProgram);
+	}
+
+	[TestCase("value")]
+	[TestCase("this.Value")]
+	[TestCase("other.Value")]
+	[TestCase("other.Child.Value")]
+	[TestCase("values[0]")]
+	[TestCase("GetValue()")]
+	[TestCase("(value)")]
+	public void CodeFixWorksForNullableExpressions(string expression)
+	{
+		var invalidProgram = $$"""
+			internal sealed class TestClass
+			{
+				public int? Value { get; set; }
+				public TestClass Child { get; set; }
+				public int? GetValue() => Value;
+
+				public string Format(int? value, TestClass other, int?[] values) =>
+					{{expression}}.HasValue ? {{expression}}.Value.ToString() : null;
+			}
+			""";
+		var fixedProgram = invalidProgram.Replace($"{expression}.HasValue ? {expression}.Value.ToString() : null",
+			$"{expression}?.ToString()", StringComparison.Ordinal);
+
+		VerifyCSharpFix(invalidProgram, fixedProgram);
+	}
+
+	[TestCase("other.Value")]
+	[TestCase("other.Child.Value")]
+	[TestCase("values[0]")]
+	[TestCase("GetValue()")]
+	public void CodeFixWorksForNullableExpressionsWithCast(string expression)
+	{
+		var invalidProgram = $$"""
+			internal sealed class TestClass
+			{
+				public int? Value { get; set; }
+				public TestClass Child { get; set; }
+				public int? GetValue() => Value;
+
+				public int? Get(int? value, TestClass other, int?[] values) =>
+					{{expression}}.HasValue ? {{expression}}.Value : (int?) null;
+			}
+			""";
+		var fixedProgram = invalidProgram.Replace($"{expression}.HasValue ? {expression}.Value : (int?) null",
+			expression, StringComparison.Ordinal);
+
+		VerifyCSharpFix(invalidProgram, fixedProgram);
+	}
+
+	[TestCase(FixAllScope.Document)]
+	[TestCase(FixAllScope.Project)]
+	[TestCase(FixAllScope.Solution)]
+	public void FixAllWorksForMemberAccesses(FixAllScope scope)
+	{
+		const string invalidProgram = """
+			internal sealed class TestClass
+			{
+				public int? Value { get; set; }
+				public TestClass Child { get; set; }
+
+				public string[] Format(TestClass other) =>
+					new[]
+					{
+						other.Value.HasValue ? other.Value.Value.ToString() : null,
+						other.Child.Value.HasValue ? other.Child.Value.Value.ToString() : null,
+					};
+			}
+			""";
+		const string fixedProgram = """
+			internal sealed class TestClass
+			{
+				public int? Value { get; set; }
+				public TestClass Child { get; set; }
+
+				public string[] Format(TestClass other) =>
+					new[]
+					{
+						other.Value?.ToString(),
+						other.Child.Value?.ToString(),
+					};
+			}
+			""";
+
+		VerifyCSharpFixAll(invalidProgram, fixedProgram, scope);
 	}
 
 	protected override DiagnosticAnalyzer GetCSharpDiagnosticAnalyzer() => new NullableHasValueConditionalAnalyzer();

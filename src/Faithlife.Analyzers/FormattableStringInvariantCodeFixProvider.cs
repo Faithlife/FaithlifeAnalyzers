@@ -24,7 +24,7 @@ public sealed class FormattableStringInvariantCodeFixProvider : CodeFixProvider
 			return;
 
 		var diagnostic = context.Diagnostics.First();
-		var invocation = root.FindNode(diagnostic.Location.SourceSpan).FirstAncestorOrSelf<InvocationExpressionSyntax>();
+		var invocation = root.FindNode(diagnostic.Location.SourceSpan, getInnermostNodeForTie: true).FirstAncestorOrSelf<InvocationExpressionSyntax>();
 		if (invocation?.Expression is not MemberAccessExpressionSyntax memberAccess ||
 			memberAccess.DescendantTrivia().Any(x => x.IsDirective || x.IsKind(SyntaxKind.SingleLineCommentTrivia) || x.IsKind(SyntaxKind.MultiLineCommentTrivia)))
 			return;

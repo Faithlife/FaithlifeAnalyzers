@@ -1,5 +1,10 @@
 # Release Notes
 
+## 1.8.2
+
+* Fix FL0021 code fixes and Fix All for nullable member accesses and other receiver expressions, and preserve valid syntax for chained null-conditional accesses.
+* Fix FL0027 code fixes and Fix All when `FormattableString.Invariant` is used as an argument.
+
 ## 1.8.1
 
 * Fix FL0018 code fixes replacing escaped composite-format placeholders such as `{{0}}` with argument expressions.
