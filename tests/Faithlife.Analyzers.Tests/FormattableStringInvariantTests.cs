@@ -8,6 +8,64 @@ namespace Faithlife.Analyzers.Tests;
 [TestFixture]
 internal sealed class FormattableStringInvariantTests : CodeFixVerifier
 {
+	[TestCase("Consume(FormattableString.Invariant($\"text = {value}\"))")]
+	[TestCase("new InvalidOperationException(FormattableString.Invariant($\"text = {value}\"))")]
+	public void CallsInsideArgumentsAreFixed(string expression)
+	{
+		var invalidProgram = $$"""
+			using System;
+
+			internal static class TestClass
+			{
+				public static object Format(int value, FormattableString formattable) => {{expression}};
+				private static object Consume(string value) => value;
+			}
+			""";
+		var lineBreak = invalidProgram.Contains("\r\n", StringComparison.Ordinal) ? "\r\n" : "\n";
+		var fixedProgram = invalidProgram
+			.Replace("using System;", $"using System;{lineBreak}using static System.FormattableString;", StringComparison.Ordinal)
+			.Replace("FormattableString.Invariant(", "Invariant(", StringComparison.Ordinal);
+
+		VerifyCSharpDiagnostic(invalidProgram, CreateDiagnostic(invalidProgram, "FormattableString.Invariant($\"text = {value}\")"));
+		VerifyCSharpFix(invalidProgram, fixedProgram);
+	}
+
+	[TestCase(FixAllScope.Document)]
+	[TestCase(FixAllScope.Project)]
+	[TestCase(FixAllScope.Solution)]
+	public void FixAllWorksForCallsInsideArguments(FixAllScope scope)
+	{
+		const string invalidProgram = """
+			using System;
+
+			internal static class TestClass
+			{
+				public static Exception[] Create(int value) =>
+					new[]
+					{
+						new InvalidOperationException(FormattableString.Invariant($"first = {value}")),
+						new InvalidOperationException(FormattableString.Invariant($"second = {value}")),
+					};
+			}
+			""";
+		const string fixedProgram = """
+			using System;
+			using static System.FormattableString;
+
+			internal static class TestClass
+			{
+				public static Exception[] Create(int value) =>
+					new[]
+					{
+						new InvalidOperationException(Invariant($"first = {value}")),
+						new InvalidOperationException(Invariant($"second = {value}")),
+					};
+			}
+			""";
+
+		VerifyCSharpFixAll(invalidProgram, fixedProgram, scope);
+	}
+
 	[TestCase("FormattableString.Invariant($\"text = ({value})\")")]
 	[TestCase("System.FormattableString.Invariant($\"text = ({value})\")")]
 	[TestCase("global::System.FormattableString.Invariant($\"text = ({value})\")")]
