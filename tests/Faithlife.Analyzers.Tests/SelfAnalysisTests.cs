@@ -33,12 +33,15 @@ internal sealed class SelfAnalysisTests
 
 		var project = solution.GetProject(projectId)!;
 		var compilation = await project.GetCompilationAsync().ConfigureAwait(false);
-		var compilationWithAnalyzers = compilation!.WithAnalyzers([.. typeof(CurrentAsyncWorkItemAnalyzer)
-			.Assembly
-			.GetTypes()
-			.Where(x => x.BaseType == typeof(DiagnosticAnalyzer))
-			.Select(Activator.CreateInstance)
-			.Cast<DiagnosticAnalyzer>(),]);
+		var compilationWithAnalyzers = compilation!.WithAnalyzers(
+		[
+			.. typeof(CurrentAsyncWorkItemAnalyzer)
+				.Assembly
+				.GetTypes()
+				.Where(x => x.BaseType == typeof(DiagnosticAnalyzer))
+				.Select(Activator.CreateInstance)
+				.Cast<DiagnosticAnalyzer>(),
+		]);
 
 		var diagnostics = await compilationWithAnalyzers.GetAnalyzerDiagnosticsAsync().ConfigureAwait(false);
 		Assert.That(diagnostics, Is.Empty);

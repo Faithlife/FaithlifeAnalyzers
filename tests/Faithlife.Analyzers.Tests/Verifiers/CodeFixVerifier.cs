@@ -2,6 +2,7 @@ using System.Globalization;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CodeActions;
 using Microsoft.CodeAnalysis.CodeFixes;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.CodeAnalysis.Formatting;
 using NUnit.Framework;
@@ -36,6 +37,32 @@ internal abstract partial class CodeFixVerifier : DiagnosticVerifier
 	protected void VerifyCSharpFix(string oldSource, string newSource, int? codeFixIndex = null, bool allowNewCompilerDiagnostics = false)
 	{
 		VerifyFix(LanguageNames.CSharp, GetCSharpDiagnosticAnalyzer(), GetCSharpCodeFixProvider(), oldSource, newSource, codeFixIndex, allowNewCompilerDiagnostics);
+	}
+
+	protected void VerifyCSharpFixAll(string oldSource, string newSource, FixAllScope scope)
+	{
+		var document = CreateDocument(oldSource);
+		var analyzer = GetCSharpDiagnosticAnalyzer();
+		var diagnostics = GetSortedDiagnosticsFromDocuments(analyzer, [document]);
+		Assert.That(diagnostics, Is.Not.Empty);
+		var compilerDiagnostics = GetCompilerDiagnostics(document);
+		var codeFixProvider = GetCSharpCodeFixProvider();
+		var actions = new List<CodeAction>();
+		codeFixProvider.RegisterCodeFixesAsync(new CodeFixContext(document, diagnostics[0], (action, _) => actions.Add(action), CancellationToken.None))
+			.GetAwaiter().GetResult();
+		Assert.That(actions, Is.Not.Empty);
+		var fixAllProvider = codeFixProvider.GetFixAllProvider();
+		Assert.That(fixAllProvider, Is.Not.Null);
+		var context = new FixAllContext(document, codeFixProvider, scope, actions[0].EquivalenceKey,
+			codeFixProvider.FixableDiagnosticIds, new FixAllDiagnosticProvider(diagnostics), CancellationToken.None);
+		var fix = fixAllProvider.GetFixAsync(context).GetAwaiter().GetResult();
+		Assert.That(fix, Is.Not.Null);
+		document = ApplyFix(document, fix);
+		Assert.That(GetSortedDiagnosticsFromDocuments(analyzer, [document]), Is.Empty);
+		Assert.That(GetNewDiagnostics(compilerDiagnostics, GetCompilerDiagnostics(document)), Is.Empty);
+		var actualRoot = document.GetSyntaxRootAsync().GetAwaiter().GetResult()!;
+		var expectedRoot = CreateDocument(newSource).GetSyntaxRootAsync().GetAwaiter().GetResult()!;
+		Assert.That(SyntaxFactory.AreEquivalent(actualRoot, expectedRoot), Is.True, GetStringFromDocument(document));
 	}
 
 	/// <summary>
@@ -115,5 +142,20 @@ internal abstract partial class CodeFixVerifier : DiagnosticVerifier
 		// after applying all of the code fixes, compare the resulting string to the inputted one
 		var actual = GetStringFromDocument(document);
 		Assert.That(actual, Is.EqualTo(newSource));
+	}
+
+	private sealed class FixAllDiagnosticProvider(Diagnostic[] diagnostics) : FixAllContext.DiagnosticProvider
+	{
+		public override async Task<IEnumerable<Diagnostic>> GetDocumentDiagnosticsAsync(Document document, CancellationToken cancellationToken)
+		{
+			var tree = await document.GetSyntaxTreeAsync(cancellationToken).ConfigureAwait(false);
+			return diagnostics.Where(x => x.Location.SourceTree == tree);
+		}
+
+		public override Task<IEnumerable<Diagnostic>> GetProjectDiagnosticsAsync(Project project, CancellationToken cancellationToken) =>
+			Task.FromResult(Enumerable.Empty<Diagnostic>());
+
+		public override Task<IEnumerable<Diagnostic>> GetAllDiagnosticsAsync(Project project, CancellationToken cancellationToken) =>
+			Task.FromResult<IEnumerable<Diagnostic>>(diagnostics);
 	}
 }

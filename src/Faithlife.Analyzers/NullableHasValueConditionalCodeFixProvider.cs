@@ -24,100 +24,93 @@ public sealed class NullableHasValueConditionalCodeFixProvider : CodeFixProvider
 		var diagnostic = context.Diagnostics.First();
 		var diagnosticSpan = diagnostic.Location.SourceSpan;
 
-		var diagnosticNode = root.FindNode(diagnosticSpan);
-		var conditionalExpression = root.FindNode(diagnosticSpan) switch
-		{
-			ConditionalExpressionSyntax topLevelConditional => topLevelConditional,
-			ArgumentSyntax { Expression: ConditionalExpressionSyntax argumentConditional } => argumentConditional,
-			_ => null,
-		};
-		if (conditionalExpression is null)
+		if (root.FindNode(diagnosticSpan, getInnermostNodeForTie: true) is not ConditionalExpressionSyntax conditionalExpression)
 			return;
 
-		if (TryExtractNullableIdentifier(conditionalExpression) is not { } nullableIdentifier)
+		if (TryExtractNullableExpression(conditionalExpression) is not { } nullableExpression)
 			return;
 
 		context.RegisterCodeFix(
 			CodeAction.Create(
 				title: "Use null propagation",
-				createChangedDocument: token => ReplaceWithNullConditionalAsync(context.Document, conditionalExpression, nullableIdentifier, token),
+				createChangedDocument: token => ReplaceWithNullConditionalAsync(context.Document, conditionalExpression, nullableExpression, token),
 				"use-null-propagation"),
 			diagnostic);
 	}
 
-	private static IdentifierNameSyntax? TryExtractNullableIdentifier(ConditionalExpressionSyntax conditionalExpression)
+	private static ExpressionSyntax? TryExtractNullableExpression(ConditionalExpressionSyntax conditionalExpression)
 	{
-		// extract nullable identifier from HasValue check
+		// extract nullable expression from HasValue check
 		if (conditionalExpression.Condition is MemberAccessExpressionSyntax
 			{
 				Name.Identifier.ValueText: "HasValue",
-				Expression: IdentifierNameSyntax identifierName,
+				Expression: var nullableExpression,
 			})
 		{
-			return identifierName;
+			return nullableExpression;
 		}
 
 		return null;
 	}
 
 	private static async Task<Document> ReplaceWithNullConditionalAsync(Document document, ConditionalExpressionSyntax conditionalExpression,
-		IdentifierNameSyntax nullableIdentifier, CancellationToken cancellationToken)
+		ExpressionSyntax nullableExpression, CancellationToken cancellationToken)
 	{
 		// build the null-conditional expression by taking the original true expression and replacing nullable.Value with nullable?
 		var trueExpression = conditionalExpression.WhenTrue;
-		var nullConditionalExpression = TransformExpression(trueExpression, nullableIdentifier.Identifier.ValueText);
+		var nullConditionalExpression = TransformExpression(trueExpression, nullableExpression);
 
 		// replace the conditional expression with the null-conditional expression
 		var root = (await document.GetSyntaxRootAsync(cancellationToken).ConfigureAwait(false))
-			.ReplaceNode(conditionalExpression, nullConditionalExpression.WithAdditionalAnnotations(Formatter.Annotation));
+			.ReplaceNode(conditionalExpression, nullConditionalExpression.WithTriviaFrom(conditionalExpression).WithAdditionalAnnotations(Formatter.Annotation));
 
 		return document.WithSyntaxRoot(root);
 	}
 
-	private static ExpressionSyntax TransformExpression(ExpressionSyntax expression, string nullableIdentifierName)
+	private static ExpressionSyntax TransformExpression(ExpressionSyntax expression, ExpressionSyntax nullableExpression)
 	{
 		switch (expression)
 		{
 			case MemberAccessExpressionSyntax
 			{
-				Expression: IdentifierNameSyntax { } identifier,
+				Expression: var receiver,
 				Name.Identifier.ValueText: "Value",
 			}
-			when identifier.Identifier.ValueText == nullableIdentifierName:
+			when AreEquivalent(receiver, nullableExpression):
 				// this is nullable.Value - this should be removed and the parent should use conditional access
-				return IdentifierName(nullableIdentifierName);
+				return receiver;
 
 			case MemberAccessExpressionSyntax
 			{
 				Expression: MemberAccessExpressionSyntax
 				{
-					Expression: IdentifierNameSyntax { } innerIdentifier,
+					Expression: var receiver,
 					Name.Identifier.ValueText: "Value",
 				},
 			}
-			memberAccess when innerIdentifier.Identifier.ValueText == nullableIdentifierName:
+			memberAccess when AreEquivalent(receiver, nullableExpression):
 				// transform nullable.Value.Something to nullable?.Something
 				return ConditionalAccessExpression(
-					IdentifierName(nullableIdentifierName),
+					receiver,
 					MemberBindingExpression(memberAccess.Name));
 
 			case MemberAccessExpressionSyntax memberAccess:
 				// recursively handle nested member accesses
-				var transformedInner = TransformExpression(memberAccess.Expression, nullableIdentifierName);
+				var transformedInner = TransformExpression(memberAccess.Expression, nullableExpression);
 
-				if (transformedInner is ConditionalAccessExpressionSyntax)
+				if (transformedInner is ConditionalAccessExpressionSyntax conditionalAccess)
 				{
 					// chain the member access after conditional access
-					return MemberAccessExpression(
-						SyntaxKind.SimpleMemberAccessExpression,
-						transformedInner,
-						memberAccess.Name);
+					return conditionalAccess.WithWhenNotNull(MemberAccessExpression(
+						SyntaxKind.SimpleMemberAccessExpression, conditionalAccess.WhenNotNull, memberAccess.Name));
 				}
 				break;
 
 			case InvocationExpressionSyntax invocation:
 				// transform the expression that the method is being called on
-				var transformedExpression = TransformExpression(invocation.Expression, nullableIdentifierName);
+				var transformedExpression = TransformExpression(invocation.Expression, nullableExpression);
+				if (transformedExpression is ConditionalAccessExpressionSyntax conditionalInvocation)
+					return conditionalInvocation.WithWhenNotNull(InvocationExpression(conditionalInvocation.WhenNotNull, invocation.ArgumentList));
 				if (transformedExpression != invocation.Expression)
 					return InvocationExpression(transformedExpression, invocation.ArgumentList);
 				break;
